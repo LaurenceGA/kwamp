@@ -3,13 +3,17 @@ package co.nz.arm.app
 import co.nz.arm.wamp.Router
 import io.ktor.application.*
 import io.ktor.features.*
+import io.ktor.http.cio.websocket.CloseReason
 import io.ktor.http.cio.websocket.Frame
+import io.ktor.http.cio.websocket.close
 import io.ktor.http.cio.websocket.readText
 import io.ktor.response.respondText
 import io.ktor.routing.*
 import io.ktor.websocket.WebSockets
 import io.ktor.websocket.webSocket
+import kotlinx.coroutines.experimental.channels.Channel
 import kotlinx.coroutines.experimental.channels.consumeEach
+import kotlinx.coroutines.experimental.launch
 import java.time.Duration
 
 private val router = Router()
@@ -23,16 +27,26 @@ fun Application.main() {
 
     routing {
         webSocket("/register") {
-            try {
-                incoming.consumeEach { frame ->
-                    if (frame is Frame.Text) {
-                        log.info(frame.readText())
-                        router.consume(frame)
-                    }
+            log.info("Websocket connection established")
+            val wampIncoming = Channel<String>()
+            val wampOutgoing= Channel<String>()
+
+            router.newConnection(wampIncoming, wampOutgoing, {message -> close(CloseReason(CloseReason.Codes.NORMAL, message))})
+
+            launch {
+                wampOutgoing.consumeEach { message ->
+                    send(Frame.Text(message))
                 }
-            } finally {
-                log.info("Disconnected")
+                log.info("Websocket no longer forwarding messages")
             }
+
+            incoming.consumeEach { frame ->
+                if (frame is Frame.Text) {
+                    wampIncoming.send(frame.readText())
+                }
+            }
+
+            log.info("Websocket connection ended")
         }
 
         get("/") {
