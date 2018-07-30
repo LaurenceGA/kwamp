@@ -7,7 +7,7 @@ import kotlin.reflect.jvm.jvmErasure
 
 inline fun <reified messageClass: Message> getFactory(): (objectArray: List<Any>) -> Message = {
     validateArray(it, messageClass::class.primaryConstructor!!.parameters)
-    (messageClass::class::primaryConstructor::get)()!!.call(*it.toTypedArray())
+    messageClass::class::primaryConstructor.get()!!.call(*it.toTypedArray())
 }
 
 fun validateArray(objectArray: List<Any>, constructorParameters: List<KParameter>) {

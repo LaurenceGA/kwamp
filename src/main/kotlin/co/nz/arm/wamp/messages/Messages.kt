@@ -2,12 +2,21 @@ package co.nz.arm.wamp.messages
 
 import co.nz.arm.wamp.URI
 
-sealed class Message(val messageType: MessageType)
-
-class Hello(realm: String, val details: Any) : Message(MessageType.HELLO) {
-    val realm: URI = URI(realm)
+sealed class Message(val messageType: MessageType) {
+    override fun toString() = "[$messageType]"
 }
 
-class Welcome(session: Int, details: Any) : Message(MessageType.WELCOME)
+class Hello(realm: String, val details: Any) : Message(MessageType.HELLO) {
+    val realm = URI(realm)
+    override fun toString() = "[$messageType, $realm, $details]"
+}
 
-class Abort(details: Any, reason: URI) : Message(MessageType.ABORT)
+class Welcome(val session: Int, val details: Any) : Message(MessageType.WELCOME) {
+    override fun toString() = "[$messageType, $session, $details]"
+}
+
+class Abort(val details: Any, reason: String) : Message(MessageType.ABORT) {
+    val reason = URI(reason)
+
+    override fun toString() = "[$messageType, $details, $reason]"
+}

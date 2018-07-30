@@ -38,7 +38,7 @@ class WAMPSession(val incoming: ReceiveChannel<String>, val outgoing: SendChanne
                 val messageArray = Klaxon().parseArray<Any>(rawMessage)
                 val message = MessageType.getFactory(messageArray!![0] as Int)?.invoke(messageArray.subList(1, messageArray.size))
                 when (message) {
-                    is Hello -> println("HULLO")
+                    is Hello -> outgoing.send("HULLO")
                 }
 
 //                val msgId = messageArray[0]
