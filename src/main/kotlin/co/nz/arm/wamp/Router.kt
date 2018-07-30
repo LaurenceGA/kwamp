@@ -54,7 +54,7 @@ class WAMPSession(val incoming: ReceiveChannel<String>, val outgoing: SendChanne
         try {
 //            val parsedMessage = Klaxon().parseJsonArray(StringReader(""))
 
-//            println("msg = ${parsedMessage}, so msg type = ${parsedMessage[0]}")
+//            println("msg = ${parsedMessage}, so msg factory = ${parsedMessage[0]}")
 //            if (parsedMessage[0] == MessageType.HELLO.id) {
 //                outgoing.send("[2, 123, {}]")
 //            }
