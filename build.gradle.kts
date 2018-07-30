@@ -2,14 +2,14 @@ import org.jetbrains.kotlin.gradle.dsl.Coroutines
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 buildscript {
-    var kotlin_version: String by extra
-    kotlin_version = "1.2.51"
+    var kotlinVersion: String by extra
+    kotlinVersion = "1.2.51"
 
     repositories {
         mavenCentral()
     }
     dependencies {
-        classpath(kotlin("gradle-plugin", kotlin_version))
+        classpath(kotlin("gradle-plugin", kotlinVersion))
     }
 }
 
@@ -26,9 +26,10 @@ application {
     mainClassName = "io.ktor.server.netty.DevelopmentEngine"
 }
 
-val kotlin_version: String by extra
-val ktor_version = "0.9.3"
-val logback_version = "1.2.1"
+val kotlinVersion: String by extra
+val ktorVersion = "0.9.3"
+val logbackVersion = "1.2.1"
+val klaxonVersion = "3.0.1"
 
 repositories {
     mavenCentral()
@@ -37,12 +38,13 @@ repositories {
 }
 
 dependencies {
-    compile(kotlin("stdlib", kotlin_version))
-    compile("io.ktor:ktor-server-core:${ktor_version}")
-    compile("io.ktor:ktor-server-netty:${ktor_version}")
-    compile("io.ktor:ktor-websockets:${ktor_version}")
-    compile("io.ktor:ktor-gson:${ktor_version}")
-    compile("ch.qos.logback:logback-classic:${logback_version}")
+    implementation(kotlin("stdlib", kotlinVersion))
+    implementation("io.ktor:ktor-server-core:${ktorVersion}")
+    implementation("io.ktor:ktor-server-netty:${ktorVersion}")
+    implementation("io.ktor:ktor-websockets:${ktorVersion}")
+    implementation("io.ktor:ktor-gson:${ktorVersion}")
+    implementation("ch.qos.logback:logback-classic:${logbackVersion}")
+    implementation("com.beust:klaxon:${klaxonVersion}")
 }
 
 tasks.withType<KotlinCompile> {
