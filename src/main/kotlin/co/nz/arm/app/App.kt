@@ -26,7 +26,7 @@ fun Application.main() {
     }
 
     routing {
-        webSocket("/register") {
+        webSocket("/connect") {
             log.info("Websocket connection established")
             val wampIncoming = Channel<String>()
             val wampOutgoing= Channel<String>()
