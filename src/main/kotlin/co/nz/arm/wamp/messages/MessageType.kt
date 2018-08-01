@@ -1,10 +1,6 @@
 package co.nz.arm.wamp.messages
 
-import kotlin.reflect.KParameter
-import kotlin.reflect.full.isSubclassOf
-import kotlin.reflect.full.primaryConstructor
-import kotlin.reflect.jvm.jvmErasure
-
+// TODO merge into Messages.kt
 enum class MessageType(val id: Int, val factory: (List<Any>) -> Message) {
     HELLO(1, getFactory<Hello>()),
     WELCOME(2, getFactory<Welcome>()),
