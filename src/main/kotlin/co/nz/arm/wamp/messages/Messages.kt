@@ -64,3 +64,5 @@ class Unregister(val requestId: Long, val registration: Long) : Message(MessageT
 class Unregistered(val requestId: Long, val registration: Long, val details: Any, val arguments: List<Any> = emptyList(), val argumentsKw: Any = Any()) : Message(MessageType.UNREGISTERED)
 
 class Invocation(val requestId: Long, val options: Any, val arguments: List<Any> = emptyList(), val argumentsKw: Any = Any()) : Message(MessageType.INVOCATION)
+
+class Yield(val requestId: Long, val options: Any, val arguments: List<Any> = emptyList(), val argumentsKw: Any = Any()) : Message(MessageType.YIELD)
