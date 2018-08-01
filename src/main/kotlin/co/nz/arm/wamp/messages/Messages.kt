@@ -25,19 +25,11 @@ class Goodbye(val details: Any, reason: String) : Message(MessageType.GOODBYE) {
     val reason = URI(reason)
 }
 
-// TODO turn arguments(Kw) to val
-class Error(val requestType: Int, val requestId: Long, val details: Any, error: String) : Message(MessageType.ERROR) {
-    constructor(requestType: Int, requestId: Long, details: Any, error: String, arguments: List<Any>) : this(requestType, requestId, details, error)
-    constructor(requestType: Int, requestId: Long, details: Any, error: String, arguments: List<Any>, argumentsKw: Any) : this(requestType, requestId, details, error, arguments)
-
+class Error(val requestType: Int, val requestId: Long, val details: Any, error: String, val arguments: List<Any> = emptyList(), val argumentsKw: Any = Any()) : Message(MessageType.ERROR) {
     val error = URI(error)
 }
 
-// TODO turn arguments(Kw) to val
-class Publish(val requestId: Long, val options: Any, topic: String) : Message(MessageType.PUBLISH) {
-    constructor(requestId: Long, options: Any, topic: String, arguments: List<Any>) : this(requestId, options, topic)
-    constructor(requestId: Long, options: Any, topic: String, arguments: List<Any>, argumentsKw: Any) : this(requestId, options, topic, arguments)
-
+class Publish(val requestId: Long, val options: Any, topic: String, val arguments: List<Any> = emptyList(), val argumentsKw: Any = Any()) : Message(MessageType.PUBLISH) {
     val topic = URI(topic)
 }
 
@@ -53,8 +45,4 @@ class Unsubscribe(val requestId: Long, val subscription: Long) : Message(Message
 
 class Unsubscribed(val requestId: Long) : Message(MessageType.UNSUBSCRIBED)
 
-// TODO turn arguments(Kw) to val
-class Event(val subscription: Long, val publication: Long, val details: Any) : Message(MessageType.EVENT) {
-    constructor(subscription: Long, publication: Long, details: Any, arguments: List<Any>) : this(subscription, publication, details)
-    constructor(subscription: Long, publication: Long, details: Any, arguments: List<Any>, argumentsKw: Any) : this(subscription, publication, details, arguments)
-}
+class Event(val subscription: Long, val publication: Long, val details: Any, val arguments: List<Any> = emptyList(), val argumentsKw: Any = Any()) : Message(MessageType.EVENT)
