@@ -16,7 +16,11 @@ fun validateArray(objectArray: List<Any>, constructorParameters: List<KParameter
 }
 
 private fun areValidParameterValues(objectArray: List<Any>, constructorParameters: List<KParameter>) =
-        objectArray.size == constructorParameters.size && canApplyValuesToParameters(objectArray, constructorParameters)
+        objectArray.size in acceptableNumberOfParameters(constructorParameters) && canApplyValuesToParameters(objectArray, constructorParameters)
+
+private fun acceptableNumberOfParameters(parameters: List<KParameter>) = numberOfNonOptional(parameters)..parameters.size
+
+private fun numberOfNonOptional(parameters: List<KParameter>) = parameters.count { !it.isOptional }
 
 private fun canApplyValuesToParameters(values: List<Any>, parameters: List<KParameter>) = values.indices.all { i ->
     values[i].canBeAppliedToType(parameters[i])
