@@ -46,3 +46,21 @@ class Unsubscribe(val requestId: Long, val subscription: Long) : Message(Message
 class Unsubscribed(val requestId: Long) : Message(MessageType.UNSUBSCRIBED)
 
 class Event(val subscription: Long, val publication: Long, val details: Any, val arguments: List<Any> = emptyList(), val argumentsKw: Any = Any()) : Message(MessageType.EVENT)
+
+class Call(val requestId: Long, val options: Any, procedure: String, val arguments: List<Any> = emptyList(), val argumentsKw: Any = Any()) : Message(MessageType.CALL) {
+    val procedure = URI(procedure)
+}
+
+class Result(val requestId: Long, val details: Any, val arguments: List<Any> = emptyList(), val argumentsKw: Any = Any()) : Message(MessageType.RESULT)
+
+class Register(val requestId: Long, val options: Any, procedure: String) : Message(MessageType.REGISTER) {
+    val procedure = URI(procedure)
+}
+
+class Registered(val requestId: Long, val registration: Long) : Message(MessageType.REGISTERED)
+
+class Unregister(val requestId: Long, val registration: Long) : Message(MessageType.UNREGISTER)
+
+class Unregistered(val requestId: Long, val registration: Long, val details: Any, val arguments: List<Any> = emptyList(), val argumentsKw: Any = Any()) : Message(MessageType.UNREGISTERED)
+
+class Invocation(val requestId: Long, val options: Any, val arguments: List<Any> = emptyList(), val argumentsKw: Any = Any()) : Message(MessageType.INVOCATION)
