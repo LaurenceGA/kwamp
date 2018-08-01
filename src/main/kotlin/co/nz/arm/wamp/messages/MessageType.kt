@@ -2,26 +2,26 @@ package co.nz.arm.wamp.messages
 
 // TODO merge into Messages.kt
 enum class MessageType(val id: Int, val factory: (List<Any>) -> Message) {
-    HELLO(1, getFactory<Hello>()),
-    WELCOME(2, getFactory<Welcome>()),
-    ABORT(3, getFactory<Abort>()),
-    GOODBYE(6, getFactory<Message>()),
-    ERROR(8, getFactory<Message>()),
-    PUBLISH(16, getFactory<Message>()),
-    PUBLISHED(17, getFactory<Message>()),
-    SUBSCRIBE(32, getFactory<Message>()),
-    SUBSCRIBED(33, getFactory<Message>()),
-    UNSUBSCRIBE(34, getFactory<Message>()),
-    UNSUBSCRIBED(35, getFactory<Message>()),
-    EVENT(36, getFactory<Message>()),
-    CALL(48, getFactory<Message>()),
-    RESULT(50, getFactory<Message>()),
-    REGISTER(64, getFactory<Message>()),
-    REGISTERED(65, getFactory<Message>()),
-    UNREGISTER(66, getFactory<Message>()),
-    UNREGISTERED(67, getFactory<Message>()),
-    INVOCATION(68, getFactory<Message>()),
-    YIELD(70, getFactory<Message>());
+    HELLO(1, generateFactory(Hello::class)),
+    WELCOME(2, generateFactory(Welcome::class)),
+    ABORT(3, generateFactory(Abort::class)),
+    GOODBYE(6, generateFactory(Goodbye::class)),
+    ERROR(8, generateFactory(Error::class)),
+    PUBLISH(16, generateFactory(Publish::class)),
+    PUBLISHED(17, generateFactory(Published::class)),
+    SUBSCRIBE(32, generateFactory(Subscribe::class)),
+    SUBSCRIBED(33, generateFactory(Subscribed::class)),
+    UNSUBSCRIBE(34, generateFactory(Unsubscribe::class)),
+    UNSUBSCRIBED(35, generateFactory(Unsubscribed::class)),
+    EVENT(36, generateFactory(Event::class)),
+    CALL(48, generateFactory(Call::class)),
+    RESULT(50, generateFactory(Result::class)),
+    REGISTER(64, generateFactory(Register::class)),
+    REGISTERED(65, generateFactory(Registered::class)),
+    UNREGISTER(66, generateFactory(Unregister::class)),
+    UNREGISTERED(67, generateFactory(Unregistered::class)),
+    INVOCATION(68, generateFactory(Invocation::class)),
+    YIELD(70, generateFactory(Yield::class));
 
     companion object {
         private val factories = hashMapOf(*MessageType.values().map(::toIndexedFactory).toTypedArray())

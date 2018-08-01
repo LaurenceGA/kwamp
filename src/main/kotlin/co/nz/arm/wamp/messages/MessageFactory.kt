@@ -1,13 +1,14 @@
 package co.nz.arm.wamp.messages
 
+import kotlin.reflect.KClass
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.jvm.jvmErasure
 
-inline fun <reified messageClass : Message> getFactory(): (objectArray: List<Any>) -> Message = {
-    validateArray(it, messageClass::class.primaryConstructor!!.parameters)
-    messageClass::class::primaryConstructor.get()!!.call(*it.toTypedArray())
+fun generateFactory(messageClass: KClass<out Message>): (objectArray: List<Any>) -> Message = {
+    validateArray(it, messageClass.primaryConstructor!!.parameters)
+    messageClass::primaryConstructor.get()!!.call(*it.toTypedArray())
 }
 
 fun validateArray(objectArray: List<Any>, constructorParameters: List<KParameter>) {
