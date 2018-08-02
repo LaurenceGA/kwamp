@@ -3,11 +3,25 @@ package co.nz.arm.wamp
 import java.util.concurrent.ThreadLocalRandom
 import kotlin.math.pow
 
-object Identifier {
-    private val minId = 0L
-    private val maxId = 2.0.pow(53).toLong()
+interface WampIdGenerator {
+    fun newId(): Long
+}
 
-    fun newRandom(): Long = (minId..maxId).random()
+object Identifier {
+    val acceptableRange = 1..2.pow(53)
+
+    fun isValid(id: Long) = id in acceptableRange
+}
+
+fun Int.pow(x: Int) = this.toDouble().pow(x).toLong()
+
+class LinearIdGenerator() : WampIdGenerator {
+    private var nextId = 1L
+    override fun newId() = ++nextId
+}
+
+class RandomIdGenerator() : WampIdGenerator {
+    override fun newId() = Identifier.acceptableRange.random()
 }
 
 fun ClosedRange<Long>.random() =
