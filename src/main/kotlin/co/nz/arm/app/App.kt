@@ -1,5 +1,6 @@
 package co.nz.arm.app
 
+import co.nz.arm.wamp.Realm
 import co.nz.arm.wamp.Router
 import io.ktor.application.*
 import io.ktor.features.*
@@ -16,7 +17,7 @@ import kotlinx.coroutines.experimental.channels.consumeEach
 import kotlinx.coroutines.experimental.launch
 import java.time.Duration
 
-private val router = Router()
+private val router = Router().also { it.addRealm(Realm("default")) }
 
 fun Application.main() {
     install(DefaultHeaders)
