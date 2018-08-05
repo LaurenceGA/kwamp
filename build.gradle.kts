@@ -50,11 +50,7 @@ dependencies {
     implementation("ch.qos.logback:logback-classic:${logbackVersion}")
     implementation("com.beust:klaxon:${klaxonVersion}")
 
-    testImplementation("org.assertj:assertj-core:${assertJVersion}")
-    testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
-
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher:${junitRunner}")
+    testImplementation("io.kotlintest:kotlintest-runner-junit5:3.1.7")
 }
 
 tasks.withType<Test> {
