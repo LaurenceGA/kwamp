@@ -1,5 +1,6 @@
 package co.nz.arm.wamp.router
 
+import co.nz.arm.wamp.Connection
 import co.nz.arm.wamp.messages.Hello
 import kotlinx.coroutines.experimental.channels.Channel
 import org.junit.jupiter.api.Test
