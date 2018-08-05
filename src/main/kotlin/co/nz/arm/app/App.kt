@@ -1,7 +1,7 @@
 package co.nz.arm.app
 
-import co.nz.arm.wamp.Realm
-import co.nz.arm.wamp.Router
+import co.nz.arm.wamp.router.Realm
+import co.nz.arm.wamp.router.Router
 import co.nz.arm.wamp.URI
 import io.ktor.application.*
 import io.ktor.features.*

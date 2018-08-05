@@ -1,6 +1,5 @@
 package co.nz.arm.wamp.messages
 
-// TODO merge into Messages.kt
 enum class MessageType(val id: Int, val factory: (List<Any>) -> Message) {
     HELLO(1, generateFactory(Hello::class)),
     WELCOME(2, generateFactory(Welcome::class)),

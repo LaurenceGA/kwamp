@@ -1,5 +1,6 @@
-package co.nz.arm.wamp
+package co.nz.arm.wamp.router
 
+import co.nz.arm.wamp.URI
 import co.nz.arm.wamp.messages.*
 import com.beust.klaxon.Klaxon
 import io.netty.util.internal.ConcurrentSet
@@ -11,27 +12,12 @@ import java.util.concurrent.ConcurrentHashMap
 
 class Router {
     private val realms = ConcurrentHashMap<URI, Realm>()
-    private val connectionRealm = ConcurrentHashMap<Connection, Realm?>()
 
     suspend fun newConnection(incoming: ReceiveChannel<String>, outgoing: SendChannel<String>, close: suspend (message: String) -> Unit) {
         println("Router setting up new connection!")
-        val connection = Connection(incoming, outgoing, close).also { connectionRealm[it] = null }
-
-        connection.forEachMessage { message ->
-            when (message) {
-                is Hello -> routeHello(connection, message)
-
-            }
-        }
+        val connection = Connection(incoming, outgoing, close)
+        SessionEstablisher(realms, connection).establish()
     }
-
-    private suspend fun routeHello(connection: Connection, message: Hello) {
-        if (connectionRealm[connection] == null) joinRealm(connection, message.realm)
-        else sendProtocolViolation(connection, "Received HELLO message after session was established.")
-    }
-
-    private suspend fun joinRealm(connection: Connection, realmURI: URI) = realms[realmURI]?.join(connection)
-            ?: sendProtocolViolation(connection, "Realm does not exist")
 
     private suspend fun sendProtocolViolation(connection: Connection, message: String) = connection.apply {
         send(Abort("{}", message))
@@ -59,7 +45,15 @@ class Connection(private val incoming: ReceiveChannel<String>, private val outgo
     }
 
     suspend fun forEachMessage(action: suspend (Message) -> Unit) = launch {
-        incoming.consumeEach { deserialize(it).also { action(it) } }
+        incoming.consumeEach { processRawMessage(it, action) }
+    }
+
+    suspend fun onNextMessage(action: suspend (Message) -> Unit) = launch {
+        processRawMessage(incoming.receive(), action)
+    }
+
+    private suspend fun processRawMessage(message: String, action: suspend (Message) -> Unit) {
+        deserialize(message).also { action(it) }
     }
 
     private fun deserialize(rawMessage: String): Message {
@@ -67,7 +61,9 @@ class Connection(private val incoming: ReceiveChannel<String>, private val outgo
         return MessageType.getFactory(messageArray!![0] as Int)?.invoke(messageArray.subList(1, messageArray.size))!!
     }
 
+    private fun serialize(message: Message) = Klaxon().toJsonString(message.toList())
+
     suspend fun send(message: Message) {
-        outgoing.send(message.toString())
+        outgoing.send(serialize(message))
     }
 }

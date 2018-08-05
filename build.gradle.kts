@@ -31,6 +31,10 @@ val ktorVersion = "0.9.3"
 val logbackVersion = "1.2.1"
 val klaxonVersion = "3.0.1"
 
+val assertJVersion = "3.10.0"
+val junitVersion = "5.2.0"
+val junitRunner = "1.0.0"
+
 repositories {
     mavenCentral()
     jcenter()
@@ -45,6 +49,16 @@ dependencies {
     implementation("io.ktor:ktor-gson:${ktorVersion}")
     implementation("ch.qos.logback:logback-classic:${logbackVersion}")
     implementation("com.beust:klaxon:${klaxonVersion}")
+
+    testImplementation("org.assertj:assertj-core:${assertJVersion}")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
+
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher:${junitRunner}")
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
 }
 
 tasks.withType<KotlinCompile> {
