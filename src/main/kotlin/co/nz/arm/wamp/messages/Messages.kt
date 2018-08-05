@@ -14,7 +14,7 @@ class Hello(realm: String, val details: Any) : Message(MessageType.HELLO) {
     override fun toList() = listOf(messageType.id, realm, details)
 }
 
-class Welcome(val session: Int, val details: Any) : Message(MessageType.WELCOME) {
+class Welcome(val session: Long, val details: Any) : Message(MessageType.WELCOME) {
     override fun toString() = "[${messageType.id}, $session, $details]"
     override fun toList() = listOf(messageType.id, session, details)
 }

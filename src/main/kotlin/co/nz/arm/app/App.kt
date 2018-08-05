@@ -1,15 +1,16 @@
 package co.nz.arm.app
 
+import co.nz.arm.wamp.Connection
 import co.nz.arm.wamp.router.Realm
 import co.nz.arm.wamp.router.Router
 import co.nz.arm.wamp.URI
+import co.nz.arm.wamp.serialization.JsonMessageSerializer
 import io.ktor.application.*
 import io.ktor.features.*
 import io.ktor.http.cio.websocket.CloseReason
 import io.ktor.http.cio.websocket.Frame
 import io.ktor.http.cio.websocket.close
 import io.ktor.http.cio.websocket.readText
-import io.ktor.response.respondText
 import io.ktor.routing.*
 import io.ktor.websocket.WebSockets
 import io.ktor.websocket.webSocket
@@ -31,9 +32,12 @@ fun Application.main() {
         webSocket("/connect") {
             log.info("Websocket connection established")
             val wampIncoming = Channel<String>()
-            val wampOutgoing= Channel<String>()
+            val wampOutgoing = Channel<String>()
 
-            router.newConnection(wampIncoming, wampOutgoing, {message -> close(CloseReason(CloseReason.Codes.NORMAL, message))})
+            val connection = Connection(wampIncoming, wampOutgoing, { message -> close(CloseReason(CloseReason.Codes.NORMAL, message)) }, JsonMessageSerializer())
+
+            router.registerConnection(connection)
+
 
             launch {
                 wampOutgoing.consumeEach { message ->
@@ -49,10 +53,6 @@ fun Application.main() {
             }
 
             log.info("Websocket connection ended")
-        }
-
-        get("/") {
-            call.respondText("Hello World")
         }
     }
 }

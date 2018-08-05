@@ -14,11 +14,7 @@ import java.util.concurrent.ConcurrentHashMap
 class Router {
     private val realms = ConcurrentHashMap<URI, Realm>()
 
-    suspend fun newConnection(incoming: ReceiveChannel<String>, outgoing: SendChannel<String>, close: suspend (message: String) -> Unit) {
-        println("Router setting up new connection!")
-        val connection = Connection(incoming, outgoing, close)
-        SessionEstablisher(realms, connection).establish()
-    }
+    suspend fun registerConnection(connection: Connection) = SessionEstablisher(realms, connection).establish()
 
     private suspend fun sendProtocolViolation(connection: Connection, message: String) = connection.apply {
         send(Abort("{}", message))

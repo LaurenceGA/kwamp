@@ -1,10 +1,21 @@
 package co.nz.arm.wamp
 
+import io.netty.util.internal.ConcurrentSet
 import java.util.concurrent.ThreadLocalRandom
 import kotlin.math.pow
 
-interface WampIdGenerator {
-    fun newId(): Long
+abstract class WampIdGenerator {
+    private val usedIds = ConcurrentSet<Long>()
+
+    protected abstract val sequence: Sequence<Long>
+
+    fun newId(): Long = sequence.first { isValid(it) }
+
+    private fun isValid(id: Long) = Identifier.isValid(id) && !hasId(id)
+
+    private fun hasId(id: Long) = id in usedIds
+
+    fun releaseId(id: Long) = usedIds.remove(id)
 }
 
 object Identifier {
@@ -15,14 +26,13 @@ object Identifier {
 
 fun Int.pow(x: Int) = this.toDouble().pow(x).toLong()
 
-class LinearIdGenerator() : WampIdGenerator {
-    private var nextId = 1L
-    override fun newId() = ++nextId
+class LinearIdGenerator(private var seed: Long = 1L) : WampIdGenerator() {
+    override val sequence = generateSequence(seed) { (it + 1).rem(Identifier.acceptableRange.endInclusive) }
 }
 
-class RandomIdGenerator() : WampIdGenerator {
-    override fun newId() = Identifier.acceptableRange.random()
+class RandomIdGenerator() : WampIdGenerator() {
+    override val sequence = generateSequence { Identifier.acceptableRange.random() }
 }
 
 fun ClosedRange<Long>.random() =
-        ThreadLocalRandom.current().nextLong(endInclusive+1 - start) +  start
+        ThreadLocalRandom.current().nextLong(endInclusive + 1 - start) + start
