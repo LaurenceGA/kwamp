@@ -1,23 +1,24 @@
 package co.nz.arm.wamp.messages
 
+import co.nz.arm.wamp.canBeAppliedToType
 import kotlin.reflect.KClass
+import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
-import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.jvm.jvmErasure
 
-fun generateFactory(messageClass: KClass<out Message>): (objectArray: List<Any>) -> Message = {
-    validateArray(it, messageClass.primaryConstructor!!.parameters)
-    messageClass::primaryConstructor.get()!!.call(*it.toTypedArray())
-}
+fun generateFactory(messageClass: KClass<out Message>): (objectArray: List<Any>) -> Message = { inputList ->
+    val parameters = messageClass.primaryConstructor!!.parameters
+    val mappedInputList = if (inputList.size in acceptableNumberOfParameters(parameters))
+        conformArrayObjectsToConstructor(inputList, parameters)
+    else
+        throw RuntimeException("Not enough parameters in message")
 
-fun validateArray(objectArray: List<Any>, constructorParameters: List<KParameter>) {
-    if (!areValidParameterValues(objectArray, constructorParameters))
-        throw RuntimeException("Invalid message")
+    messageClass::primaryConstructor.get()!!.call(*mappedInputList.toTypedArray())
 }
 
 private fun areValidParameterValues(objectArray: List<Any>, constructorParameters: List<KParameter>) =
-        objectArray.size in acceptableNumberOfParameters(constructorParameters) && canApplyValuesToParameters(objectArray, constructorParameters)
+        canApplyValuesToParameters(objectArray, constructorParameters)
 
 private fun acceptableNumberOfParameters(parameters: List<KParameter>) = numberOfNonOptional(parameters)..parameters.size
 
@@ -27,4 +28,15 @@ private fun canApplyValuesToParameters(values: List<Any>, parameters: List<KPara
     values[i].canBeAppliedToType(parameters[i])
 }
 
-fun Any.canBeAppliedToType(parameter: KParameter) = this::class.isSubclassOf(parameter.type.jvmErasure)
+private fun conformArrayObjectsToConstructor(inputArray: List<Any>, parameters: List<KParameter>) = inputArray.mapIndexed { index, item ->
+    if (inputArray[index].canBeAppliedToType(parameters[index]))
+        item
+    else
+        getUnaryParameterConstructor(item, parameters[index]).call(item)
+}
+
+private fun getUnaryParameterConstructor(input: Any, parameter: KParameter): KFunction<Any> = try {
+    parameter.type.jvmErasure.constructors.first { areValidParameterValues(listOf(input), it.parameters) }
+} catch (e: NoSuchElementException) {
+    throw RuntimeException("Type mismatch in message")
+}

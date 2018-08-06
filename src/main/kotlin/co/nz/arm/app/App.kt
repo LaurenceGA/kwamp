@@ -3,7 +3,7 @@ package co.nz.arm.app
 import co.nz.arm.wamp.Connection
 import co.nz.arm.wamp.router.Realm
 import co.nz.arm.wamp.router.Router
-import co.nz.arm.wamp.URI
+import co.nz.arm.wamp.Uri
 import co.nz.arm.wamp.serialization.JsonMessageSerializer
 import io.ktor.application.*
 import io.ktor.features.*
@@ -19,7 +19,7 @@ import kotlinx.coroutines.experimental.channels.consumeEach
 import kotlinx.coroutines.experimental.launch
 import java.time.Duration
 
-private val router = Router().also { it.addRealm(Realm(URI("default"))) }
+private val router = Router().also { it.addRealm(Realm(Uri("default"))) }
 
 fun Application.main() {
     install(DefaultHeaders)

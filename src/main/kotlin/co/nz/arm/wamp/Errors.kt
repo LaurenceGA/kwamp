@@ -42,5 +42,5 @@ enum class WampError(uri: String) {
     ;
 
 
-    val uri = URI(uri)
+    val uri = Uri(uri)
 }

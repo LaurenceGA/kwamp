@@ -1,5 +1,9 @@
 package co.nz.arm.wamp.messages
 
+import co.nz.arm.wamp.Uri
+import com.beust.klaxon.Converter
+import com.beust.klaxon.JsonValue
+
 enum class MessageType(val id: Int, val factory: (List<Any>) -> Message) {
     HELLO(1, generateFactory(Hello::class)),
     WELCOME(2, generateFactory(Welcome::class)),
@@ -27,6 +31,12 @@ enum class MessageType(val id: Int, val factory: (List<Any>) -> Message) {
 
         private fun toIndexedFactory(message: MessageType) = Pair(message.id, message.factory)
 
-        fun getFactory(id: Int) = factories[id]
+        fun getFactory(id: Int) = factories[id] ?: throw RuntimeException("Unknown message type")
+    }
+
+    object MessageTypeConverter : Converter {
+        override fun canConvert(cls: Class<*>) = cls == MessageType::class.java
+        override fun fromJson(jv: JsonValue): Any = false
+        override fun toJson(value: Any) = "${(value as MessageType).id}"
     }
 }

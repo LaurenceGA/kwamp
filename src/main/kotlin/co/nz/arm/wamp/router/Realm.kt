@@ -5,7 +5,7 @@ import co.nz.arm.wamp.messages.Welcome
 import kotlinx.coroutines.experimental.launch
 import java.util.concurrent.ConcurrentHashMap
 
-class Realm(val uri: URI) {
+class Realm(val uri: Uri) {
     private val sessions = SessionSet(RandomIdGenerator())
 
     suspend fun join(connection: Connection) = startSession(connection)
