@@ -23,8 +23,8 @@ class JsonMessageSerializerTest : StringSpec({
                 row(Subscribed(123, 456), "[33, 123, 456]"),
                 row(Unsubscribe(123, 456), "[34, 123, 456]"),
                 row(Unsubscribed(123), "[35, 123]")
-        ) { message, rawMessage ->
-            messageSerializer.serialize(message) shouldBe rawMessage
+        ) { message, serializedMessage ->
+            messageSerializer.serialize(message) shouldBe serializedMessage
         }
     }
 
