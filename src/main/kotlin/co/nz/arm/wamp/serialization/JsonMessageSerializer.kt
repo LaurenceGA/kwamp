@@ -26,5 +26,5 @@ class JsonMessageSerializer : MessageSerializer {
     override fun serialize(message: Message) = Klaxon()
             .converter(Uri.UriConverter)
             .converter(MessageType.MessageTypeConverter)
-            .toJsonString(message.toList())
+            .toJsonString(message.asList())
 }
