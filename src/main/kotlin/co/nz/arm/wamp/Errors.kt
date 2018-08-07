@@ -13,12 +13,6 @@ enum class WampError(uri: String) {
     NO_SUCH_SUBSCRIPTION("wamp.error.no_such_subscription"),
     // A call failed since the given argument types or values are not acceptable to the called procedure.
     INVALID_ARGUMENT("wamp.error.invalid_argument"),
-    // The Peer is shutting down completely - used as a GOODBYE (or ABORT) reason.
-    SYSTEM_SHUTDOWN("wamp.close.system_shutdown"),
-    // The Peer want to leave the realm - used as a GOODBYE reason.
-    CLOSE_REALM("wamp.close.close_realm"),
-    // A Peer acknowledges ending of a session - used as a GOODBYE reply reason.
-    GOODBYE_AND_OUT("wamp.close.goodbye_and_out"),
     // A Peer received invalid WAMP protocol message (e.g. HELLO message after session was already established) - used as a ABORT reply reason.
     PROTOCOL_VIOLATION("wamp.error.protocol_violation"),
     // A join, call, register, publish or subscribe failed, since the Peer is not authorized to perform the operation.
@@ -38,9 +32,28 @@ enum class WampError(uri: String) {
     // A Router rejected client request to disclose its identity
     OPTION_DISALLOWED_DISCLOSE_ME("wamp.error.option_disallowed.disclose_me"),
     // A Router encountered a network failure
-    NETWORK_FAILURE("wamp.error.network_failure"),
-    ;
+    NETWORK_FAILURE("wamp.error.network_failure");
 
 
     val uri = Uri(uri)
 }
+
+open class WampException(val error: WampError, message: String? = null, cause: Throwable = WampException(error)) : Exception(message, cause)
+
+class InvalidUriException(message: String? = null, cause: Throwable = InvalidUriException())
+    : WampException(WampError.INVALID_URI, message = message, cause = cause)
+
+class NoSuchProcedureException(message: String? = null, cause: Throwable = NoSuchProcedureException())
+    : WampException(WampError.NO_SUCH_PROCEDURE, message = message, cause = cause)
+
+class ProcedureAlreadyExistsException(message: String? = null, cause: Throwable = ProcedureAlreadyExistsException())
+    : WampException(WampError.PROCEDURE_ALREADY_EXISTS, message = message, cause = cause)
+
+open class ProtocolViolationException(message: String? = null, cause: Throwable = ProtocolViolationException())
+    : WampException(WampError.PROTOCOL_VIOLATION, message = message, cause = cause)
+
+class InvalidMessageException(message: String? = null, cause: Throwable = InvalidMessageException())
+    : ProtocolViolationException(message = message, cause = cause)
+
+class NoSuchRealmException(message: String? = null, cause: Throwable = NoSuchRealmException())
+    : WampException(WampError.NO_SUCH_REALM, message = message, cause = cause)
