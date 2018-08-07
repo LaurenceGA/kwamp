@@ -31,7 +31,7 @@ data class Unsubscribed(val requestId: Long) : Message(MessageType.UNSUBSCRIBED)
 
 data class Event(val subscription: Long, val publication: Long, val details: Any, val arguments: List<Any>? = null, val argumentsKw: Any? = null) : Message(MessageType.EVENT)
 
-data class Call(val requestId: Long, val options: Any, val procedure: Uri, val arguments: List<Any> = emptyList(), val argumentsKw: Any? = null) : Message(MessageType.CALL)
+data class Call(val requestId: Long, val options: Any, val procedure: Uri, val arguments: List<Any>? = null, val argumentsKw: Any? = null) : Message(MessageType.CALL)
 
 data class Result(val requestId: Long, val details: Any, val arguments: List<Any>? = null, val argumentsKw: Any? = null) : Message(MessageType.RESULT)
 
