@@ -17,22 +17,19 @@ fun generateFactory(messageClass: KClass<out Message>): (objectArray: List<Any>)
     messageClass::primaryConstructor.get()!!.call(*mappedInputList.toTypedArray())
 }
 
-private fun areValidParameterValues(objectArray: List<Any>, constructorParameters: List<KParameter>) =
-        canApplyValuesToParameters(objectArray, constructorParameters)
-
 private fun acceptableNumberOfParameters(parameters: List<KParameter>) = numberOfNonOptional(parameters)..parameters.size
 
 private fun numberOfNonOptional(parameters: List<KParameter>) = parameters.count { !it.isOptional }
 
-private fun canApplyValuesToParameters(values: List<Any>, parameters: List<KParameter>) = values.indices.all { i ->
-    values[i].canBeAppliedToType(parameters[i])
-}
-
 private fun conformArrayObjectsToConstructor(inputArray: List<Any>, parameters: List<KParameter>) = inputArray.mapIndexed { index, item ->
-    if (inputArray[index].canBeAppliedToType(parameters[index]))
+    if (inputArray[index].canBeAppliedToType(parameters[index]) || inputArray[index] is Int)
         item
     else
         getUnaryParameterConstructor(item, parameters[index]).call(item)
+}
+
+private fun canApplyValuesToParameters(values: List<Any>, parameters: List<KParameter>) = values.indices.all { i ->
+    values[i].canBeAppliedToType(parameters[i])
 }
 
 private fun getUnaryParameterConstructor(input: Any, parameter: KParameter): KFunction<Any> = try {
@@ -40,3 +37,7 @@ private fun getUnaryParameterConstructor(input: Any, parameter: KParameter): KFu
 } catch (e: NoSuchElementException) {
     throw RuntimeException("Type mismatch in message")
 }
+
+private fun areValidParameterValues(objectArray: List<Any>, constructorParameters: List<KParameter>) =
+        objectArray.size in acceptableNumberOfParameters(constructorParameters)
+                && canApplyValuesToParameters(objectArray, constructorParameters)

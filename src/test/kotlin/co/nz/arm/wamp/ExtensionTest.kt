@@ -5,6 +5,9 @@ import io.kotlintest.shouldBe
 import io.kotlintest.shouldEqual
 import io.kotlintest.specs.StringSpec
 import io.kotlintest.tables.row
+import kotlin.reflect.KParameter
+import kotlin.reflect.KType
+import kotlin.reflect.full.createType
 
 class ExtensionTest : StringSpec({
     "Partition a list" {
@@ -25,5 +28,18 @@ class ExtensionTest : StringSpec({
     "split at single item list" {
         val baseList = listOf(1)
         baseList.splitAt(1).shouldBe(Pair<List<Int>, List<Int>>(listOf(1), listOf()))
+    }
+
+    "can be applied to parameter" {
+        1.canBeAppliedToType(object : KParameter {
+            override val annotations = emptyList<Annotation>()
+            override val index = 0
+            override val isOptional = false
+            override val isVararg = false
+            override val kind = KParameter.Kind.VALUE
+            override val name = "someLong"
+            override val type = Long::class.createType()
+
+        }) shouldBe true
     }
 })

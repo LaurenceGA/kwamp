@@ -31,9 +31,9 @@ val ktorVersion = "0.9.3"
 val logbackVersion = "1.2.1"
 val klaxonVersion = "3.0.1"
 
-val assertJVersion = "3.10.0"
-val junitVersion = "5.2.0"
-val junitRunner = "1.0.0"
+val apacheLang3CommonsVersion = "3.7"
+
+val kotlinTestVersion = "3.1.7"
 
 repositories {
     mavenCentral()
@@ -43,14 +43,15 @@ repositories {
 
 dependencies {
     implementation(kotlin("stdlib", kotlinVersion))
-    implementation("io.ktor:ktor-server-core:${ktorVersion}")
-    implementation("io.ktor:ktor-server-netty:${ktorVersion}")
-    implementation("io.ktor:ktor-websockets:${ktorVersion}")
-    implementation("io.ktor:ktor-gson:${ktorVersion}")
-    implementation("ch.qos.logback:logback-classic:${logbackVersion}")
-    implementation("com.beust:klaxon:${klaxonVersion}")
+    implementation("io.ktor:ktor-server-core:$ktorVersion")
+    implementation("io.ktor:ktor-server-netty:$ktorVersion")
+    implementation("io.ktor:ktor-websockets:$ktorVersion")
+    implementation("io.ktor:ktor-gson:$ktorVersion")
+    implementation("ch.qos.logback:logback-classic:$logbackVersion")
+    implementation("com.beust:klaxon:$klaxonVersion")
+    implementation("org.apache.commons:commons-lang3:$apacheLang3CommonsVersion")
 
-    testImplementation("io.kotlintest:kotlintest-runner-junit5:3.1.7")
+    testImplementation("io.kotlintest:kotlintest-runner-junit5:$kotlinTestVersion")
 }
 
 tasks.withType<Test> {

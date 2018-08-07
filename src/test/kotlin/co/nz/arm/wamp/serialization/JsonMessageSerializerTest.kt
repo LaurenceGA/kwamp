@@ -22,9 +22,12 @@ class JsonMessageSerializerTest : StringSpec({
                 row(Subscribe(123, "options", Uri("topic")), "[32, 123, \"options\", \"topic\"]"),
                 row(Subscribed(123, 456), "[33, 123, 456]"),
                 row(Unsubscribe(123, 456), "[34, 123, 456]"),
-                row(Unsubscribed(123), "[35, 123]")
-        ) { message, serializedMessage ->
-            messageSerializer.serialize(message) shouldBe serializedMessage
+                row(Unsubscribed(123), "[35, 123]"),
+                row(Event(123, 456, "details"), "[36, 123, 456, \"details\"]"),
+                row(Call(123, "options", Uri("procedure")), "[48, 123, \"options\", \"procedure\"]")
+        ) { message, rawMessage ->
+            messageSerializer.serialize(message) shouldBe rawMessage
+            messageSerializer.deserialize(rawMessage) shouldBe message
         }
     }
 
