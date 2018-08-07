@@ -18,7 +18,11 @@ class JsonMessageSerializerTest : StringSpec({
                 row(Goodbye("details", Uri("reason")), "[6, \"details\", \"reason\"]"),
                 row(Error(5, 123, "details", Uri("error")), "[8, 5, 123, \"details\", \"error\"]"),
                 row(Publish(123, "options", Uri("topic")), "[16, 123, \"options\", \"topic\"]"),
-                row(Published(123, 456), "[17, 123, 456]")
+                row(Published(123, 456), "[17, 123, 456]"),
+                row(Subscribe(123, "options", Uri("topic")), "[32, 123, \"options\", \"topic\"]"),
+                row(Subscribed(123, 456), "[33, 123, 456]"),
+                row(Unsubscribe(123, 456), "[34, 123, 456]"),
+                row(Unsubscribed(123), "[35, 123]")
         ) { message, rawMessage ->
             messageSerializer.serialize(message) shouldBe rawMessage
         }
