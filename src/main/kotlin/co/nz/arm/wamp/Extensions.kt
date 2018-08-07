@@ -5,6 +5,7 @@ import kotlin.reflect.KParameter
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.isSubclassOf
+import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.jvm.jvmErasure
 
 // Partition a list by index
@@ -14,3 +15,5 @@ fun List<Any>.splitAt(index: Int) = Pair(subList(0, index), subList(index, size)
 fun Any.canBeAppliedToType(parameter: KParameter) = this::class.isSubclassOf(parameter.type.jvmErasure)
 
 fun Any.readProperty(propName: String): Any? = ((this::class as KClass<Any>).declaredMemberProperties.first { it.name == propName }).get(this)
+
+fun Any.primaryConstructorValues() = this::class.primaryConstructor!!.parameters.map { this.readProperty(it.name!!) }
