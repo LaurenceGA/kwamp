@@ -15,9 +15,9 @@ data class Abort(val details: Any, val reason: Uri) : Message(MessageType.ABORT)
 
 data class Goodbye(val details: Any, val reason: Uri) : Message(MessageType.GOODBYE)
 
-data class Error(val requestType: Int, val requestId: Long, val details: Any, val error: Uri, val arguments: List<Any>? = null, val argumentsKw: Any? = null) : Message(MessageType.ERROR)
+data class Error(val requestType: Int, val requestId: Long, val details: Any, val error: Uri, val arguments: List<Any?>? = null, val argumentsKw:Any? = null) : Message(MessageType.ERROR)
 
-data class Publish(val requestId: Long, val options: Any, val topic: Uri, val arguments: List<Any>? = null, val argumentsKw: Any? = null) : Message(MessageType.PUBLISH)
+data class Publish(val requestId: Long, val options: Any, val topic: Uri, val arguments: List<Any?>? = null, val argumentsKw: Any? = null) : Message(MessageType.PUBLISH)
 
 data class Published(val requestId: Long, val publication: Long) : Message(MessageType.PUBLISHED)
 
@@ -41,7 +41,7 @@ data class Registered(val requestId: Long, val registration: Long) : Message(Mes
 
 data class Unregister(val requestId: Long, val registration: Long) : Message(MessageType.UNREGISTER)
 
-data class Unregistered(val requestId: Long, val registration: Long, val details: Any, val arguments: List<Any>? = null, val argumentsKw: Any? = null) : Message(MessageType.UNREGISTERED)
+data class Unregistered(val requestId: Long) : Message(MessageType.UNREGISTERED)
 
 data class Invocation(val requestId: Long, val options: Any, val arguments: List<Any>? = null, val argumentsKw: Any? = null) : Message(MessageType.INVOCATION)
 
