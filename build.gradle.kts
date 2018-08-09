@@ -29,7 +29,7 @@ application {
 val kotlinVersion: String by extra
 val ktorVersion = "0.9.3"
 val logbackVersion = "1.2.1"
-val klaxonVersion = "3.0.1"
+val klaxonVersion = "3.0.6"
 
 val apacheLang3CommonsVersion = "3.7"
 
