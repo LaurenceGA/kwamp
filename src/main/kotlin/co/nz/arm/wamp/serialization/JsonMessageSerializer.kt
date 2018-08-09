@@ -1,9 +1,11 @@
 package co.nz.arm.wamp.serialization
 
+import co.nz.arm.wamp.InvalidMessageException
 import co.nz.arm.wamp.Uri
 import co.nz.arm.wamp.messages.Message
 import co.nz.arm.wamp.messages.MessageType
 import com.beust.klaxon.Klaxon
+import com.beust.klaxon.KlaxonException
 
 class JsonMessageSerializer : MessageSerializer {
     override fun deserialize(rawMessage: String): Message {
@@ -13,14 +15,19 @@ class JsonMessageSerializer : MessageSerializer {
         return factory.invoke(data)
     }
 
-    private fun parseRawMessage(rawMessage: String) = Klaxon().parseArray<Any>(rawMessage) ?: throw RuntimeException("Invalid parse")
+    private fun parseRawMessage(rawMessage: String) = try {
+        Klaxon().parseArray<Any>(rawMessage) ?: throw InvalidMessageException("Couldn't parse message into an array")
+    } catch (e: KlaxonException) {
+        throw InvalidMessageException("Couldn't parse message", e)
+    }
+
 
     private fun extractMessageType(messageArray: List<Any>) = try {
         Pair(messageArray[0] as Int, messageArray.drop(1))
-    } catch (e: ArrayIndexOutOfBoundsException) {
-        throw RuntimeException("MessageArray must have a least one item")
+    } catch (e: IndexOutOfBoundsException) {
+        throw InvalidMessageException("Message must have a least one item", e)
     } catch (e: ClassCastException) {
-        throw RuntimeException("Message type must be an integer")
+        throw InvalidMessageException("Message type must be an integer", e)
     }
 
     override fun serialize(message: Message) = Klaxon()

@@ -1,6 +1,6 @@
 package co.nz.arm.wamp.messages
 
-import co.nz.arm.wamp.Uri
+import co.nz.arm.wamp.ProtocolViolationException
 import com.beust.klaxon.Converter
 import com.beust.klaxon.JsonValue
 
@@ -31,7 +31,7 @@ enum class MessageType(val id: Int, val factory: (List<Any>) -> Message) {
 
         private fun toIndexedFactory(message: MessageType) = Pair(message.id, message.factory)
 
-        fun getFactory(id: Int) = factories[id] ?: throw RuntimeException("Unknown message type")
+        fun getFactory(id: Int) = factories[id] ?: throw ProtocolViolationException("Unknown message type '$id'")
     }
 
     object MessageTypeConverter : Converter {

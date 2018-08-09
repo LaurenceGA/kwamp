@@ -13,6 +13,10 @@ class Realm(val uri: Uri) {
     private suspend fun startSession(connection: Connection) = sessions.newSession(connection).apply {
         connection.forEachMessage {
             println(it)
+        }.invokeOnCompletion { exception ->
+            when (exception) {
+                is ProtocolViolationException -> connection.sendProtocolViolation(exception)
+            }
         }
     }
 }

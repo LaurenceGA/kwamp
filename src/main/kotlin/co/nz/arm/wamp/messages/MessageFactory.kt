@@ -38,7 +38,7 @@ private fun canApplyValuesToParameters(values: List<Any>, parameters: List<KPara
 private fun getUnaryParameterConstructor(input: Any, parameter: KParameter): KFunction<Any> = try {
     parameter.type.jvmErasure.constructors.first { areValidParameterValues(listOf(input), it.parameters) }
 } catch (e: NoSuchElementException) {
-    throw IllegalArgumentException("Couldn't find a way to create ${parameter.type.jvmErasure.simpleName} from $input")
+    throw IllegalArgumentException("Couldn't find a way to create ${parameter.type.jvmErasure.simpleName} from $input", e)
 }
 
 private fun areValidParameterValues(objectArray: List<Any>, constructorParameters: List<KParameter>) =
