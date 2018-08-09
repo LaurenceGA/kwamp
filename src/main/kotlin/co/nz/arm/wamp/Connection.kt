@@ -2,10 +2,10 @@ package co.nz.arm.wamp
 
 import co.nz.arm.wamp.messages.Message
 import co.nz.arm.wamp.serialization.MessageSerializer
+import kotlinx.coroutines.experimental.*
 import kotlinx.coroutines.experimental.channels.ReceiveChannel
 import kotlinx.coroutines.experimental.channels.SendChannel
 import kotlinx.coroutines.experimental.channels.consumeEach
-import kotlinx.coroutines.experimental.launch
 
 class Connection(private val incoming: ReceiveChannel<String>,
                  private val outgoing: SendChannel<String>,
@@ -16,11 +16,11 @@ class Connection(private val incoming: ReceiveChannel<String>,
         closeConnection(message)
     }
 
-    suspend fun forEachMessage(action: suspend (Message) -> Unit) = launch {
+    suspend fun forEachMessage(action: suspend (Message) -> Unit) = launch(cancelOnException) {
         incoming.consumeEach { processRawMessage(it, action) }
     }
 
-    suspend fun onNextMessage(action: suspend (Message) -> Unit) = launch {
+    suspend fun onNextMessage(action: suspend (Message) -> Unit) = launch(cancelOnException) {
         processRawMessage(incoming.receive(), action)
     }
 
@@ -28,14 +28,11 @@ class Connection(private val incoming: ReceiveChannel<String>,
         deserialize(message).also { action(it) }
     }
 
-//    private fun deserialize(rawMessage: String): Message {
-//        val messageArray = Klaxon().parseArray<Any>(rawMessage)
-//        return MessageType.getFactory(messageArray!![0] as Int)?.invoke(messageArray.subList(1, messageArray.size))!!
-//    }
-//
-//    private fun serialize(message: Message) = Klaxon().toJsonString(message.toList())
-
     suspend fun send(message: Message) {
         outgoing.send(serialize(message))
     }
+}
+
+val cancelOnException = DefaultDispatcher + CoroutineExceptionHandler { context, throwable ->
+    context.cancel(throwable)
 }
