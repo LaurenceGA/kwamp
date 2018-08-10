@@ -2,6 +2,7 @@ package co.nz.arm.wamp.router
 
 import co.nz.arm.wamp.*
 import co.nz.arm.wamp.messages.Abort
+import co.nz.arm.wamp.messages.Goodbye
 import co.nz.arm.wamp.messages.Hello
 import co.nz.arm.wamp.messages.Welcome
 import kotlinx.coroutines.experimental.launch
@@ -18,6 +19,7 @@ class Realm(val uri: Uri) {
                 is Hello -> throw ProtocolViolationException("Received Hello message after session established")
                 is Welcome -> throw ProtocolViolationException("Receive Welcome message from client")
                 is Abort -> connection.close("Abort from client")
+                is Goodbye -> connection.sendGoodbye()
             }
         }.invokeOnCompletion { exception ->
             when (exception) {
