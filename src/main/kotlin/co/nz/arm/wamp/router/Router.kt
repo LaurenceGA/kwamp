@@ -10,11 +10,6 @@ class Router {
 
     suspend fun registerConnection(connection: Connection) = SessionEstablisher(realms, connection).establish()
 
-    private suspend fun sendProtocolViolation(connection: Connection, message: String) = connection.apply {
-        send(Abort("{}", Uri(message)))
-        close(message)
-    }
-
     fun addRealm(realm: Realm) {
         if (realm.uri !in realms) realms[realm.uri] = realm
         else throw RuntimeException("Realm already exists")
