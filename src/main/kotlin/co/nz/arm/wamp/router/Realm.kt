@@ -46,7 +46,7 @@ class SessionSet(private val idGenerator: WampIdGenerator) {
 class WampSession(val id: Long, private val connection: Connection) {
     init {
         launch {
-            connection.send(Welcome(id, mapOf("roles" to mapOf("broker" to mapOf<String, Any?>(), "dealer" to mapOf()))))
+            connection.send(Welcome(id, mapOf("agent" to "KWAMP", "roles" to mapOf("broker" to mapOf<String, Any?>(), "dealer" to mapOf()))))
         }
     }
 }
