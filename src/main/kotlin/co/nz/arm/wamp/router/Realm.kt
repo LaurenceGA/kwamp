@@ -1,6 +1,8 @@
 package co.nz.arm.wamp.router
 
 import co.nz.arm.wamp.*
+import co.nz.arm.wamp.messages.Abort
+import co.nz.arm.wamp.messages.Hello
 import co.nz.arm.wamp.messages.Welcome
 import kotlinx.coroutines.experimental.launch
 import java.util.concurrent.ConcurrentHashMap
@@ -13,6 +15,11 @@ class Realm(val uri: Uri) {
     private suspend fun startSession(connection: Connection) = sessions.newSession(connection).apply {
         connection.forEachMessage {
             println(it)
+            when(it) {
+                is Hello -> throw ProtocolViolationException("Received Hello message after session established")
+                is Welcome -> throw ProtocolViolationException("Receive Welcome message from client")
+                is Abort -> connection.close("Abort from client")
+            }
         }.invokeOnCompletion { exception ->
             when (exception) {
                 is ProtocolViolationException -> connection.sendProtocolViolation(exception)
