@@ -20,7 +20,8 @@ class SessionEstablisher(private val realms: ConcurrentHashMap<Uri, Realm>, priv
             }
         }.invokeOnCompletion { throwable ->
             when (throwable) {
-                is ProtocolViolationException -> connection.sendProtocolViolation(throwable)
+                is ProtocolViolationException -> connection.abort(throwable)
+                is NoSuchRealmException -> connection.abort(throwable)
             }
         }
     }

@@ -23,7 +23,7 @@ class Realm(val uri: Uri) {
             }
         }.invokeOnCompletion { exception ->
             when (exception) {
-                is ProtocolViolationException -> connection.sendProtocolViolation(exception)
+                is ProtocolViolationException -> connection.abort(exception)
             }
             sessions.endSession(id)
         }
