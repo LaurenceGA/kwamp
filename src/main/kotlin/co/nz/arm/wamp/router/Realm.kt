@@ -14,7 +14,6 @@ class Realm(val uri: Uri) {
 
     private suspend fun startSession(connection: Connection) = sessions.newSession(connection).apply {
         connection.forEachMessage {
-            println(it)
             when(it) {
                 is Hello -> throw ProtocolViolationException("Received Hello message after session established")
                 is Welcome -> throw ProtocolViolationException("Receive Welcome message from client")
@@ -24,6 +23,7 @@ class Realm(val uri: Uri) {
             when (exception) {
                 is ProtocolViolationException -> connection.sendProtocolViolation(exception)
             }
+            sessions.endSession(id)
         }
     }
 }
@@ -41,7 +41,7 @@ class SessionSet(private val idGenerator: WampIdGenerator) {
     }
 }
 
-class WampSession(id: Long, val connection: Connection) {
+class WampSession(val id: Long, private val connection: Connection) {
     init {
         launch {
             connection.send(Welcome(id, ""))
