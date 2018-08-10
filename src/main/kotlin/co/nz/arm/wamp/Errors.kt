@@ -38,22 +38,22 @@ enum class WampError(uri: String) {
     val uri = Uri(uri)
 }
 
-open class WampException(val error: WampError, message: String? = null, cause: Throwable = WampException(error)) : Exception(message, cause)
+open class WampException(val error: WampError, message: String? = null, cause: Throwable? = null) : Exception(message, cause)
 
-class InvalidUriException(message: String? = null, cause: Throwable = InvalidUriException())
+class InvalidUriException(message: String? = null, cause: Throwable? = null)
     : WampException(WampError.INVALID_URI, message = message, cause = cause)
 
-class NoSuchProcedureException(message: String? = null, cause: Throwable = NoSuchProcedureException())
+class NoSuchProcedureException(message: String? = null, cause: Throwable? = null)
     : WampException(WampError.NO_SUCH_PROCEDURE, message = message, cause = cause)
 
-class ProcedureAlreadyExistsException(message: String? = null, cause: Throwable = ProcedureAlreadyExistsException())
+class ProcedureAlreadyExistsException(message: String? = null, cause: Throwable? = null)
     : WampException(WampError.PROCEDURE_ALREADY_EXISTS, message = message, cause = cause)
 
-open class ProtocolViolationException(message: String? = null, cause: Throwable = ProtocolViolationException())
+open class ProtocolViolationException(message: String? = null, cause: Throwable? = null)
     : WampException(WampError.PROTOCOL_VIOLATION, message = message, cause = cause)
 
-class InvalidMessageException(message: String? = null, cause: Throwable = InvalidMessageException())
+class InvalidMessageException(message: String? = null, cause: Throwable? = null)
     : ProtocolViolationException(message = message, cause = cause)
 
-class NoSuchRealmException(message: String? = null, cause: Throwable = NoSuchRealmException())
+class NoSuchRealmException(message: String? = null, cause: Throwable? = null)
     : WampException(WampError.NO_SUCH_REALM, message = message, cause = cause)
