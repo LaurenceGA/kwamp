@@ -4,7 +4,7 @@ import co.nz.arm.wamp.*
 import co.nz.arm.wamp.messages.Hello
 import java.util.concurrent.ConcurrentHashMap
 
-class SessionEstablisher(private val realms: ConcurrentHashMap<Uri, Realm>, private val connection: Connection) {
+class SessionEstablisher(private val realms: ConcurrentHashMap<Uri, Realm>, private val connection: Connection, private val messageSender: MessageSender = MessageSender()) {
     suspend fun establish() {
         onExpectedHelloMessage {
             realms[it.realm]?.join(connection)
@@ -20,8 +20,8 @@ class SessionEstablisher(private val realms: ConcurrentHashMap<Uri, Realm>, priv
             }
         }.invokeOnCompletion { throwable ->
             when (throwable) {
-                is ProtocolViolationException -> connection.abort(throwable)
-                is NoSuchRealmException -> connection.abort(throwable)
+                is ProtocolViolationException -> messageSender.abort(connection, throwable)
+                is NoSuchRealmException -> messageSender.abort(connection, throwable)
             }
         }
     }
