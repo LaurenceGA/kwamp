@@ -7,7 +7,7 @@ sealed class Message(val messageType: MessageType) {
     fun asList(): List<Any?> = listOf(messageType).plus(this.primaryConstructorValues().filter { it != null })
 }
 
-data class Hello(val realm: Uri, val details: Any) : Message(MessageType.HELLO)
+data class Hello(val realm: Uri, val details: Map<String, Any?>) : Message(MessageType.HELLO)
 
 data class Welcome(val session: Long, val details: Any) : Message(MessageType.WELCOME)
 
@@ -15,7 +15,7 @@ data class Abort(val details: Any, val reason: Uri) : Message(MessageType.ABORT)
 
 data class Goodbye(val details: Any, val reason: Uri) : Message(MessageType.GOODBYE)
 
-data class Error(val requestType: Int, val requestId: Long, val details: Any, val error: Uri, val arguments: List<Any?>? = null, val argumentsKw:Any? = null) : Message(MessageType.ERROR)
+data class Error(val requestType: Int, val requestId: Long, val details: Any, val error: Uri, val arguments: List<Any?>? = null, val argumentsKw: Map<String, Any?>? = null) : Message(MessageType.ERROR)
 
 data class Publish(val requestId: Long, val options: Any, val topic: Uri, val arguments: List<Any?>? = null, val argumentsKw: Any? = null) : Message(MessageType.PUBLISH)
 

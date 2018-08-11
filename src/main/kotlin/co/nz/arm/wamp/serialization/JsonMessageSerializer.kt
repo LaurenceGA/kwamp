@@ -4,8 +4,8 @@ import co.nz.arm.wamp.InvalidMessageException
 import co.nz.arm.wamp.Uri
 import co.nz.arm.wamp.messages.Message
 import co.nz.arm.wamp.messages.MessageType
-import com.beust.klaxon.Klaxon
-import com.beust.klaxon.KlaxonException
+import com.beust.klaxon.*
+import java.io.StringReader
 
 class JsonMessageSerializer : MessageSerializer {
     override fun deserialize(rawMessage: String): Message {
@@ -16,9 +16,30 @@ class JsonMessageSerializer : MessageSerializer {
     }
 
     private fun parseRawMessage(rawMessage: String) = try {
-        Klaxon().parseArray<Any>(rawMessage) ?: throw InvalidMessageException("Couldn't parse message into an array")
+        Klaxon().parseArrayWithMapConverter(rawMessage.reader())
     } catch (e: KlaxonException) {
         throw InvalidMessageException("Couldn't parse message", e)
+    }
+
+    private fun Klaxon.parseArrayWithMapConverter(reader: StringReader) = converter(MAP_CONVERTER).fromJsonArray(parseJsonArray(reader))
+
+    private fun Klaxon.fromJsonArray(jsonArray: JsonArray<*>): List<Any> {
+        val result = arrayListOf<Any>()
+        jsonArray.forEach { jo ->
+            if (jo is JsonObject) {
+                val t = parseFromJsonObject<Map<String, Any?>>(jo)
+                if (t != null) result.add(t)
+                else throw KlaxonException("Couldn't convert $jo")
+            } else if (jo != null) {
+                val converter = findConverterFromClass(Any::class.java, null)
+                val convertedValue = converter.fromJson(JsonValue(jo, null, null, this))
+                result.add(convertedValue)
+            } else {
+                throw KlaxonException("Couldn't convert $jo")
+            }
+        }
+
+        return result
     }
 
 
@@ -34,4 +55,10 @@ class JsonMessageSerializer : MessageSerializer {
             .converter(Uri.UriConverter)
             .converter(MessageType.MessageTypeConverter)
             .toJsonString(message.asList())
+}
+
+private val MAP_CONVERTER = object : Converter {
+    override fun canConvert(cls: Class<*>) = cls == Map::class.java
+    override fun toJson(value: Any): String = ""
+    override fun fromJson(jv: JsonValue): Map<String, Any?> = HashMap(jv.obj!!)
 }

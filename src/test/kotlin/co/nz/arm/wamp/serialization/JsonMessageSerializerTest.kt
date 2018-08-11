@@ -1,5 +1,6 @@
 package co.nz.arm.wamp.serialization
 
+import co.nz.arm.wamp.InvalidMessageException
 import co.nz.arm.wamp.Uri
 import co.nz.arm.wamp.messages.*
 import com.beust.klaxon.Klaxon
@@ -12,8 +13,8 @@ import io.kotlintest.tables.row
 class JsonMessageSerializerTest : StringSpec({
     val messageSerializer = JsonMessageSerializer()
     val messageData = listOf(
-            row(Hello(Uri("testRealm"), "details"),
-                    "[1, \"testRealm\", \"details\"]"),
+            row(Hello(Uri("testRealm"), mapOf("details" to "detail")),
+                    "[1, \"testRealm\", {\"details\": \"detail\"}]"),
             row(Welcome(123, "details"),
                     "[2, 123, \"details\"]"),
             row(Abort("details", Uri("reason")),
@@ -58,13 +59,13 @@ class JsonMessageSerializerTest : StringSpec({
     }
 
     "Unknown message type" {
-        shouldThrow<RuntimeException> {
+        shouldThrow<InvalidMessageException> {
             messageSerializer.deserialize("[-1, {}]")
         }
     }
 
     "Incorrect messageType type" {
-        shouldThrow<RuntimeException> {
+        shouldThrow<InvalidMessageException> {
             messageSerializer.deserialize("[\"NAN\", {}]")
         }
     }
