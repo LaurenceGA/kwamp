@@ -9,7 +9,7 @@ import kotlinx.coroutines.experimental.launch
 
 class MessageSender {
     fun sendGoodbye(connection: Connection) = launch {
-        connection.send(Goodbye("", WampClose.GOODBYE_AND_OUT.uri))
+        connection.send(Goodbye(mapOf(), WampClose.GOODBYE_AND_OUT.uri))
         connection.close("Closed by client.")
     }
 
