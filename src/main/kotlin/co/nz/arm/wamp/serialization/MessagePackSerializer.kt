@@ -1,28 +1,42 @@
 package co.nz.arm.wamp.serialization
 
+import co.nz.arm.wamp.InvalidMessageException
+import co.nz.arm.wamp.Uri
+import co.nz.arm.wamp.isWhole
 import co.nz.arm.wamp.messages.Message
+import co.nz.arm.wamp.messages.MessageType
 import com.daveanthonythomas.moshipack.MoshiPack
-import java.nio.charset.Charset
 
 class MessagePackSerializer : MessageSerializer {
-    private val jsonSerializer = JsonMessageSerializer()
+    override fun deserialize(rawMessage: ByteArray): Message {
+        val messageArray = parseRawMessage(rawMessage)
+        val (messageType, data) = extractMessageType(messageArray)
+        val factory = MessageType.getFactory(messageType)
+        return factory.invoke(data)
+    }
 
-    override fun deserialize(rawMessage: ByteArray): Message =
-            jsonSerializer
-                    .deserialize(msgPackToJson(rawMessage))
+    private fun parseRawMessage(rawMessage: ByteArray) = try {
+        MoshiPack.unpack<List<Any>>(rawMessage)
+    } catch (e: IllegalStateException) {
+        throw InvalidMessageException("Couldn't parse message", e)
+    }
 
-    private fun msgPackToJson(rawMessage: ByteArray) =
-            MoshiPack
-                    .msgpackToJson(rawMessage)
-                    .toByteArray(Charset.defaultCharset())
+    private fun extractMessageType(messageArray: List<Any>) = try {
+        Pair(toInteger(messageArray[0] as Double), messageArray.drop(1))
+    } catch (e: IndexOutOfBoundsException) {
+        throw InvalidMessageException("Message must have a least one item", e)
+    } catch (e: ClassCastException) {
+        throw InvalidMessageException("Message type must be a number", e)
+    }
+
+    private fun toInteger(num: Double): Int =
+            num.toInt()
+                    .takeIf { num.isWhole() }
+                    ?: throw InvalidMessageException("Message type must be an integer")
 
     override fun serialize(message: Message): ByteArray =
-            MoshiPack
-                    .jsonToMsgpack(msgToJson(message))
-                    .readByteArray()
-
-    private fun msgToJson(message: Message) =
-            jsonSerializer
-                    .serialize(message)
-                    .toString(Charset.defaultCharset())
+        MoshiPack({
+            add(MessageType.MessageTypeJsonAdapter)
+            add(Uri.UriJsonAdapter)
+        }).packToByteArray(message.asList())
 }

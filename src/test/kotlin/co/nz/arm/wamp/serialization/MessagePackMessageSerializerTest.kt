@@ -23,15 +23,15 @@ class MessagePackMessageSerializerTest : StringSpec({
         }
     }
 
-    "!Unknown message type" {
+    "Unknown message type" {
         shouldThrow<InvalidMessageException> {
-            messageSerializer.deserialize("[-1, {}]".toByteArray())
+            messageSerializer.deserialize(MoshiPack.jsonToMsgpack("[-1.0, {}]").readByteArray())
         }
     }
 
-    "!Incorrect messageType type" {
+    "Incorrect messageType type" {
         shouldThrow<InvalidMessageException> {
-            messageSerializer.deserialize("[\"NAN\", {}]".toByteArray())
+            messageSerializer.deserialize(MoshiPack.jsonToMsgpack("[\"NAN\", {}]").readByteArray())
         }
     }
 })
