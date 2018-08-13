@@ -29,7 +29,9 @@ application {
 val kotlinVersion: String by extra
 val ktorVersion = "0.9.3"
 val logbackVersion = "1.2.1"
+
 val klaxonVersion = "3.0.6"
+val moshiPackVersion = "1.0.0-beta"
 
 val apacheLang3CommonsVersion = "3.7"
 
@@ -47,8 +49,12 @@ dependencies {
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
     implementation("io.ktor:ktor-websockets:$ktorVersion")
     implementation("io.ktor:ktor-gson:$ktorVersion")
+
     implementation("ch.qos.logback:logback-classic:$logbackVersion")
+
+    implementation("com.daveanthonythomas.moshipack:moshipack:$moshiPackVersion")
     implementation("com.beust:klaxon:$klaxonVersion")
+
     implementation("org.apache.commons:commons-lang3:$apacheLang3CommonsVersion")
 
     testImplementation("io.kotlintest:kotlintest-runner-junit5:$kotlinTestVersion")

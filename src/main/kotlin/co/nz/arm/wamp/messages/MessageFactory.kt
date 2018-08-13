@@ -1,6 +1,7 @@
 package co.nz.arm.wamp.messages
 
 import co.nz.arm.wamp.canBeAppliedToType
+import co.nz.arm.wamp.isWhole
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
@@ -28,7 +29,7 @@ private fun conformArrayObjectsToConstructor(inputArray: List<Any>, parameters: 
     if (inputArray[index].canBeAppliedToType(parameters[index]))
         item
     else
-        getUnaryParameterConstructor(item, parameters[index]).call(item)
+        tryToConvert(item, parameters[index])
 }
 
 private fun canApplyValuesToParameters(values: List<Any>, parameters: List<KParameter>) = values.indices.all { i ->
@@ -38,9 +39,25 @@ private fun canApplyValuesToParameters(values: List<Any>, parameters: List<KPara
 private fun getUnaryParameterConstructor(input: Any, parameter: KParameter): KFunction<Any> = try {
     parameter.type.jvmErasure.constructors.first { areValidParameterValues(listOf(input), it.parameters) }
 } catch (e: NoSuchElementException) {
-    throw IllegalArgumentException("Couldn't find a way to create ${parameter.type.jvmErasure.simpleName} from $input", e)
+    throw IllegalArgumentException("Couldn't find a way to create ${parameter.type.jvmErasure.simpleName} from $input (${input::class.simpleName})", e)
 }
 
 private fun areValidParameterValues(objectArray: List<Any>, constructorParameters: List<KParameter>) =
         objectArray.size in acceptableNumberOfParameters(constructorParameters)
                 && canApplyValuesToParameters(objectArray, constructorParameters)
+
+private fun tryToConvert(item: Any, parameter: KParameter): Any {
+    return try {
+        getUnaryParameterConstructor(item, parameter).call(item)
+    } catch (e: IllegalArgumentException) {
+        if (item is Double && item.isWhole()) {
+            when(parameter.type.jvmErasure) {
+                Long::class -> item.toLong()
+                Int::class -> item.toInt()
+                else -> throw e
+            }
+        } else {
+            throw e
+        }
+    }
+}

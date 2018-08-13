@@ -1,47 +1,37 @@
 package co.nz.arm.wamp.serialization
 
 import co.nz.arm.wamp.InvalidMessageException
-import com.beust.klaxon.Klaxon
+import com.daveanthonythomas.moshipack.MoshiPack
 import io.kotlintest.data.forall
 import io.kotlintest.shouldBe
 import io.kotlintest.shouldThrow
 import io.kotlintest.specs.StringSpec
 import java.nio.charset.Charset
 
-class JsonMessageSerializerTest : StringSpec({
-    val messageSerializer = JsonMessageSerializer()
+class MessagePackMessageSerializerTest : StringSpec({
+    val messageSerializer = MessagePackSerializer()
 
     "Serialize  messages" {
         forall(*messageData.toTypedArray()) { message, rawMessageJson ->
-            messageSerializer.serialize(message).toString(Charset.defaultCharset()) shouldBe rawMessageJson
+            messageSerializer.serialize(message).toString(Charset.defaultCharset()) shouldBe MoshiPack().jsonToMsgpack(rawMessageJson).readString(Charset.defaultCharset())
         }
     }
 
     "Deserialize messages" {
         forall(*messageData.toTypedArray()) { message, rawMessageJson ->
-            messageSerializer.deserialize(rawMessageJson.toByteArray()) shouldBe message
+            messageSerializer.deserialize(MoshiPack.jsonToMsgpack(rawMessageJson).readByteArray()) shouldBe message
         }
     }
 
-    "Unknown message type" {
+    "!Unknown message type" {
         shouldThrow<InvalidMessageException> {
             messageSerializer.deserialize("[-1, {}]".toByteArray())
         }
     }
 
-    "Incorrect messageType type" {
+    "!Incorrect messageType type" {
         shouldThrow<InvalidMessageException> {
             messageSerializer.deserialize("[\"NAN\", {}]".toByteArray())
         }
     }
-
-    "!Klaxon" {
-        Klaxon().toJsonString(listOf(1, 2, null, null, 3, null)) shouldBe "[1, 2, null, null, 3, null]"
-        Klaxon().toJsonString(object {
-            val test = null
-        }) shouldBe "{\"test\": null}"
-        Klaxon().toJsonString(SomeTest(null)) shouldBe "{\"test\": null}"
-    }
 })
-
-class SomeTest(val test: Any?)

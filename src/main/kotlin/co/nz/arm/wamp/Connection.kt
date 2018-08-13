@@ -7,8 +7,8 @@ import kotlinx.coroutines.experimental.channels.ReceiveChannel
 import kotlinx.coroutines.experimental.channels.SendChannel
 import kotlinx.coroutines.experimental.channels.consumeEach
 
-class Connection(private val incoming: ReceiveChannel<String>,
-                 private val outgoing: SendChannel<String>,
+class Connection(private val incoming: ReceiveChannel<ByteArray>,
+                 private val outgoing: SendChannel<ByteArray>,
                  private val closeConnection: suspend (message: String) -> Unit,
                  private val messageSerializer: MessageSerializer) : MessageSerializer by messageSerializer {
     suspend fun close(message: String) {
@@ -24,7 +24,7 @@ class Connection(private val incoming: ReceiveChannel<String>,
         processRawMessage(incoming.receive(), action)
     }
 
-    private suspend fun processRawMessage(message: String, action: suspend (Message) -> Unit) {
+    private suspend fun processRawMessage(message: ByteArray, action: suspend (Message) -> Unit) {
         deserialize(message).also { action(it) }
     }
 

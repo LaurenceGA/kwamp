@@ -2,14 +2,16 @@ package co.nz.arm.wamp.serialization
 
 import co.nz.arm.wamp.InvalidMessageException
 import co.nz.arm.wamp.Uri
+import co.nz.arm.wamp.isWhole
 import co.nz.arm.wamp.messages.Message
 import co.nz.arm.wamp.messages.MessageType
 import com.beust.klaxon.*
 import java.io.StringReader
+import java.nio.charset.Charset
 
 class JsonMessageSerializer : MessageSerializer {
-    override fun deserialize(rawMessage: String): Message {
-        val messageArray = parseRawMessage(rawMessage)
+    override fun deserialize(rawMessage: ByteArray): Message {
+        val messageArray = parseRawMessage(rawMessage.toString(Charset.defaultCharset()))
         val (messageType, data) = extractMessageType(messageArray)
         val factory = MessageType.getFactory(messageType)
         return factory.invoke(data)
@@ -44,17 +46,22 @@ class JsonMessageSerializer : MessageSerializer {
 
 
     private fun extractMessageType(messageArray: List<Any>) = try {
-        Pair(messageArray[0] as Int, messageArray.drop(1))
+        Pair(toInteger(messageArray[0] as Double), messageArray.drop(1))
     } catch (e: IndexOutOfBoundsException) {
         throw InvalidMessageException("Message must have a least one item", e)
     } catch (e: ClassCastException) {
-        throw InvalidMessageException("Message type must be an integer", e)
+        throw InvalidMessageException("Message type must be a number", e)
     }
+
+    private fun toInteger(num: Double): Int =
+            num.toInt()
+                    .takeIf { num.isWhole() }
+                    ?: throw InvalidMessageException("Message type must be an integer")
 
     override fun serialize(message: Message) = Klaxon()
             .converter(Uri.UriConverter)
             .converter(MessageType.MessageTypeConverter)
-            .toJsonString(message.asList())
+            .toJsonString(message.asList()).toByteArray()
 }
 
 private val MAP_CONVERTER = object : Converter {
