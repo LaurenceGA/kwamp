@@ -30,7 +30,7 @@ class ExtensionTest : StringSpec({
         baseList.splitAt(1).shouldBe(Pair<List<Int>, List<Int>>(listOf(1), listOf()))
     }
 
-    "can be applied to parameter" {
+    "can be applied to parameter (int to Long)" {
         1.canBeAppliedToType(object : KParameter {
             override val annotations = emptyList<Annotation>()
             override val index = 0
@@ -41,5 +41,24 @@ class ExtensionTest : StringSpec({
             override val type = Long::class.createType()
 
         }) shouldBe true
+    }
+
+    "Double is whole" {
+        forall(
+                row(0.0, true),
+                row(1.0, true),
+                row(-1.0, true),
+                row(2.0, true),
+                row(50.0, true),
+                row(-50.0, true),
+                row(124321350351.0, true),
+                row(-0.1, false),
+                row(-123124312.513513124, false),
+                row(103.000005, false),
+                row(-1353.12412, false)
+
+        ) { num, whole ->
+            num.isWhole() shouldBe whole
+        }
     }
 })

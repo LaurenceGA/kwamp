@@ -3,7 +3,6 @@ package co.nz.arm.wamp
 import org.apache.commons.lang3.ClassUtils
 import kotlin.reflect.KClass
 import kotlin.reflect.KParameter
-import kotlin.reflect.KProperty1
 import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.primaryConstructor
@@ -20,3 +19,5 @@ fun Any.canBeAppliedToType(parameter: KParameter) = this::class.isSubclassOf(par
 fun Any.readProperty(propName: String): Any? = ((this::class as KClass<Any>).declaredMemberProperties.first { it.name == propName }).get(this)
 
 fun Any.primaryConstructorValues() = this::class.primaryConstructor!!.parameters.map { this.readProperty(it.name!!) }
+
+fun Double.isWhole() = this.rem(1) == 0.0
