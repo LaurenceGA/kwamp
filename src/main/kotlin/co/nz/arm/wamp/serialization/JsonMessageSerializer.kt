@@ -46,14 +46,14 @@ class JsonMessageSerializer : MessageSerializer {
 
 
     private fun extractMessageType(messageArray: List<Any>) = try {
-        Pair(toInteger(messageArray[0] as Double), messageArray.drop(1))
+        Pair(toInteger(messageArray[0] as Number), messageArray.drop(1))
     } catch (e: IndexOutOfBoundsException) {
         throw InvalidMessageException("Message must have a least one item", e)
     } catch (e: ClassCastException) {
         throw InvalidMessageException("Message type must be a number", e)
     }
 
-    private fun toInteger(num: Double): Int =
+    private fun toInteger(num: Number): Int =
             num.toInt()
                     .takeIf { num.isWhole() }
                     ?: throw InvalidMessageException("Message type must be an integer")

@@ -20,4 +20,6 @@ fun Any.readProperty(propName: String): Any? = ((this::class as KClass<Any>).dec
 
 fun Any.primaryConstructorValues() = this::class.primaryConstructor!!.parameters.map { this.readProperty(it.name!!) }
 
+fun Number.isWhole() = this.toDouble().isWhole()
+
 fun Double.isWhole() = this.rem(1) == 0.0
