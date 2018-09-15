@@ -1,12 +1,13 @@
 package co.nz.arm.wamp
 
+import co.nz.arm.wamp.core.canBeAppliedToType
+import co.nz.arm.wamp.core.isWhole
+import co.nz.arm.wamp.core.splitAt
 import io.kotlintest.data.forall
 import io.kotlintest.shouldBe
-import io.kotlintest.shouldEqual
 import io.kotlintest.specs.StringSpec
 import io.kotlintest.tables.row
 import kotlin.reflect.KParameter
-import kotlin.reflect.KType
 import kotlin.reflect.full.createType
 
 class ExtensionTest : StringSpec({

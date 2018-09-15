@@ -1,7 +1,7 @@
-package co.nz.arm.wamp.messages
+package co.nz.arm.wamp.core.messages
 
-import co.nz.arm.wamp.Uri
-import co.nz.arm.wamp.primaryConstructorValues
+import co.nz.arm.wamp.core.Uri
+import co.nz.arm.wamp.core.primaryConstructorValues
 
 sealed class Message(val messageType: MessageType) {
     fun asList(): List<Any?> = listOf(messageType).plus(this.primaryConstructorValues().filter { it != null })

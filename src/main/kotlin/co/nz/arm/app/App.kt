@@ -1,10 +1,10 @@
 package co.nz.arm.app
 
-import co.nz.arm.wamp.*
+import co.nz.arm.wamp.core.*
 import co.nz.arm.wamp.router.Realm
 import co.nz.arm.wamp.router.Router
-import co.nz.arm.wamp.serialization.JsonMessageSerializer
-import co.nz.arm.wamp.serialization.MessagePackSerializer
+import co.nz.arm.wamp.core.serialization.JsonMessageSerializer
+import co.nz.arm.wamp.core.serialization.MessagePackSerializer
 import io.ktor.application.*
 import io.ktor.features.*
 import io.ktor.http.cio.websocket.CloseReason

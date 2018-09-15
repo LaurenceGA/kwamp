@@ -1,10 +1,10 @@
 package co.nz.arm.wamp.router
 
-import co.nz.arm.wamp.Connection
-import co.nz.arm.wamp.WampClose
-import co.nz.arm.wamp.WampException
-import co.nz.arm.wamp.messages.Abort
-import co.nz.arm.wamp.messages.Goodbye
+import co.nz.arm.wamp.core.Connection
+import co.nz.arm.wamp.core.WampClose
+import co.nz.arm.wamp.core.WampException
+import co.nz.arm.wamp.core.messages.Abort
+import co.nz.arm.wamp.core.messages.Goodbye
 import kotlinx.coroutines.experimental.launch
 
 class MessageSender {

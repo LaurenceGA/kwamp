@@ -1,10 +1,10 @@
-package co.nz.arm.wamp.serialization
+package co.nz.arm.wamp.core.serialization
 
-import co.nz.arm.wamp.InvalidMessageException
-import co.nz.arm.wamp.Uri
-import co.nz.arm.wamp.isWhole
-import co.nz.arm.wamp.messages.Message
-import co.nz.arm.wamp.messages.MessageType
+import co.nz.arm.wamp.core.InvalidMessageException
+import co.nz.arm.wamp.core.Uri
+import co.nz.arm.wamp.core.isWhole
+import co.nz.arm.wamp.core.messages.Message
+import co.nz.arm.wamp.core.messages.MessageType
 import com.beust.klaxon.*
 import java.io.StringReader
 import java.nio.charset.Charset

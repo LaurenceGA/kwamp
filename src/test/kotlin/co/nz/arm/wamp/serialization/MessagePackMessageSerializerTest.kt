@@ -1,6 +1,7 @@
 package co.nz.arm.wamp.serialization
 
-import co.nz.arm.wamp.InvalidMessageException
+import co.nz.arm.wamp.core.InvalidMessageException
+import co.nz.arm.wamp.core.serialization.MessagePackSerializer
 import com.daveanthonythomas.moshipack.MoshiPack
 import io.kotlintest.data.forall
 import io.kotlintest.shouldBe

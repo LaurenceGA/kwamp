@@ -1,7 +1,7 @@
 package co.nz.arm.wamp.router
 
-import co.nz.arm.wamp.Connection
-import co.nz.arm.wamp.Uri
+import co.nz.arm.wamp.core.Connection
+import co.nz.arm.wamp.core.Uri
 import co.nz.arm.wamp.messages.*
 import java.util.concurrent.ConcurrentHashMap
 

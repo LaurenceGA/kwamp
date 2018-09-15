@@ -1,4 +1,4 @@
-package co.nz.arm.wamp
+package co.nz.arm.wamp.core
 
 enum class WampClose(uri: String) {
     // The Peer is shutting down completely - used as a GOODBYE (or ABORT) reason.

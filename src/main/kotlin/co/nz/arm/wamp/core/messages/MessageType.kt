@@ -1,6 +1,6 @@
-package co.nz.arm.wamp.messages
+package co.nz.arm.wamp.core.messages
 
-import co.nz.arm.wamp.InvalidMessageException
+import co.nz.arm.wamp.core.InvalidMessageException
 import com.beust.klaxon.Converter
 import com.beust.klaxon.JsonValue
 import com.squareup.moshi.JsonAdapter
@@ -31,7 +31,7 @@ enum class MessageType(val id: Int, val factory: (List<Any>) -> Message) {
     YIELD(70, generateFactory(Yield::class));
 
     companion object {
-        private val factories = hashMapOf(*MessageType.values().map(::toIndexedFactory).toTypedArray())
+        private val factories = hashMapOf(*MessageType.values().map(Companion::toIndexedFactory).toTypedArray())
 
         private fun toIndexedFactory(message: MessageType) = Pair(message.id, message.factory)
 

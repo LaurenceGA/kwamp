@@ -1,7 +1,7 @@
-package co.nz.arm.wamp
+package co.nz.arm.wamp.core
 
-import co.nz.arm.wamp.messages.Message
-import co.nz.arm.wamp.serialization.MessageSerializer
+import co.nz.arm.wamp.core.messages.Message
+import co.nz.arm.wamp.core.serialization.MessageSerializer
 import kotlinx.coroutines.experimental.*
 import kotlinx.coroutines.experimental.channels.ReceiveChannel
 import kotlinx.coroutines.experimental.channels.SendChannel

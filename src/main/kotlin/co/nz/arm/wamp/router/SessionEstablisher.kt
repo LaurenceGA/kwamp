@@ -1,7 +1,10 @@
 package co.nz.arm.wamp.router
 
-import co.nz.arm.wamp.*
-import co.nz.arm.wamp.messages.Hello
+import co.nz.arm.wamp.core.Connection
+import co.nz.arm.wamp.core.NoSuchRealmException
+import co.nz.arm.wamp.core.ProtocolViolationException
+import co.nz.arm.wamp.core.Uri
+import co.nz.arm.wamp.core.messages.Hello
 import java.util.concurrent.ConcurrentHashMap
 
 class SessionEstablisher(private val realms: ConcurrentHashMap<Uri, Realm>, private val connection: Connection, private val messageSender: MessageSender = MessageSender()) {

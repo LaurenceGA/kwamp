@@ -1,4 +1,4 @@
-package co.nz.arm.wamp
+package co.nz.arm.wamp.core
 
 import org.apache.commons.lang3.ClassUtils
 import kotlin.reflect.KClass

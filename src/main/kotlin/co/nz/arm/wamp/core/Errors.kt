@@ -1,4 +1,4 @@
-package co.nz.arm.wamp
+package co.nz.arm.wamp.core
 
 enum class WampError(uri: String) {
     // Peer provided an incorrect URI for any URI-based attribute of WAMP message, such as realm, topic or procedure

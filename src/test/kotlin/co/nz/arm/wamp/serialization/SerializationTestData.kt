@@ -1,6 +1,7 @@
 package co.nz.arm.wamp.serialization
 
-import co.nz.arm.wamp.Uri
+import co.nz.arm.wamp.core.Uri
+import co.nz.arm.wamp.core.messages.*
 import co.nz.arm.wamp.messages.*
 import io.kotlintest.tables.row
 

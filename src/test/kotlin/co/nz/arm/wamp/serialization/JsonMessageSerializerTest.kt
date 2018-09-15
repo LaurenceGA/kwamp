@@ -1,6 +1,7 @@
 package co.nz.arm.wamp.serialization
 
-import co.nz.arm.wamp.InvalidMessageException
+import co.nz.arm.wamp.core.InvalidMessageException
+import co.nz.arm.wamp.core.serialization.JsonMessageSerializer
 import com.beust.klaxon.Klaxon
 import io.kotlintest.data.forall
 import io.kotlintest.shouldBe

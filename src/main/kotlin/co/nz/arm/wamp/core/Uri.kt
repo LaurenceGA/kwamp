@@ -1,4 +1,4 @@
-package co.nz.arm.wamp
+package co.nz.arm.wamp.core
 
 import com.beust.klaxon.Converter
 import com.beust.klaxon.JsonValue

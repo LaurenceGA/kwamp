@@ -1,4 +1,4 @@
-package co.nz.arm.wamp
+package co.nz.arm.wamp.core
 
 import io.netty.util.internal.ConcurrentSet
 import java.util.concurrent.ThreadLocalRandom
@@ -26,7 +26,7 @@ object Identifier {
 
 fun Int.pow(x: Int) = this.toDouble().pow(x).toLong()
 
-class LinearIdGenerator(private var seed: Long = 1L) : WampIdGenerator() {
+class LinearIdGenerator(private val seed: Long = 1L) : WampIdGenerator() {
     override val sequence = generateSequence(seed) { (it + 1).rem(Identifier.acceptableRange.endInclusive) }
 }
 

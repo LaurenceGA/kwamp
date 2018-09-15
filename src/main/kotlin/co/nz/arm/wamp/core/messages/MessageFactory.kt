@@ -1,7 +1,7 @@
-package co.nz.arm.wamp.messages
+package co.nz.arm.wamp.core.messages
 
-import co.nz.arm.wamp.canBeAppliedToType
-import co.nz.arm.wamp.isWhole
+import co.nz.arm.wamp.core.canBeAppliedToType
+import co.nz.arm.wamp.core.isWhole
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter

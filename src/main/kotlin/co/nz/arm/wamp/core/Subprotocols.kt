@@ -1,4 +1,4 @@
-package co.nz.arm.wamp
+package co.nz.arm.wamp.core
 
 const val WAMP_JSON : String = "wamp.2.json"
 const val WAMP_MSG_PACK : String = "wamp.2.msgpack"
