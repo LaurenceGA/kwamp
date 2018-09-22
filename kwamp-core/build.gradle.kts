@@ -11,5 +11,3 @@ dependencies {
     implementation("com.beust:klaxon:$klaxonVersion")
     implementation("org.apache.commons:commons-lang3:$apacheLang3CommonsVersion")
 }
-
-//kotlin.experimental.coroutines = Coroutines.ENABLE

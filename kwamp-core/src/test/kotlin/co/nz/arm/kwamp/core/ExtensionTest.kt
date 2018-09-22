@@ -1,8 +1,5 @@
 package co.nz.arm.kwamp.core
 
-import co.nz.arm.kwamp.core.canBeAppliedToType
-import co.nz.arm.kwamp.core.isWhole
-import co.nz.arm.kwamp.core.splitAt
 import io.kotlintest.data.forall
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
@@ -46,17 +43,17 @@ class ExtensionTest : StringSpec({
 
     "Double is whole" {
         forall(
-                row(0.0, true),
-                row(1.0, true),
-                row(-1.0, true),
-                row(2.0, true),
-                row(50.0, true),
-                row(-50.0, true),
-                row(124321350351.0, true),
-                row(-0.1, false),
-                row(-123124312.513513124, false),
-                row(103.000005, false),
-                row(-1353.12412, false)
+            row(0.0, true),
+            row(1.0, true),
+            row(-1.0, true),
+            row(2.0, true),
+            row(50.0, true),
+            row(-50.0, true),
+            row(124321350351.0, true),
+            row(-0.1, false),
+            row(-123124312.513513124, false),
+            row(103.000005, false),
+            row(-1353.12412, false)
 
         ) { num, whole ->
             num.isWhole() shouldBe whole

@@ -13,7 +13,9 @@ class MessagePackMessageSerializerTest : StringSpec({
 
     "Serialize  messages" {
         forall(*messageData.toTypedArray()) { message, rawMessageJson ->
-            messageSerializer.serialize(message).toString(Charset.defaultCharset()) shouldBe MoshiPack().jsonToMsgpack(rawMessageJson).readString(Charset.defaultCharset())
+            messageSerializer.serialize(message).toString(Charset.defaultCharset()) shouldBe MoshiPack().jsonToMsgpack(
+                rawMessageJson
+            ).readString(Charset.defaultCharset())
         }
     }
 

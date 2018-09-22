@@ -16,7 +16,8 @@ fun List<Any>.splitAt(index: Int) = Pair(subList(0, index), subList(index, size)
 fun Any.canBeAppliedToType(parameter: KParameter) = this::class.isSubclassOf(parameter.type.jvmErasure)
         || ClassUtils.isAssignable(this::class.java, parameter.type.jvmErasure.java)
 
-fun Any.readProperty(propName: String): Any? = ((this::class as KClass<Any>).declaredMemberProperties.first { it.name == propName }).get(this)
+fun Any.readProperty(propName: String): Any? =
+    ((this::class as KClass<Any>).declaredMemberProperties.first { it.name == propName }).get(this)
 
 fun Any.primaryConstructorValues() = this::class.primaryConstructor!!.parameters.map { this.readProperty(it.name!!) }
 

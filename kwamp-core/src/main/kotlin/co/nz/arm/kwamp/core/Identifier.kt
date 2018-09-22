@@ -31,8 +31,8 @@ class LinearIdGenerator(private val seed: Long = 1L) : WampIdGenerator() {
 }
 
 class RandomIdGenerator() : WampIdGenerator() {
-    override val sequence = generateSequence { Identifier.acceptableRange.random() }
+    override val sequence = generateSequence(0L) { Identifier.acceptableRange.random() }
 }
 
 fun ClosedRange<Long>.random() =
-        ThreadLocalRandom.current().nextLong(endInclusive + 1 - start) + start
+    ThreadLocalRandom.current().nextLong(endInclusive + 1 - start) + start

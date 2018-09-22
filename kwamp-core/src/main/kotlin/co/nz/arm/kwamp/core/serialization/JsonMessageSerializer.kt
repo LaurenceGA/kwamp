@@ -23,7 +23,8 @@ class JsonMessageSerializer : MessageSerializer {
         throw InvalidMessageException("Couldn't parse message", e)
     }
 
-    private fun Klaxon.parseArrayWithMapConverter(reader: StringReader) = converter(co.nz.arm.kwamp.core.serialization.MAP_CONVERTER).fromJsonArray(parseJsonArray(reader))
+    private fun Klaxon.parseArrayWithMapConverter(reader: StringReader) =
+        converter(co.nz.arm.kwamp.core.serialization.MAP_CONVERTER).fromJsonArray(parseJsonArray(reader))
 
     private fun Klaxon.fromJsonArray(jsonArray: JsonArray<*>): List<Any> {
         val result = arrayListOf<Any>()
@@ -54,14 +55,14 @@ class JsonMessageSerializer : MessageSerializer {
     }
 
     private fun toInteger(num: Number): Int =
-            num.toInt()
-                    .takeIf { num.isWhole() }
-                    ?: throw InvalidMessageException("Message type must be an integer")
+        num.toInt()
+            .takeIf { num.isWhole() }
+            ?: throw InvalidMessageException("Message type must be an integer")
 
     override fun serialize(message: Message) = Klaxon()
-            .converter(Uri.UriConverter)
-            .converter(MessageType.MessageTypeConverter)
-            .toJsonString(message.asList()).toByteArray()
+        .converter(Uri.UriConverter)
+        .converter(MessageType.MessageTypeConverter)
+        .toJsonString(message.asList()).toByteArray()
 }
 
 private val MAP_CONVERTER = object : Converter {

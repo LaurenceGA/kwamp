@@ -4,7 +4,7 @@ import io.kotlintest.specs.StringSpec
 
 class ConnectionTest : StringSpec({
     "Can send hello" {
-//        val incoming = Channel<String>()
+        //        val incoming = Channel<String>()
 //        val outgoing = Channel<String>()
 //
 //        val connection = Connection(incoming, outgoing, {_ -> null})

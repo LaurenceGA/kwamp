@@ -7,11 +7,15 @@ import co.nz.arm.kwamp.core.Uri
 import co.nz.arm.kwamp.core.messages.Hello
 import java.util.concurrent.ConcurrentHashMap
 
-class SessionEstablisher(private val realms: ConcurrentHashMap<Uri, Realm>, private val connection: Connection, private val messageSender: MessageSender = MessageSender()) {
+class SessionEstablisher(
+    private val realms: ConcurrentHashMap<Uri, Realm>,
+    private val connection: Connection,
+    private val messageSender: MessageSender = MessageSender()
+) {
     suspend fun establish() {
         onExpectedHelloMessage {
             realms[it.realm]?.join(connection)
-                    ?: throw NoSuchRealmException("Realm does not exist")
+                ?: throw NoSuchRealmException("Realm does not exist")
         }
     }
 
@@ -25,6 +29,7 @@ class SessionEstablisher(private val realms: ConcurrentHashMap<Uri, Realm>, priv
             when (throwable) {
                 is ProtocolViolationException -> messageSender.abort(connection, throwable)
                 is NoSuchRealmException -> messageSender.abort(connection, throwable)
+                else -> throwable?.run { printStackTrace() }
             }
         }
     }

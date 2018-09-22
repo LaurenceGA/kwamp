@@ -5,7 +5,8 @@ import co.nz.arm.kwamp.core.messages.Abort
 import co.nz.arm.kwamp.core.messages.Goodbye
 import co.nz.arm.kwamp.core.messages.Hello
 import co.nz.arm.kwamp.core.messages.Welcome
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.util.concurrent.ConcurrentHashMap
 
 class Realm(val uri: Uri, private val messageSender: MessageSender = MessageSender()) {
@@ -15,7 +16,7 @@ class Realm(val uri: Uri, private val messageSender: MessageSender = MessageSend
 
     private suspend fun startSession(connection: Connection) = sessions.newSession(connection).apply {
         connection.forEachMessage {
-            when(it) {
+            when (it) {
                 is Hello -> throw ProtocolViolationException("Received Hello message after session established")
                 is Welcome -> throw ProtocolViolationException("Receive Welcome message from client")
                 is Abort -> connection.close("Abort from client")
@@ -45,8 +46,13 @@ class SessionSet(private val idGenerator: WampIdGenerator) {
 
 class WampSession(val id: Long, private val connection: Connection) {
     init {
-        launch {
-            connection.send(Welcome(id, mapOf("agent" to "KWAMP", "roles" to mapOf("broker" to mapOf<String, Any?>(), "dealer" to mapOf()))))
+        GlobalScope.launch {
+            connection.send(
+                Welcome(
+                    id,
+                    mapOf("agent" to "KWAMP", "roles" to mapOf("broker" to mapOf<String, Any?>(), "dealer" to mapOf()))
+                )
+            )
         }
     }
 }

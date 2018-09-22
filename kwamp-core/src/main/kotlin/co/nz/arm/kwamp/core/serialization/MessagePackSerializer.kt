@@ -30,9 +30,9 @@ class MessagePackSerializer : MessageSerializer {
     }
 
     private fun toInteger(num: Double): Int =
-            num.toInt()
-                    .takeIf { num.isWhole() }
-                    ?: throw InvalidMessageException("Message type must be an integer")
+        num.toInt()
+            .takeIf { num.isWhole() }
+            ?: throw InvalidMessageException("Message type must be an integer")
 
     override fun serialize(message: Message): ByteArray =
         MoshiPack({

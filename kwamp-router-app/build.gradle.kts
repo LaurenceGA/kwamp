@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.gradle.dsl.Coroutines
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -13,10 +14,10 @@ application {
 }
 
 repositories {
-    maven (url = "https://dl.bintray.com/kotlin/ktor")
+    maven(url = "https://dl.bintray.com/kotlin/ktor")
 }
 
-val ktorVersion = "0.9.3"
+val ktorVersion = "0.9.5-rc13"
 val logbackVersion = "1.2.1"
 
 dependencies {
