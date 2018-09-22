@@ -7,7 +7,7 @@ import io.kotlintest.tables.row
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.createType
 
-class ExtensionTest : StringSpec({
+internal class ExtensionTest : StringSpec({
     "Partition a list" {
         val baseList = listOf(1, 2, 3, 4, 5)
         forall(

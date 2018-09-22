@@ -25,7 +25,7 @@ plugins {
 }
 
 val kotlinVersion: String by extra
-val kotlinTestVersion = "3.1.7"
+val kotlinTestVersion = "3.1.10"
 
 subprojects {
     apply {
@@ -49,6 +49,7 @@ subprojects {
     dependencies {
         implementation(kotlin("stdlib", kotlinVersion))
         implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:0.26.1-eap13")
+        implementation(kotlin("reflect", kotlinVersion))
 
         testImplementation("io.kotlintest:kotlintest-runner-junit5:$kotlinTestVersion")
     }

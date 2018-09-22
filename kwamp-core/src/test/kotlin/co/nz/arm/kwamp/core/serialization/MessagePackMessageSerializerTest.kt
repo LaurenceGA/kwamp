@@ -8,7 +8,7 @@ import io.kotlintest.shouldThrow
 import io.kotlintest.specs.StringSpec
 import java.nio.charset.Charset
 
-class MessagePackMessageSerializerTest : StringSpec({
+internal class MessagePackMessageSerializerTest : StringSpec({
     val messageSerializer = MessagePackSerializer()
 
     "Serialize  messages" {

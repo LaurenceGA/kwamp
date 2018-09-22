@@ -2,7 +2,7 @@ package co.nz.arm.kwamp.core
 
 import io.kotlintest.specs.StringSpec
 
-class ConnectionTest : StringSpec({
+internal class ConnectionTest : StringSpec({
     "Can send hello" {
         //        val incoming = Channel<String>()
 //        val outgoing = Channel<String>()

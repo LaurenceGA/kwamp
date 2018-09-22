@@ -19,12 +19,10 @@ abstract class WampIdGenerator {
 }
 
 object Identifier {
-    val acceptableRange = 1..2.pow(53)
+    internal val acceptableRange = 1..2.pow(53)
 
     fun isValid(id: Long) = id in acceptableRange
 }
-
-fun Int.pow(x: Int) = this.toDouble().pow(x).toLong()
 
 class LinearIdGenerator(private val seed: Long = 1L) : WampIdGenerator() {
     override val sequence = generateSequence(seed) { (it + 1).rem(Identifier.acceptableRange.endInclusive) }
@@ -33,6 +31,8 @@ class LinearIdGenerator(private val seed: Long = 1L) : WampIdGenerator() {
 class RandomIdGenerator() : WampIdGenerator() {
     override val sequence = generateSequence(0L) { Identifier.acceptableRange.random() }
 }
+
+fun Int.pow(x: Int) = this.toDouble().pow(x).toLong()
 
 fun ClosedRange<Long>.random() =
     ThreadLocalRandom.current().nextLong(endInclusive + 1 - start) + start
