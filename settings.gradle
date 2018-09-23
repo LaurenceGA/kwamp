@@ -1,4 +1,4 @@
-rootProject.name = 'iot-proxy-server'
+rootProject.name = 'kwamp'
 include 'kwamp-core'
 include 'kwamp-router'
 include 'kwamp-router-app'
