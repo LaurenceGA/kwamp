@@ -1,15 +1,19 @@
 package co.nz.arm.kwamp.router
 
 import co.nz.arm.kwamp.core.*
-import co.nz.arm.kwamp.core.messages.Abort
-import co.nz.arm.kwamp.core.messages.Goodbye
-import co.nz.arm.kwamp.core.messages.Hello
-import co.nz.arm.kwamp.core.messages.Welcome
+import co.nz.arm.kwamp.core.messages.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.util.concurrent.ConcurrentHashMap
 
-class Realm(val uri: Uri, private val messageSender: MessageSender = MessageSender()) {
+class Realm(
+    val uri: Uri,
+    private val messageSender: MessageSender = MessageSender(),
+    private val remoteProcedureHandler: RemoteProcedureHandler = RemoteProcedureHandler(
+        messageSender,
+        LinearIdGenerator()
+    )
+) {
     private val sessions = SessionSet(RandomIdGenerator())
 
     suspend fun join(connection: Connection) = startSession(connection)
@@ -21,6 +25,9 @@ class Realm(val uri: Uri, private val messageSender: MessageSender = MessageSend
                 is Welcome -> throw ProtocolViolationException("Receive Welcome message from client")
                 is Abort -> connection.close("Abort from client")
                 is Goodbye -> messageSender.sendGoodbye(connection)
+                is Register -> remoteProcedureHandler.registerProcedure(connection, it)
+                is Unregister -> remoteProcedureHandler.unregisterProcedure(connection, it)
+                else -> throw NotImplementedError("Message type ${it.messageType} not implemented")
             }
         }.invokeOnCompletion { exception ->
             when (exception) {

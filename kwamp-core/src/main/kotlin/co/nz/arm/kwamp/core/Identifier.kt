@@ -9,7 +9,7 @@ abstract class WampIdGenerator {
 
     protected abstract val sequence: Sequence<Long>
 
-    fun newId(): Long = sequence.first { isValid(it) }
+    fun newId(): Long = sequence.first { isValid(it) }.also { usedIds.add(it) }
 
     private fun isValid(id: Long) = Identifier.isValid(id) && !hasId(id)
 
@@ -24,7 +24,7 @@ object Identifier {
     fun isValid(id: Long) = id in acceptableRange
 }
 
-class LinearIdGenerator(private val seed: Long = 1L) : WampIdGenerator() {
+class LinearIdGenerator(seed: Long = 1L) : WampIdGenerator() {
     override val sequence = generateSequence(seed) { (it + 1).rem(Identifier.acceptableRange.endInclusive) }
 }
 

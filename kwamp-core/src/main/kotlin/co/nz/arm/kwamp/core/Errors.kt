@@ -58,3 +58,6 @@ class InvalidMessageException(message: String? = null, cause: Throwable? = null)
 
 class NoSuchRealmException(message: String? = null, cause: Throwable? = null) :
     WampException(WampError.NO_SUCH_REALM, message = message, cause = cause)
+
+class NoSuchRegistrationException(message: String? = null, cause: Throwable? = null) :
+    WampException(WampError.NO_SUCH_REGISTRATION, message = message, cause = cause)
