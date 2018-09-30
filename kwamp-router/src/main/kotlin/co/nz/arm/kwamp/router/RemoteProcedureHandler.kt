@@ -1,9 +1,6 @@
 package co.nz.arm.kwamp.router
 
-import co.nz.arm.kwamp.core.Connection
-import co.nz.arm.kwamp.core.LinearIdGenerator
-import co.nz.arm.kwamp.core.NoSuchRegistrationException
-import co.nz.arm.kwamp.core.Uri
+import co.nz.arm.kwamp.core.*
 import co.nz.arm.kwamp.core.messages.Register
 import co.nz.arm.kwamp.core.messages.Unregister
 import java.util.concurrent.locks.ReentrantLock
@@ -21,6 +18,8 @@ class RemoteProcedureHandler(
         connection: Connection,
         registrationMessage: Register
     ) {
+        if (registrationMessage.procedure in procedures) throw ProcedureAlreadyExistsException(registrationMessage.requestId)
+
         linearIdGenerator.newId().let { registrationId ->
             procedureLock.withLock {
                 procedures[registrationMessage.procedure] = registrationId
@@ -33,7 +32,7 @@ class RemoteProcedureHandler(
     fun unregisterProcedure(connection: Connection, unregisterMessage: Unregister) {
         procedureLock.withLock {
             val procedureConfig = procedureRegistrations.remove(unregisterMessage.registration)
-                ?: throw NoSuchRegistrationException("Registration with id ${unregisterMessage.registration} does not exist")
+                ?: throw NoSuchRegistrationErrorException(unregisterMessage.requestId)
 
             procedures.remove(procedureConfig.uri) ?: throw IllegalStateException("Couldn't find stored procedure URI")
         }

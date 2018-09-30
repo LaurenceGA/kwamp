@@ -2,11 +2,9 @@ package co.nz.arm.kwamp.router
 
 import co.nz.arm.kwamp.core.Connection
 import co.nz.arm.kwamp.core.WampClose
+import co.nz.arm.kwamp.core.WampErrorException
 import co.nz.arm.kwamp.core.WampException
-import co.nz.arm.kwamp.core.messages.Abort
-import co.nz.arm.kwamp.core.messages.Goodbye
-import co.nz.arm.kwamp.core.messages.Registered
-import co.nz.arm.kwamp.core.messages.Unregistered
+import co.nz.arm.kwamp.core.messages.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
@@ -27,5 +25,9 @@ class MessageSender {
 
     fun sendUnregistered(connection: Connection, requestId: Long) = GlobalScope.launch {
         connection.send(Unregistered(requestId))
+    }
+
+    fun sendError(connection: Connection, wampError: WampErrorException) = GlobalScope.launch {
+        connection.send(wampError.getErrorMessage())
     }
 }

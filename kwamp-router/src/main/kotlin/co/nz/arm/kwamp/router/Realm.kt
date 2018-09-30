@@ -20,20 +20,32 @@ class Realm(
 
     private suspend fun startSession(connection: Connection) = sessions.newSession(connection).apply {
         connection.forEachMessage {
-            when (it) {
-                is Hello -> throw ProtocolViolationException("Received Hello message after session established")
-                is Welcome -> throw ProtocolViolationException("Receive Welcome message from client")
-                is Abort -> connection.close("Abort from client")
-                is Goodbye -> messageSender.sendGoodbye(connection)
-                is Register -> remoteProcedureHandler.registerProcedure(connection, it)
-                is Unregister -> remoteProcedureHandler.unregisterProcedure(connection, it)
-                else -> throw NotImplementedError("Message type ${it.messageType} not implemented")
+            try {
+                handleConnectionMessage(it, connection)
+            } catch (nonFatalError: WampErrorException) {
+                messageSender.sendError(connection, nonFatalError)
             }
-        }.invokeOnCompletion { exception ->
-            when (exception) {
-                is ProtocolViolationException -> messageSender.abort(connection, exception)
+        }.invokeOnCompletion { fatalException ->
+            when (fatalException) {
+                is ProtocolViolationException -> messageSender.abort(connection, fatalException)
+                else -> fatalException?.run { printStackTrace() }
             }
             sessions.endSession(id)
+        }
+    }
+
+    private suspend fun handleConnectionMessage(
+        message: Message,
+        connection: Connection
+    ) {
+        when (message) {
+            is Hello -> throw ProtocolViolationException("Received Hello message after session established")
+            is Welcome -> throw ProtocolViolationException("Receive Welcome message from client")
+            is Abort -> connection.close("Abort from client")
+            is Goodbye -> messageSender.sendGoodbye(connection)
+            is Register -> remoteProcedureHandler.registerProcedure(connection, message)
+            is Unregister -> remoteProcedureHandler.unregisterProcedure(connection, message)
+            else -> throw NotImplementedError("Message type ${message.messageType} not implemented")
         }
     }
 }
