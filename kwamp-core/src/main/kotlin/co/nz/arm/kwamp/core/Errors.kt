@@ -1,5 +1,9 @@
 package co.nz.arm.kwamp.core
 
+import co.nz.arm.kwamp.core.messages.Dict
+import co.nz.arm.kwamp.core.messages.Error
+import co.nz.arm.kwamp.core.messages.MessageType
+
 enum class WampError(uri: String) {
     // Peer provided an incorrect URI for any URI-based attribute of WAMP message, such as realm, topic or procedure
     INVALID_URI("wamp.error.invalid_uri"),
@@ -47,9 +51,6 @@ class InvalidUriException(message: String? = null, cause: Throwable? = null) :
 class NoSuchProcedureException(message: String? = null, cause: Throwable? = null) :
     WampException(WampError.NO_SUCH_PROCEDURE, message = message, cause = cause)
 
-class ProcedureAlreadyExistsException(message: String? = null, cause: Throwable? = null) :
-    WampException(WampError.PROCEDURE_ALREADY_EXISTS, message = message, cause = cause)
-
 open class ProtocolViolationException(message: String? = null, cause: Throwable? = null) :
     WampException(WampError.PROTOCOL_VIOLATION, message = message, cause = cause)
 
@@ -58,3 +59,21 @@ class InvalidMessageException(message: String? = null, cause: Throwable? = null)
 
 class NoSuchRealmException(message: String? = null, cause: Throwable? = null) :
     WampException(WampError.NO_SUCH_REALM, message = message, cause = cause)
+
+open class WampErrorException(
+    error: WampError,
+    val requestType: MessageType,
+    val requestId: Long,
+    private val details: Dict = emptyMap(),
+    private val arguments: List<Any?>? = null,
+    private val argumentsKw: Dict? = null
+) :
+    WampException(error) {
+    fun getErrorMessage() = Error(requestType.id, requestId, details, error.uri, arguments, argumentsKw)
+}
+
+class ProcedureAlreadyExistsException(requestId: Long) :
+WampErrorException(WampError.PROCEDURE_ALREADY_EXISTS, requestType = MessageType.REGISTER, requestId = requestId)
+
+class NoSuchRegistrationErrorException(requestId: Long) :
+    WampErrorException(WampError.NO_SUCH_REGISTRATION, requestType = MessageType.UNREGISTER, requestId = requestId)
