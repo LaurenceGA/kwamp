@@ -11,7 +11,8 @@ class Realm(
     private val messageSender: MessageSender = MessageSender(),
     private val remoteProcedureHandler: RemoteProcedureHandler = RemoteProcedureHandler(
         messageSender,
-        LinearIdGenerator()
+        LinearIdGenerator(),
+        RandomIdGenerator()
     )
 ) {
     private val sessions = SessionSet(RandomIdGenerator())
@@ -45,6 +46,7 @@ class Realm(
             is Goodbye -> messageSender.sendGoodbye(connection)
             is Register -> remoteProcedureHandler.registerProcedure(connection, message)
             is Unregister -> remoteProcedureHandler.unregisterProcedure(connection, message)
+            is Call -> remoteProcedureHandler.callProcedure(connection, message)
             else -> throw NotImplementedError("Message type ${message.messageType} not implemented")
         }
     }

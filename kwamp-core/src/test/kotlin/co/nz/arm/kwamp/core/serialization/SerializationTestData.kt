@@ -90,8 +90,8 @@ val messageData = listOf(
         "[67, 123]"
     ),
     row(
-        Invocation(123, optionsDict),
-        "[68, 123, $optionsDictRaw]"
+        Invocation(123, 456, optionsDict),
+        "[68, 123, 456, $optionsDictRaw]"
     ),
     row(
         Yield(123, optionsDict),

@@ -48,9 +48,6 @@ open class WampException(val error: WampError, message: String? = null, cause: T
 class InvalidUriException(message: String? = null, cause: Throwable? = null) :
     WampException(WampError.INVALID_URI, message = message, cause = cause)
 
-class NoSuchProcedureException(message: String? = null, cause: Throwable? = null) :
-    WampException(WampError.NO_SUCH_PROCEDURE, message = message, cause = cause)
-
 open class ProtocolViolationException(message: String? = null, cause: Throwable? = null) :
     WampException(WampError.PROTOCOL_VIOLATION, message = message, cause = cause)
 
@@ -77,3 +74,6 @@ WampErrorException(WampError.PROCEDURE_ALREADY_EXISTS, requestType = MessageType
 
 class NoSuchRegistrationErrorException(requestId: Long) :
     WampErrorException(WampError.NO_SUCH_REGISTRATION, requestType = MessageType.UNREGISTER, requestId = requestId)
+
+class NoSuchProcedureException(requestId: Long) :
+    WampErrorException(WampError.NO_SUCH_PROCEDURE, requestType = MessageType.CALL, requestId = requestId)

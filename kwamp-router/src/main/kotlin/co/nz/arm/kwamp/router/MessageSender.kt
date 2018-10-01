@@ -30,4 +30,16 @@ class MessageSender {
     fun sendError(connection: Connection, wampError: WampErrorException) = GlobalScope.launch {
         connection.send(wampError.getErrorMessage())
     }
+
+    fun sendInvocation(
+        procedureImplementingConnection: Connection,
+        requestId: Long,
+        registration: Long,
+        details: Dict,
+        arguments: List<Any?>?,
+        argumentsKw: Dict?
+    ) =
+        GlobalScope.launch {
+            procedureImplementingConnection.send(Invocation(requestId, registration, details, arguments, argumentsKw))
+        }
 }

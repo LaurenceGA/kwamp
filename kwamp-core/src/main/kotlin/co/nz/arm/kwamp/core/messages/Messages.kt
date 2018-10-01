@@ -48,7 +48,7 @@ data class Event(
     val subscription: Long,
     val publication: Long,
     val details: Dict,
-    val arguments: List<Any>? = null,
+    val arguments: List<Any?>? = null,
     val argumentsKw: Dict? = null
 ) : Message(MessageType.EVENT)
 
@@ -56,14 +56,14 @@ data class Call(
     val requestId: Long,
     val options: Dict,
     val procedure: Uri,
-    val arguments: List<Any>? = null,
+    val arguments: List<Any?>? = null,
     val argumentsKw: Dict? = null
 ) : Message(MessageType.CALL)
 
 data class Result(
     val requestId: Long,
     val details: Dict,
-    val arguments: List<Any>? = null,
+    val arguments: List<Any?>? = null,
     val argumentsKw: Dict? = null
 ) : Message(MessageType.RESULT)
 
@@ -77,14 +77,15 @@ data class Unregistered(val requestId: Long) : Message(MessageType.UNREGISTERED)
 
 data class Invocation(
     val requestId: Long,
-    val options: Dict,
-    val arguments: List<Any>? = null,
+    val registration: Long,
+    val details: Dict,
+    val arguments: List<Any?>? = null,
     val argumentsKw: Dict? = null
 ) : Message(MessageType.INVOCATION)
 
 data class Yield(
     val requestId: Long,
     val options: Dict,
-    val arguments: List<Any>? = null,
+    val arguments: List<Any?>? = null,
     val argumentsKw: Dict? = null
 ) : Message(MessageType.YIELD)
