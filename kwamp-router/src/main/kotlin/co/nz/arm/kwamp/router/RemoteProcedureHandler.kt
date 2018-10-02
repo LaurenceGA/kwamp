@@ -1,9 +1,7 @@
 package co.nz.arm.kwamp.router
 
 import co.nz.arm.kwamp.core.*
-import co.nz.arm.kwamp.core.messages.Call
-import co.nz.arm.kwamp.core.messages.Register
-import co.nz.arm.kwamp.core.messages.Unregister
+import co.nz.arm.kwamp.core.messages.*
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 
@@ -38,6 +36,7 @@ class RemoteProcedureHandler(
 
     fun unregisterProcedure(connection: Connection, unregisterMessage: Unregister) {
         procedureLock.withLock {
+            //TODO clear associated invocations
             val procedureConfig = procedureRegistrations.remove(unregisterMessage.registration)
                 ?: throw NoSuchRegistrationErrorException(unregisterMessage.requestId)
 
@@ -47,7 +46,7 @@ class RemoteProcedureHandler(
         messageSender.sendUnregistered(connection, unregisterMessage.requestId)
     }
 
-    fun callProcedure(connection: Connection, callMessage: Call) {
+    fun callProcedure(callerConnection: Connection, callMessage: Call) {
         randomIdGenerator.newId().let { invocationRequestId ->
             val procedureConfig = getProcedureConfig(callMessage)
             messageSender.sendInvocation(
@@ -60,7 +59,12 @@ class RemoteProcedureHandler(
             )
 
             invocations[invocationRequestId] =
-                    InvocationConfig(invocationRequestId, connection, procedureConfig.procedureProvidingConnection)
+                    InvocationConfig(
+                        callMessage.requestId,
+                        callerConnection,
+                        invocationRequestId,
+                        procedureConfig.procedureProvidingConnection
+                    )
         }
     }
 
@@ -68,8 +72,36 @@ class RemoteProcedureHandler(
         procedureRegistrations[procedures[callMessage.procedure]]
             ?: throw NoSuchProcedureException(callMessage.requestId)
     }
+
+    fun handleYield(yieldMessage: Yield) {
+        val invocationConfig = invocations.remove(yieldMessage.requestId)!!
+        messageSender.sendResult(
+            invocationConfig.caller,
+            invocationConfig.callRequestId,
+            emptyMap(),
+            yieldMessage.arguments,
+            yieldMessage.argumentsKw
+        )
+    }
+
+    fun handleInvocationError(errorMessage: Error) {
+        val invocationConfig = invocations.remove(errorMessage.requestId)!!
+        messageSender.sendCallError(
+            invocationConfig.caller,
+            invocationConfig.callRequestId,
+            emptyMap(),
+            errorMessage.error,
+            errorMessage.arguments,
+            errorMessage.argumentsKw
+        )
+    }
 }
 
 data class ProcedureConfig(val uri: Uri, val procedureProvidingConnection: Connection, val registrationId: Long)
 
-data class InvocationConfig(val invocationRequestId: Long, val caller: Connection, val callee: Connection)
+data class InvocationConfig(
+    val callRequestId: Long,
+    val caller: Connection,
+    val invocationRequestId: Long,
+    val callee: Connection
+)

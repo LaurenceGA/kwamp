@@ -66,7 +66,7 @@ open class WampErrorException(
     private val argumentsKw: Dict? = null
 ) :
     WampException(error) {
-    fun getErrorMessage() = Error(requestType.id, requestId, details, error.uri, arguments, argumentsKw)
+    fun getErrorMessage() = Error(requestType, requestId, details, error.uri, arguments, argumentsKw)
 }
 
 class ProcedureAlreadyExistsException(requestId: Long) :

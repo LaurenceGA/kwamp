@@ -26,16 +26,23 @@ val messageData = listOf(
         "[6, $detailsDictRaw, \"reason\"]"
     ),
     row(
-        Error(5, 123, detailsDict, Uri("error")),
-        "[8, 5, 123, $detailsDictRaw, \"error\"]"
+        Error(MessageType.ABORT, 123, detailsDict, Uri("error")),
+        "[8, 3, 123, $detailsDictRaw, \"error\"]"
     ),
 //            row(Error(5, 123, "details", Uri("error"), listOf("arg1", 2, null)),
 //                    "[8, 5, 123, \"details\", \"error\", [\"arg1\", 2, null]]"),
 //                row(Error(5, 123, "details", Uri("error"), listOf("arg1", 2, null), mapOf("arg3" to "val3", "arg4" to 4)),
 //                        "[8, 5, 123, \"details\", \"error\", [\"arg1\", 2, null], {\"arg3\": \"val3\", \"arg4\": 4}]"),
     row(
-        Error(5, 123, detailsDict, Uri("error"), listOf("arg1", 2.0), mapOf("arg3" to "val3", "arg4" to 4.0)),
-        "[8, 5, 123, $detailsDictRaw, \"error\", [\"arg1\", 2.0], {\"arg3\": \"val3\", \"arg4\": 4.0}]"
+        Error(
+            MessageType.ABORT,
+            123,
+            detailsDict,
+            Uri("error"),
+            listOf("arg1", 2.0),
+            mapOf("arg3" to "val3", "arg4" to 4.0)
+        ),
+        "[8, 3, 123, $detailsDictRaw, \"error\", [\"arg1\", 2.0], {\"arg3\": \"val3\", \"arg4\": 4.0}]"
     ),
     row(
         Publish(123, optionsDict, Uri("topic")),

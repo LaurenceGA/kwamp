@@ -18,7 +18,7 @@ data class Abort(val details: Dict, val reason: Uri) : Message(MessageType.ABORT
 data class Goodbye(val details: Dict, val reason: Uri) : Message(MessageType.GOODBYE)
 
 data class Error(
-    val requestType: Int,
+    val requestType: MessageType,
     val requestId: Long,
     val details: Dict,
     val error: Uri,

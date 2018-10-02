@@ -1,9 +1,6 @@
 package co.nz.arm.kwamp.router
 
-import co.nz.arm.kwamp.core.Connection
-import co.nz.arm.kwamp.core.WampClose
-import co.nz.arm.kwamp.core.WampErrorException
-import co.nz.arm.kwamp.core.WampException
+import co.nz.arm.kwamp.core.*
 import co.nz.arm.kwamp.core.messages.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -14,7 +11,7 @@ class MessageSender {
         connection.close("Closed by client.")
     }
 
-    fun abort(connection: Connection, exception: WampException) = GlobalScope.launch {
+    fun sendAbort(connection: Connection, exception: WampException) = GlobalScope.launch {
         connection.send(Abort(mapOf("message" to exception.localizedMessage), exception.error.uri))
         connection.close(exception.localizedMessage)
     }
@@ -27,7 +24,7 @@ class MessageSender {
         connection.send(Unregistered(requestId))
     }
 
-    fun sendError(connection: Connection, wampError: WampErrorException) = GlobalScope.launch {
+    fun sendExceptionError(connection: Connection, wampError: WampErrorException) = GlobalScope.launch {
         connection.send(wampError.getErrorMessage())
     }
 
@@ -41,5 +38,28 @@ class MessageSender {
     ) =
         GlobalScope.launch {
             procedureImplementingConnection.send(Invocation(requestId, registration, details, arguments, argumentsKw))
+        }
+
+    fun sendResult(
+        callerConnection: Connection,
+        callRequestId: Long,
+        details: Dict,
+        arguments: List<Any?>?,
+        argumentsKw: Dict?
+    ) =
+        GlobalScope.launch {
+            callerConnection.send(Result(callRequestId, details, arguments, argumentsKw))
+        }
+
+    fun sendCallError(
+        callerConnection: Connection,
+        callRequestId: Long,
+        details: Dict,
+        error: Uri,
+        arguments: List<Any?>?,
+        argumentsKw: Dict?
+    ) =
+        GlobalScope.launch {
+            callerConnection.send(Error(MessageType.CALL, callRequestId, details, error, arguments, argumentsKw))
         }
 }

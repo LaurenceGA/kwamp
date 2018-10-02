@@ -61,6 +61,8 @@ private fun tryToConvert(item: Any, parameter: KParameter): Any {
                 Int::class -> item.toInt()
                 else -> throw e
             }
+        } else if (parameter.type.jvmErasure == MessageType::class && item is Int) {
+            MessageType.getMessageType(item)
         } else {
             throw e
         }
