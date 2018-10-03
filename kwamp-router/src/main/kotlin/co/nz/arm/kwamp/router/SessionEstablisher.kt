@@ -27,8 +27,8 @@ class SessionEstablisher(
             }
         }.invokeOnCompletion { throwable ->
             when (throwable) {
-                is ProtocolViolationException -> messageSender.abort(connection, throwable)
-                is NoSuchRealmException -> messageSender.abort(connection, throwable)
+                is ProtocolViolationException -> messageSender.sendAbort(connection, throwable)
+                is NoSuchRealmException -> messageSender.sendAbort(connection, throwable)
                 else -> throwable?.run { printStackTrace() }
             }
         }

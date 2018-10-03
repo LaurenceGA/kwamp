@@ -1,0 +1,38 @@
+C1 Register procedure
+
+> [1, "default", {}]
+< [2, 2472552596551306, {"agent": "KWAMP", "roles": {"broker": {}, "dealer": {}}}]
+> [64, 25349185, {}, "myProc"]
+< [65, 25349185, 1]
+< [68, 5855869813663107, 1, {}]
+> [70, 5855869813663107, {}, ["Hello, world!"]]
+
+C2 Call procedure
+
+> [1, "default", {}]
+< [2, 4403991784948995, {"agent": "KWAMP", "roles": {"broker": {}, "dealer": {}}}]
+> [48, 123, {}, "myProc"]
+< [50, 123, {}, ["Hello, world!"]]
+
+
+Failed RPC
+
+C1 Register procedure
+
+> [1, "default", {}]
+< [2, 2472552596551306, {"agent": "KWAMP", "roles": {"broker": {}, "dealer": {}}}]
+> [64, 25349185, {}, "myProc"]
+< [65, 25349185, 1]
+< [68, 5855869813663107, 1, {}]
+> [8, 68, 5855869813663107, {}, "com.myapp.error", ["There was an error."], {"severity": 3}]
+
+C2 Call procedure
+
+> [1, "default", {}]
+< [2, 4403991784948995, {"agent": "KWAMP", "roles": {"broker": {}, "dealer": {}}}]
+> [48, 123, {}, "myProc"]
+< [8, 48, 123, {}, "com.myapp.error", ["There was an error."], {"severity": 3}]
+
+
+
+

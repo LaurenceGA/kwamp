@@ -1,0 +1,4 @@
+> [1, "default", {}]
+< [2, 266182337497579, {"agent": "KWAMP", "roles": {"broker": {}, "dealer": {}}}]
+> [6, {"message": "The host is shutting down now."},"wamp.close.system_shutdown"]
+< [6, {}, "wamp.close.goodbye_and_out"]

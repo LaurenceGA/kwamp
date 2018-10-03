@@ -32,10 +32,13 @@ enum class MessageType(val id: Int, val factory: (List<Any>) -> Message) {
 
     companion object {
         private val factories = hashMapOf(*MessageType.values().map(Companion::toIndexedFactory).toTypedArray())
+        private val messageTypes = hashMapOf(*MessageType.values().map(Companion::toIndexedIdentity).toTypedArray())
 
-        private fun toIndexedFactory(message: MessageType) = Pair(message.id, message.factory)
+        private fun toIndexedFactory(messageType: MessageType) = Pair(messageType.id, messageType.factory)
+        private fun toIndexedIdentity(messageType: MessageType) = Pair(messageType.id, messageType)
 
         fun getFactory(id: Int) = factories[id] ?: throw InvalidMessageException("Unknown message type '$id'")
+        fun getMessageType(id: Int) = messageTypes[id] ?: throw InvalidMessageException("Unknown message type '$id'")
     }
 
     object MessageTypeConverter : Converter {

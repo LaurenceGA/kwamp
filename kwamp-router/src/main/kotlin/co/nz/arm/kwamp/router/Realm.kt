@@ -11,7 +11,8 @@ class Realm(
     private val messageSender: MessageSender = MessageSender(),
     private val remoteProcedureHandler: RemoteProcedureHandler = RemoteProcedureHandler(
         messageSender,
-        LinearIdGenerator()
+        LinearIdGenerator(),
+        RandomIdGenerator()
     )
 ) {
     private val sessions = SessionSet(RandomIdGenerator())
@@ -23,11 +24,11 @@ class Realm(
             try {
                 handleConnectionMessage(it, connection)
             } catch (nonFatalError: WampErrorException) {
-                messageSender.sendError(connection, nonFatalError)
+                messageSender.sendExceptionError(connection, nonFatalError)
             }
         }.invokeOnCompletion { fatalException ->
             when (fatalException) {
-                is ProtocolViolationException -> messageSender.abort(connection, fatalException)
+                is ProtocolViolationException -> messageSender.sendAbort(connection, fatalException)
                 else -> fatalException?.run { printStackTrace() }
             }
             sessions.endSession(id)
@@ -45,7 +46,17 @@ class Realm(
             is Goodbye -> messageSender.sendGoodbye(connection)
             is Register -> remoteProcedureHandler.registerProcedure(connection, message)
             is Unregister -> remoteProcedureHandler.unregisterProcedure(connection, message)
+            is Call -> remoteProcedureHandler.callProcedure(connection, message)
+            is Yield -> remoteProcedureHandler.handleYield(message)
+            is Error -> handleError(message)
             else -> throw NotImplementedError("Message type ${message.messageType} not implemented")
+        }
+    }
+
+    private fun handleError(errorMessage: Error) {
+        when (errorMessage.requestType) {
+            MessageType.INVOCATION -> remoteProcedureHandler.handleInvocationError(errorMessage)
+            else -> throw NotImplementedError("Error with request type ${errorMessage.requestType} not implemented")
         }
     }
 }

@@ -7,6 +7,7 @@ import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
 
+//TODO validate construction (S5.1.1) and return WampError.INVALID_URI on failure
 data class Uri(val uri: String) {
     object UriConverter : Converter {
         override fun canConvert(cls: Class<*>) = cls == Uri::class.java
