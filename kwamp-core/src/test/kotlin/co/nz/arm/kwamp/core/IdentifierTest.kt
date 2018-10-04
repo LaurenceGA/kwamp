@@ -7,7 +7,7 @@ internal class IdentifierTest : StringSpec({
     "Generate linear id" {
         val linearIdGenerator = LinearIdGenerator()
         for (i in 0..100) {
-            linearIdGenerator.newId() shouldBe i
+            linearIdGenerator.newId() shouldBe i + 1
         }
     }
 })

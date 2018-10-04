@@ -7,14 +7,16 @@ import kotlinx.coroutines.launch
 import java.util.concurrent.ConcurrentHashMap
 
 class Realm(
-    val uri: Uri,
-    private val messageSender: MessageSender = MessageSender(),
+    val uri: Uri
+) {
+    private val messageSender: MessageSender = MessageSender()
     private val remoteProcedureHandler: RemoteProcedureHandler = RemoteProcedureHandler(
         messageSender,
         LinearIdGenerator(),
         RandomIdGenerator()
     )
-) {
+    private val subscriptionHandler: SubscriptionHandler = SubscriptionHandler(messageSender, RandomIdGenerator())
+
     private val sessions = SessionSet(RandomIdGenerator())
 
     suspend fun join(connection: Connection) = startSession(connection)
@@ -44,11 +46,18 @@ class Realm(
             is Welcome -> throw ProtocolViolationException("Receive Welcome message from client")
             is Abort -> connection.close("Abort from client")
             is Goodbye -> messageSender.sendGoodbye(connection)
+
             is Register -> remoteProcedureHandler.registerProcedure(connection, message)
             is Unregister -> remoteProcedureHandler.unregisterProcedure(connection, message)
+
             is Call -> remoteProcedureHandler.callProcedure(connection, message)
             is Yield -> remoteProcedureHandler.handleYield(message)
+
+            is Subscribe -> subscriptionHandler.subscribe(connection, message)
+            is Unsubscribe -> subscriptionHandler.unsubscribe(connection, message)
+
             is Error -> handleError(message)
+
             else -> throw NotImplementedError("Message type ${message.messageType} not implemented")
         }
     }
