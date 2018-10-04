@@ -24,7 +24,7 @@ class RemoteProcedureHandler(
     ) {
         if (registrationMessage.procedure in procedures) throw ProcedureAlreadyExistsException(registrationMessage.requestId)
 
-        linearIdGenerator.newId().let { registrationId ->
+        linearIdGenerator.newId().also { registrationId ->
             procedureLock.withLock {
                 procedures[registrationMessage.procedure] = registrationId
                 procedureRegistrations[registrationId] =
@@ -47,7 +47,7 @@ class RemoteProcedureHandler(
     }
 
     fun callProcedure(callerConnection: Connection, callMessage: Call) {
-        randomIdGenerator.newId().let { invocationRequestId ->
+        randomIdGenerator.newId().also { invocationRequestId ->
             val procedureConfig = getProcedureConfig(callMessage)
             messageSender.sendInvocation(
                 procedureConfig.procedureProvidingConnection,

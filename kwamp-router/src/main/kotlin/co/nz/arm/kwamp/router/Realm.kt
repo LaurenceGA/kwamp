@@ -24,7 +24,7 @@ class Realm(
     private suspend fun startSession(connection: Connection) = sessions.newSession(connection).apply {
         connection.forEachMessage {
             try {
-                handleConnectionMessage(it, connection)
+                handleConnectionMessage(it, connection, this)
             } catch (nonFatalError: WampErrorException) {
                 messageSender.sendExceptionError(connection, nonFatalError)
             }
@@ -39,7 +39,8 @@ class Realm(
 
     private suspend fun handleConnectionMessage(
         message: Message,
-        connection: Connection
+        connection: Connection,
+        session: WampSession
     ) {
         when (message) {
             is Hello -> throw ProtocolViolationException("Received Hello message after session established")
@@ -53,7 +54,7 @@ class Realm(
             is Call -> remoteProcedureHandler.callProcedure(connection, message)
             is Yield -> remoteProcedureHandler.handleYield(message)
 
-            is Subscribe -> subscriptionHandler.subscribe(connection, message)
+            is Subscribe -> subscriptionHandler.subscribe(session, message)
             is Unsubscribe -> subscriptionHandler.unsubscribe(connection, message)
 
             is Error -> handleError(message)
@@ -83,7 +84,7 @@ class SessionSet(private val idGenerator: WampIdGenerator) {
     }
 }
 
-class WampSession(val id: Long, private val connection: Connection) {
+data class WampSession(val id: Long, val connection: Connection) {
     init {
         GlobalScope.launch {
             connection.send(
@@ -93,5 +94,9 @@ class WampSession(val id: Long, private val connection: Connection) {
                 )
             )
         }
+    }
+
+    fun equals(other: WampSession): Boolean {
+        return id == other.id
     }
 }
