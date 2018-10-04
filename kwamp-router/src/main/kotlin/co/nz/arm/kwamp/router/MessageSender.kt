@@ -62,4 +62,12 @@ class MessageSender {
         GlobalScope.launch {
             callerConnection.send(Error(MessageType.CALL, callRequestId, details, error, arguments, argumentsKw))
         }
+
+    fun sendSubscribed(connection: Connection, requestId: Long, subscribeRequestId: Long) = GlobalScope.launch {
+        connection.send(Subscribed(requestId, subscribeRequestId))
+    }
+
+    fun sendUnsubscribe(connection: Connection, unsubscribeRequestId: Long) = GlobalScope.launch {
+        connection.send(Unsubscribed(unsubscribeRequestId))
+    }
 }
