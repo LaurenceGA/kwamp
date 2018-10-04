@@ -1,6 +1,5 @@
 package co.nz.arm.kwamp.router
 
-import co.nz.arm.kwamp.core.Connection
 import co.nz.arm.kwamp.core.NoSuchSubscriptionException
 import co.nz.arm.kwamp.core.RandomIdGenerator
 import co.nz.arm.kwamp.core.Uri
@@ -39,7 +38,7 @@ class SubscriptionHandler(private val messageSender: MessageSender, private val 
                 }
         }
 
-    fun unsubscribe(connection: Connection, unsubscribeMessage: Unsubscribe) {
+    fun unsubscribe(session: WampSession, unsubscribeMessage: Unsubscribe) {
         subscriptionLock.withLock {
             val subscription = subscriptions.remove(unsubscribeMessage.subscription)
                 ?: throw NoSuchSubscriptionException(unsubscribeMessage.requestId)
@@ -49,7 +48,7 @@ class SubscriptionHandler(private val messageSender: MessageSender, private val 
                 ?: throw IllegalStateException("Couldn't find subscription URI")
         }
 
-        messageSender.sendUnsubscribe(connection, unsubscribeMessage.requestId)
+        messageSender.sendUnsubscribe(session.connection, unsubscribeMessage.requestId)
     }
 }
 

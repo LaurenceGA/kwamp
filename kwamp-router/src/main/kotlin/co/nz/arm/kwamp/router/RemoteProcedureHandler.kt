@@ -19,7 +19,7 @@ class RemoteProcedureHandler(
     private val invocations = HashMap<Long, InvocationConfig>()
 
     fun registerProcedure(
-        connection: Connection,
+        session: WampSession,
         registrationMessage: Register
     ) {
         if (registrationMessage.procedure in procedures) throw ProcedureAlreadyExistsException(registrationMessage.requestId)
@@ -28,13 +28,13 @@ class RemoteProcedureHandler(
             procedureLock.withLock {
                 procedures[registrationMessage.procedure] = registrationId
                 procedureRegistrations[registrationId] =
-                        ProcedureConfig(registrationMessage.procedure, connection, registrationId)
+                        ProcedureConfig(registrationMessage.procedure, session, registrationId)
             }
-            messageSender.sendRegistered(connection, registrationMessage.requestId, registrationId)
+            messageSender.sendRegistered(session.connection, registrationMessage.requestId, registrationId)
         }
     }
 
-    fun unregisterProcedure(connection: Connection, unregisterMessage: Unregister) {
+    fun unregisterProcedure(session: WampSession, unregisterMessage: Unregister) {
         procedureLock.withLock {
             //TODO clear associated invocations
             val procedureConfig = procedureRegistrations.remove(unregisterMessage.registration)
@@ -43,14 +43,14 @@ class RemoteProcedureHandler(
             //TODO release ID after use from linear id generator
             procedures.remove(procedureConfig.uri) ?: throw IllegalStateException("Couldn't find stored procedure URI")
         }
-        messageSender.sendUnregistered(connection, unregisterMessage.requestId)
+        messageSender.sendUnregistered(session.connection, unregisterMessage.requestId)
     }
 
-    fun callProcedure(callerConnection: Connection, callMessage: Call) {
+    fun callProcedure(callerSession: WampSession, callMessage: Call) {
         randomIdGenerator.newId().also { invocationRequestId ->
             val procedureConfig = getProcedureConfig(callMessage)
             messageSender.sendInvocation(
-                procedureConfig.procedureProvidingConnection,
+                procedureConfig.procedureProvidingSession.connection,
                 invocationRequestId,
                 procedureConfig.registrationId,
                 emptyMap(),
@@ -61,9 +61,9 @@ class RemoteProcedureHandler(
             invocations[invocationRequestId] =
                     InvocationConfig(
                         callMessage.requestId,
-                        callerConnection,
+                        callerSession,
                         invocationRequestId,
-                        procedureConfig.procedureProvidingConnection
+                        procedureConfig.procedureProvidingSession
                     )
         }
     }
@@ -76,7 +76,7 @@ class RemoteProcedureHandler(
     fun handleYield(yieldMessage: Yield) {
         val invocationConfig = invocations.remove(yieldMessage.requestId)!!
         messageSender.sendResult(
-            invocationConfig.caller,
+            invocationConfig.caller.connection,
             invocationConfig.callRequestId,
             emptyMap(),
             yieldMessage.arguments,
@@ -87,7 +87,7 @@ class RemoteProcedureHandler(
     fun handleInvocationError(errorMessage: Error) {
         val invocationConfig = invocations.remove(errorMessage.requestId)!!
         messageSender.sendCallError(
-            invocationConfig.caller,
+            invocationConfig.caller.connection,
             invocationConfig.callRequestId,
             emptyMap(),
             errorMessage.error,
@@ -97,11 +97,11 @@ class RemoteProcedureHandler(
     }
 }
 
-data class ProcedureConfig(val uri: Uri, val procedureProvidingConnection: Connection, val registrationId: Long)
+data class ProcedureConfig(val uri: Uri, val procedureProvidingSession: WampSession, val registrationId: Long)
 
 data class InvocationConfig(
     val callRequestId: Long,
-    val caller: Connection,
+    val caller: WampSession,
     val invocationRequestId: Long,
-    val callee: Connection
+    val callee: WampSession
 )

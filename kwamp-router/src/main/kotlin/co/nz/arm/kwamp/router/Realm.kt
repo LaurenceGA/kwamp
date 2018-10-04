@@ -24,7 +24,7 @@ class Realm(
     private suspend fun startSession(connection: Connection) = sessions.newSession(connection).apply {
         connection.forEachMessage {
             try {
-                handleConnectionMessage(it, connection, this)
+                handleConnectionMessage(it, this)
             } catch (nonFatalError: WampErrorException) {
                 messageSender.sendExceptionError(connection, nonFatalError)
             }
@@ -39,23 +39,22 @@ class Realm(
 
     private suspend fun handleConnectionMessage(
         message: Message,
-        connection: Connection,
         session: WampSession
     ) {
         when (message) {
             is Hello -> throw ProtocolViolationException("Received Hello message after session established")
             is Welcome -> throw ProtocolViolationException("Receive Welcome message from client")
-            is Abort -> connection.close("Abort from client")
-            is Goodbye -> messageSender.sendGoodbye(connection)
+            is Abort -> session.connection.close("Abort from client")
+            is Goodbye -> messageSender.sendGoodbye(session.connection)
 
-            is Register -> remoteProcedureHandler.registerProcedure(connection, message)
-            is Unregister -> remoteProcedureHandler.unregisterProcedure(connection, message)
+            is Register -> remoteProcedureHandler.registerProcedure(session, message)
+            is Unregister -> remoteProcedureHandler.unregisterProcedure(session, message)
 
-            is Call -> remoteProcedureHandler.callProcedure(connection, message)
+            is Call -> remoteProcedureHandler.callProcedure(session, message)
             is Yield -> remoteProcedureHandler.handleYield(message)
 
             is Subscribe -> subscriptionHandler.subscribe(session, message)
-            is Unsubscribe -> subscriptionHandler.unsubscribe(connection, message)
+            is Unsubscribe -> subscriptionHandler.unsubscribe(session, message)
 
             is Error -> handleError(message)
 
