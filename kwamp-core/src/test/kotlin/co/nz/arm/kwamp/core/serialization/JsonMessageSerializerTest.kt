@@ -42,6 +42,6 @@ internal class JsonMessageSerializerTest : StringSpec({
         }) shouldBe "{\"test\": null}"
         Klaxon().toJsonString(SomeTest(null)) shouldBe "{\"test\": null}"
     }
-})
-
-class SomeTest(val test: Any?)
+}) {
+    class SomeTest(val test: Any?)
+}
