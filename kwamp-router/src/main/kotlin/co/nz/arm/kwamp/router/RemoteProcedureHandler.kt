@@ -41,7 +41,7 @@ class RemoteProcedureHandler(
                 ?: throw NoSuchRegistrationErrorException(unregisterMessage.requestId)
 
             //TODO release ID after use from linear id generator
-            procedures.remove(procedureConfig.uri) ?: throw IllegalStateException("Couldn't find stored procedure URI")
+            procedures.remove(procedureConfig.uri)!!
         }
         messageSender.sendUnregistered(session.connection, unregisterMessage.requestId)
     }

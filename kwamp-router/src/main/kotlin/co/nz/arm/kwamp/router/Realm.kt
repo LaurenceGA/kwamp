@@ -56,6 +56,8 @@ class Realm(
             is Subscribe -> subscriptionHandler.subscribe(session, message)
             is Unsubscribe -> subscriptionHandler.unsubscribe(session, message)
 
+            is Publish -> subscriptionHandler.publish(session, message)
+
             is Error -> handleError(message)
 
             else -> throw NotImplementedError("Message type ${message.messageType} not implemented")

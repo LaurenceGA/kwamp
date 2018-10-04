@@ -8,3 +8,8 @@
 < [35, 85346237]
 > [34, 85346238, 4743007275451519]
 < [8, 34, 85346238, {}, "wamp.error.no_such_subscription"]
+
+
+
+// Publish Event
+[16, 239714735, {"acknowledge": true}, "test.topic", ["1"], {"color": "orange", "sizes": [23, 42, 7]}]
