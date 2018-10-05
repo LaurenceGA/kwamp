@@ -70,4 +70,18 @@ class MessageSender {
     fun sendUnsubscribe(connection: Connection, unsubscribeRequestId: Long) = GlobalScope.launch {
         connection.send(Unsubscribed(unsubscribeRequestId))
     }
+
+    fun sendPublished(connection: Connection, requestId: Long, publicationId: Long) = GlobalScope.launch {
+        connection.send(Published(requestId, publicationId))
+    }
+
+    fun sendEvent(
+        connection: Connection,
+        subscriptionId: Long,
+        publicationId: Long,
+        arguments: List<Any?>?,
+        argumentsKw: Dict?
+    ) = GlobalScope.launch {
+        connection.send(Event(subscriptionId, publicationId, emptyMap(), arguments, argumentsKw))
+    }
 }
