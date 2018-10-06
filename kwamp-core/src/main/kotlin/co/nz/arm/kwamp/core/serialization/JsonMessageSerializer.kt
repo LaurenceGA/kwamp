@@ -23,29 +23,6 @@ class JsonMessageSerializer : MessageSerializer {
         throw InvalidMessageException("Couldn't parse message", e)
     }
 
-    private fun Klaxon.parseArrayWithMapConverter(reader: StringReader) =
-        converter(co.nz.arm.kwamp.core.serialization.MAP_CONVERTER).fromJsonArray(parseJsonArray(reader))
-
-    private fun Klaxon.fromJsonArray(jsonArray: JsonArray<*>): List<Any> {
-        val result = arrayListOf<Any>()
-        jsonArray.forEach { jo ->
-            if (jo is JsonObject) {
-                val t = parseFromJsonObject<Map<String, Any?>>(jo)
-                if (t != null) result.add(t)
-                else throw KlaxonException("Couldn't convert $jo")
-            } else if (jo != null) {
-                val converter = findConverterFromClass(Any::class.java, null)
-                val convertedValue = converter.fromJson(JsonValue(jo, null, null, this))
-                result.add(convertedValue)
-            } else {
-                throw KlaxonException("Couldn't convert $jo")
-            }
-        }
-
-        return result
-    }
-
-
     private fun extractMessageType(messageArray: List<Any>) = try {
         Pair(toInteger(messageArray[0] as Number), messageArray.drop(1))
     } catch (e: IndexOutOfBoundsException) {
@@ -65,8 +42,25 @@ class JsonMessageSerializer : MessageSerializer {
         .toJsonString(message.asList()).toByteArray()
 }
 
+internal fun Klaxon.parseArrayWithMapConverter(reader: StringReader) =
+    converter(co.nz.arm.kwamp.core.serialization.MAP_CONVERTER).fromJsonArray(parseJsonArray(reader))
+
+internal fun Klaxon.fromJsonArray(jsonArray: JsonArray<*>) = jsonArray.map(this::convertJsonObject)
+
+internal fun Klaxon.convertJsonObject(jo: Any?): Any = when {
+    jo is JsonObject -> parseFromJsonObject<Map<String, Any?>>(jo)
+        ?: throw KlaxonException("Couldn't convert $jo")
+    jo != null -> {
+        val converter = findConverterFromClass(Any::class.java, null)
+        converter.fromJson(JsonValue(jo, null, null, this))
+    }
+    else -> throw KlaxonException("Couldn't convert $jo")
+}
+
 private val MAP_CONVERTER = object : Converter {
     override fun canConvert(cls: Class<*>) = cls == Map::class.java
     override fun toJson(value: Any): String = ""
-    override fun fromJson(jv: JsonValue): Map<String, Any?> = HashMap(jv.obj!!)
+    override fun fromJson(jv: JsonValue): Map<String, Any?> = HashMap(jv.obj!!).mapValues(this::convertEntry)
+
+    private fun convertEntry(entry: Map.Entry<String, Any?>) = Klaxon().converter(this).convertJsonObject(entry.value)
 }
