@@ -23,9 +23,10 @@ class Connection(
             incoming.consumeEach { processRawMessage(it, action) }
         }
 
-    suspend fun onNextMessage(action: suspend (Message) -> Unit) = GlobalScope.launch(context = cancelOnException) {
-        processRawMessage(incoming.receive(), action)
-    }
+    suspend fun onNextMessage(action: suspend (Message) -> Unit) =
+        GlobalScope.launch(context = cancelOnException) {
+            processRawMessage(incoming.receive(), action)
+        }
 
     private suspend fun processRawMessage(message: ByteArray, action: suspend (Message) -> Unit) {
         deserialize(message).also { action(it) }
