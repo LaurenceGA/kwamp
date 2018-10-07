@@ -20,6 +20,7 @@ class SessionEstablisher(
     }
 
     private suspend fun onExpectedHelloMessage(action: suspend (message: Hello) -> Unit) {
+        //TODO use connection typed onMessage to encapsulate logic
         connection.onNextMessage {
             when (it) {
                 is Hello -> action(it)
