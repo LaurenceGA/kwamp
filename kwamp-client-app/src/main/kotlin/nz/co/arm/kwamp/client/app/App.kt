@@ -30,7 +30,7 @@ object App {
     private fun establishWebsocketConnection(wampIncoming: Channel<ByteArray>, wampOutgoing: Channel<ByteArray>) {
         runBlocking {
             GlobalScope.launch {
-                val client = HttpClient(CIO).config { install(WebSockets) }
+                val client = websocketClient()
                 //TODO pass URL vars as parameter
                 client.ws(host = "localhost", port = 8080, path = "/connect") {
                     GlobalScope.launch {
@@ -51,4 +51,6 @@ object App {
             }
         }
     }
+
+    private fun websocketClient() = HttpClient(CIO).config { install(WebSockets) }
 }
