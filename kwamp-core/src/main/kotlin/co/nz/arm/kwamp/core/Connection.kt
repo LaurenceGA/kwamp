@@ -14,8 +14,11 @@ class Connection(
     private val messageSerializer: MessageSerializer
 ) : MessageSerializer by messageSerializer {
     suspend fun close(message: String) {
-        outgoing.close()
+        while (outgoing.isFull) {
+            // Wait until messages are sent through the channel
+        }
         closeConnection(message)
+        outgoing.close()
     }
 
     suspend fun forEachMessage(action: suspend (Message) -> Unit) =

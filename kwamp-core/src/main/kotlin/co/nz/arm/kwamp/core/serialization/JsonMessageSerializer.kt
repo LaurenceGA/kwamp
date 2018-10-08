@@ -21,6 +21,8 @@ class JsonMessageSerializer : MessageSerializer {
         Klaxon().parseArrayWithMapConverter(rawMessage.reader())
     } catch (e: KlaxonException) {
         throw InvalidMessageException("Couldn't parse message", e)
+    } catch (e: IllegalStateException) {    // Needs to be caught due to a Klaxon bug
+        throw InvalidMessageException("Couldn't read message", e)
     }
 
     private fun extractMessageType(messageArray: List<Any>) = try {

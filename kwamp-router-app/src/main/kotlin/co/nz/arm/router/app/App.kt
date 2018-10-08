@@ -25,6 +25,7 @@ import kotlinx.coroutines.launch
 import java.time.Duration
 
 private val router = Router().also { it.addRealm(Realm(Uri("default"))) }
+private const val websocketPath = "/connect"
 
 fun Application.main() {
     install(DefaultHeaders)
@@ -34,13 +35,13 @@ fun Application.main() {
     }
 
     routing {
-        webSocket("/connect") {
+        webSocket(websocketPath) {
             startWampSession(this, WAMP_DEFAULT)
         }
-        webSocket("/connect", WAMP_JSON) {
+        webSocket(websocketPath, WAMP_JSON) {
             startWampSession(this, WAMP_JSON)
         }
-        webSocket("/connect", WAMP_MSG_PACK) {
+        webSocket(websocketPath, WAMP_MSG_PACK) {
             startWampSession(this, WAMP_MSG_PACK)
         }
     }
@@ -55,7 +56,10 @@ private suspend fun Application.startWampSession(session: DefaultWebSocketServer
         val connection = Connection(
             wampIncoming,
             wampOutgoing,
-            { message -> close(CloseReason(CloseReason.Codes.NORMAL, message)) },
+            { message ->
+                flush()
+                close(CloseReason(CloseReason.Codes.NORMAL, message))
+            },
             getSerializer(protocol)
         )
 
