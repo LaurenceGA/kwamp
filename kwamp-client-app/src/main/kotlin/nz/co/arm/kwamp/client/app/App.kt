@@ -22,12 +22,16 @@ object App {
 
     @JvmStatic
     fun main(args: Array<String>) {
-        val wampIncoming = Channel<ByteArray>()
-        val wampOutgoing = Channel<ByteArray>()
-        val wampClient = Client(wampIncoming, wampOutgoing)
-        establishWebsocketConnection(wampIncoming, wampOutgoing)
+        val wampClient = createWebsocketWampClient()
 
         wampClient.joinRealm("default")
+    }
+
+    private fun createWebsocketWampClient(): Client {
+        val wampIncoming = Channel<ByteArray>()
+        val wampOutgoing = Channel<ByteArray>()
+        establishWebsocketConnection(wampIncoming, wampOutgoing)
+        return Client(wampIncoming, wampOutgoing)
     }
 
     private fun establishWebsocketConnection(
