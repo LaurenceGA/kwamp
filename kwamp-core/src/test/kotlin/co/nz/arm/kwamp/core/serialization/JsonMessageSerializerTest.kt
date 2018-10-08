@@ -2,10 +2,13 @@ package co.nz.arm.kwamp.core.serialization
 
 import co.nz.arm.kwamp.core.InvalidMessageException
 import com.beust.klaxon.Klaxon
+import com.beust.klaxon.KlaxonException
+import io.kotlintest.assertSoftly
 import io.kotlintest.data.forall
 import io.kotlintest.shouldBe
 import io.kotlintest.shouldThrow
 import io.kotlintest.specs.StringSpec
+import java.io.StringReader
 import java.nio.charset.Charset
 
 internal class JsonMessageSerializerTest : StringSpec({
@@ -35,12 +38,24 @@ internal class JsonMessageSerializerTest : StringSpec({
         }
     }
 
-    "!Klaxon" {
+    "!Klaxon nulls" {
         Klaxon().toJsonString(listOf(1, 2, null, null, 3, null)) shouldBe "[1, 2, null, null, 3, null]"
         Klaxon().toJsonString(object {
             val test = null
         }) shouldBe "{\"test\": null}"
         Klaxon().toJsonString(SomeTest(null)) shouldBe "{\"test\": null}"
+    }
+
+    "!Klaxon can't read" {
+        assertSoftly {
+            for (testStr in listOf("a", "b", "c", "as", "ag", "ab", "gs", "rs", "er")) {
+                // 'as' throws IllegalArgumentException instead of KlaxonException
+                shouldThrow<KlaxonException> {
+                    println(testStr)
+                    Klaxon().parseJsonArray(StringReader(testStr))
+                }
+            }
+        }
     }
 }) {
     class SomeTest(val test: Any?)
