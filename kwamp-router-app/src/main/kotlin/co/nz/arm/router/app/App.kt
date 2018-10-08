@@ -55,7 +55,10 @@ private suspend fun Application.startWampSession(session: DefaultWebSocketServer
         val connection = Connection(
             wampIncoming,
             wampOutgoing,
-            { message -> close(CloseReason(CloseReason.Codes.NORMAL, message)) },
+            { message ->
+                flush()
+                close(CloseReason(CloseReason.Codes.NORMAL, message))
+            },
             getSerializer(protocol)
         )
 
