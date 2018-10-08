@@ -32,7 +32,7 @@ class Conversation(
     fun execute() = canvas.actions.forEach { action -> action() }
 }
 
-const val RECEIVE_TIMEOUT = 3000
+const val RECEIVE_TIMEOUT = 3000L
 
 class ConversationCanvas() {
     val actions: MutableList<() -> Unit> = mutableListOf()
