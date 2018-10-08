@@ -24,7 +24,7 @@ class Realm(
     private suspend fun startSession(connection: Connection) = sessions.newSession(connection).apply {
         connection.forEachMessage {
             try {
-                handleConnectionMessage(it, this)
+                handleMessage(it, this)
             } catch (nonFatalError: WampErrorException) {
                 messageSender.sendExceptionError(connection, nonFatalError)
             }
@@ -37,7 +37,7 @@ class Realm(
         }
     }
 
-    private suspend fun handleConnectionMessage(
+    private suspend fun handleMessage(
         message: Message,
         session: WampSession
     ) {

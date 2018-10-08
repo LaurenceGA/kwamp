@@ -23,14 +23,26 @@ class Connection(
             incoming.consumeEach { processRawMessage(it, action) }
         }
 
-    suspend fun onNextMessage(action: suspend (Message) -> Unit) =
-        GlobalScope.launch(context = cancelOnException) {
+    suspend fun <R> onNextMessage(action: suspend (Message) -> R): Deferred<R> =
+        GlobalScope.async(context = cancelOnException) {
             processRawMessage(incoming.receive(), action)
         }
 
-    private suspend fun processRawMessage(message: ByteArray, action: suspend (Message) -> Unit) {
-        deserialize(message).also { action(it) }
+    suspend inline fun <reified T : Message, R> withNextMessage(crossinline action: suspend (message: T) -> R): Deferred<R> {
+        val job = onNextMessage {
+            when (it) {
+                is T -> action(it)
+                else -> throw UnexpectedMessageException(T::class, it::class)
+            }
+        }
+        job.invokeOnCompletion { throwable ->
+            if (throwable != null) throw throwable
+        }
+        return job
     }
+
+    private suspend fun <R> processRawMessage(message: ByteArray, action: suspend (Message) -> R): R =
+        action(deserialize(message))
 
     suspend fun send(message: Message) {
         outgoing.send(serialize(message))

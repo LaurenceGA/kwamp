@@ -2,7 +2,9 @@ package co.nz.arm.kwamp.core
 
 import co.nz.arm.kwamp.core.messages.Dict
 import co.nz.arm.kwamp.core.messages.Error
+import co.nz.arm.kwamp.core.messages.Message
 import co.nz.arm.kwamp.core.messages.MessageType
+import kotlin.reflect.KClass
 
 enum class WampError(uri: String) {
     // Peer provided an incorrect URI for any URI-based attribute of WAMP message, such as realm, topic or procedure
@@ -54,6 +56,9 @@ open class ProtocolViolationException(message: String? = null, cause: Throwable?
 class InvalidMessageException(message: String? = null, cause: Throwable? = null) :
     ProtocolViolationException(message = message, cause = cause)
 
+class UnexpectedMessageException(expected: KClass<out Message>, actual: KClass<out Message>) :
+    ProtocolViolationException(message = "Expected ${expected.simpleName}, actual ${actual.simpleName}")
+
 class NoSuchRealmException(message: String? = null, cause: Throwable? = null) :
     WampException(WampError.NO_SUCH_REALM, message = message, cause = cause)
 
@@ -70,7 +75,7 @@ open class WampErrorException(
 }
 
 class ProcedureAlreadyExistsException(requestId: Long) :
-WampErrorException(WampError.PROCEDURE_ALREADY_EXISTS, requestType = MessageType.REGISTER, requestId = requestId)
+    WampErrorException(WampError.PROCEDURE_ALREADY_EXISTS, requestType = MessageType.REGISTER, requestId = requestId)
 
 class NoSuchRegistrationErrorException(requestId: Long) :
     WampErrorException(WampError.NO_SUCH_REGISTRATION, requestType = MessageType.UNREGISTER, requestId = requestId)
