@@ -13,19 +13,9 @@ class SessionEstablisher(
     private val messageSender: MessageSender = MessageSender()
 ) {
     suspend fun establish() {
-        onExpectedHelloMessage {
-            realms[it.realm]?.join(connection)
+        connection.withNextMessage { message: Hello ->
+            realms[message.realm]?.join(connection)
                 ?: throw NoSuchRealmException("Realm does not exist")
-        }
-    }
-
-    private suspend fun onExpectedHelloMessage(action: suspend (message: Hello) -> Unit) {
-        //TODO use connection typed onMessage to encapsulate logic
-        connection.onNextMessage {
-            when (it) {
-                is Hello -> action(it)
-                else -> throw ProtocolViolationException("Didn't start with hello message")
-            }
         }.invokeOnCompletion { throwable ->
             when (throwable) {
                 is ProtocolViolationException -> messageSender.sendAbort(connection, throwable)
