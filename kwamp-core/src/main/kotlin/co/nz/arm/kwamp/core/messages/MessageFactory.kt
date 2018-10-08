@@ -1,5 +1,6 @@
 package co.nz.arm.kwamp.core.messages
 
+import co.nz.arm.kwamp.core.InvalidMessageException
 import co.nz.arm.kwamp.core.canBeAppliedToType
 import co.nz.arm.kwamp.core.isWhole
 import kotlin.reflect.KClass
@@ -24,7 +25,7 @@ private fun mapInputListTypesToParameters(inputList: List<Any>, parameters: List
     if (inputList.size in acceptableNumberOfParameters(parameters))
         conformArrayObjectsToConstructor(inputList, parameters)
     else
-        throw IllegalArgumentException("Not enough parameters in message")
+        throw InvalidMessageException("Not enough parameters in message")
 
 private fun conformArrayObjectsToConstructor(inputArray: List<Any>, parameters: List<KParameter>) =
     inputArray.mapIndexed { index, item ->
@@ -42,7 +43,7 @@ private fun getUnaryParameterConstructor(input: Any, parameter: KParameter): KFu
     parameter.type.jvmErasure.constructors.first { areValidParameterValues(listOf(input), it.parameters) }
 } catch (e: NoSuchElementException) {
     throw IllegalArgumentException(
-        "Couldn't find a way to create ${parameter.type.jvmErasure.simpleName} from $input (${input::class.simpleName})",
+        "Couldn't create type ${parameter.type.jvmErasure.simpleName} from value $input (${input::class.simpleName})",
         e
     )
 }
@@ -64,7 +65,7 @@ private fun tryToConvert(item: Any, parameter: KParameter): Any {
         } else if (parameter.type.jvmErasure == MessageType::class && item is Int) {
             MessageType.getMessageType(item)
         } else {
-            throw e
+            throw InvalidMessageException(e.message, e)
         }
     }
 }

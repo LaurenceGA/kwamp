@@ -57,7 +57,7 @@ class InvalidMessageException(message: String? = null, cause: Throwable? = null)
     ProtocolViolationException(message = message, cause = cause)
 
 class UnexpectedMessageException(expected: KClass<out Message>, actual: KClass<out Message>) :
-    ProtocolViolationException(message = "Expected ${expected.simpleName}, actual ${actual.simpleName}")
+    ProtocolViolationException(message = "Expected ${expected.simpleName}, but got ${actual.simpleName}")
 
 class NoSuchRealmException(message: String? = null, cause: Throwable? = null) :
     WampException(WampError.NO_SUCH_REALM, message = message, cause = cause)
