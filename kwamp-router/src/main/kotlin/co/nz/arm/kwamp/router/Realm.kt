@@ -10,12 +10,12 @@ class Realm(
     val uri: Uri
 ) {
     private val messageSender: MessageSender = MessageSender()
-    private val remoteProcedureHandler: RemoteProcedureHandler = RemoteProcedureHandler(
+    private val dealer: Dealer = Dealer(
         messageSender,
         LinearIdGenerator(),
         RandomIdGenerator()
     )
-    private val subscriptionHandler: SubscriptionHandler = SubscriptionHandler(messageSender, RandomIdGenerator())
+    private val broker: Broker = Broker(messageSender, RandomIdGenerator())
 
     private val sessions = SessionSet(RandomIdGenerator())
 
@@ -47,16 +47,16 @@ class Realm(
             is Abort -> session.connection.close("Abort from client")
             is Goodbye -> messageSender.sendGoodbye(session.connection)
 
-            is Register -> remoteProcedureHandler.registerProcedure(session, message)
-            is Unregister -> remoteProcedureHandler.unregisterProcedure(session, message)
+            is Register -> dealer.registerProcedure(session, message)
+            is Unregister -> dealer.unregisterProcedure(session, message)
 
-            is Call -> remoteProcedureHandler.callProcedure(session, message)
-            is Yield -> remoteProcedureHandler.handleYield(message)
+            is Call -> dealer.callProcedure(session, message)
+            is Yield -> dealer.handleYield(message)
 
-            is Subscribe -> subscriptionHandler.subscribe(session, message)
-            is Unsubscribe -> subscriptionHandler.unsubscribe(session, message)
+            is Subscribe -> broker.subscribe(session, message)
+            is Unsubscribe -> broker.unsubscribe(session, message)
 
-            is Publish -> subscriptionHandler.publish(session, message)
+            is Publish -> broker.publish(session, message)
 
             is Error -> handleError(message)
 
@@ -66,7 +66,7 @@ class Realm(
 
     private fun handleError(errorMessage: Error) {
         when (errorMessage.requestType) {
-            MessageType.INVOCATION -> remoteProcedureHandler.handleInvocationError(errorMessage)
+            MessageType.INVOCATION -> dealer.handleInvocationError(errorMessage)
             else -> throw NotImplementedError("Error with request type ${errorMessage.requestType} not implemented")
         }
     }

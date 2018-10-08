@@ -5,8 +5,7 @@ import co.nz.arm.kwamp.core.messages.*
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 
-// A WAMP Dealer
-class RemoteProcedureHandler(
+class Dealer(
     private val messageSender: MessageSender,
     private val linearIdGenerator: LinearIdGenerator,
     private val randomIdGenerator: RandomIdGenerator
