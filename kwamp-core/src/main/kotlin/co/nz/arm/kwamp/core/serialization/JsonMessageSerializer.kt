@@ -7,7 +7,6 @@ import co.nz.arm.kwamp.core.messages.Message
 import co.nz.arm.kwamp.core.messages.MessageType
 import com.beust.klaxon.*
 import java.io.StringReader
-import java.lang.IllegalStateException
 import java.nio.charset.Charset
 
 class JsonMessageSerializer : MessageSerializer {
@@ -22,7 +21,7 @@ class JsonMessageSerializer : MessageSerializer {
         Klaxon().parseArrayWithMapConverter(rawMessage.reader())
     } catch (e: KlaxonException) {
         throw InvalidMessageException("Couldn't parse message", e)
-    } catch (e: IllegalStateException) {
+    } catch (e: IllegalStateException) {    // Needs to be caught due to a Klaxon bug
         throw InvalidMessageException("Couldn't read message", e)
     }
 
