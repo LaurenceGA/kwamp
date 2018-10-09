@@ -1,7 +1,10 @@
 package co.nz.arm.kwamp.conversations.infrastructure
 
 import co.nz.arm.kwamp.core.Connection
+import co.nz.arm.kwamp.core.Uri
+import co.nz.arm.kwamp.core.messages.Hello
 import co.nz.arm.kwamp.core.messages.Message
+import co.nz.arm.kwamp.core.messages.Welcome
 import co.nz.arm.kwamp.core.serialization.JsonMessageSerializer
 import co.nz.arm.kwamp.core.serialization.MessageSerializer
 import co.nz.arm.kwamp.router.Router
@@ -39,6 +42,11 @@ class ConversationCanvas() {
 
     infix fun TestConnection.willSend(messageSupplier: () -> Message) {
         actions += { runBlocking { send(messageSupplier()) } }
+    }
+
+    fun TestConnection.startsASession() {
+        willSend { Hello(Uri("default"), emptyMap()) }
+        shouldReceiveMessage<Welcome>()
     }
 
     inline infix fun <reified T : Message> TestConnection.shouldReceiveMessage(crossinline messageVerifier: (message: T) -> Unit) {

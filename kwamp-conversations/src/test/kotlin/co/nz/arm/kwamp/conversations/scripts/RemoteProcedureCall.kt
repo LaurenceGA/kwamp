@@ -25,11 +25,8 @@ fun remoteProcedureCall(
     clientB: TestConnection = TestConnection()
 ) =
     Conversation(router, clientA, clientB) {
-        clientA willSend { Hello(Uri("default"), emptyMap()) }
-        clientA.shouldReceiveMessage<Welcome>()
-
-        clientB willSend { Hello(Uri("default"), emptyMap()) }
-        clientB.shouldReceiveMessage<Welcome>()
+        clientA.startsASession()
+        clientB.startsASession()
 
         clientA willSend { Register(123L, emptyMap(), Uri("clientA.proc")) }
         clientA shouldReceiveMessage { message: Registered ->
