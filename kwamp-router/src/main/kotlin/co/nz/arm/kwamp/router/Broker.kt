@@ -11,7 +11,7 @@ import kotlin.concurrent.withLock
 
 const val ACKNOWLEDGE_OPTION = "acknowledge"
 
-class SubscriptionHandler(private val messageSender: MessageSender, private val randomIdGenerator: RandomIdGenerator) {
+class Broker(private val messageSender: MessageSender, private val randomIdGenerator: RandomIdGenerator) {
     private val subscriptionLock = ReentrantLock()
     private val topicSubscriptions = HashMap<Uri, MutableList<Long>>()
     private val subscriptions = HashMap<Long, Subscription>()
