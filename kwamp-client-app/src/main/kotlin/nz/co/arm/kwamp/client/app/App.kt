@@ -24,14 +24,16 @@ object App {
     fun main(args: Array<String>) {
         val wampClient = createWebsocketWampClient()
 
-        wampClient.joinRealm("default")
+        runBlocking {
+            println(wampClient.call("test.proc").await())
+        }
     }
 
     private fun createWebsocketWampClient(): Client {
         val wampIncoming = Channel<ByteArray>()
         val wampOutgoing = Channel<ByteArray>()
         establishWebsocketConnection(wampIncoming, wampOutgoing)
-        return Client(wampIncoming, wampOutgoing)
+        return Client(wampIncoming, wampOutgoing, realm = "default")
     }
 
     private fun establishWebsocketConnection(

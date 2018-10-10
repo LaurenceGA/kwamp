@@ -15,7 +15,7 @@ class SessionEstablisher(
     suspend fun establish() {
         connection.withNextMessage { message: Hello ->
             realms[message.realm]?.join(connection)
-                ?: throw NoSuchRealmException("Realm does not exist")
+                ?: throw NoSuchRealmException("Realm '${message.realm.uri}' does not exist")
         }.invokeOnCompletion { throwable ->
             when (throwable) {
                 is ProtocolViolationException -> messageSender.sendAbort(connection, throwable)
