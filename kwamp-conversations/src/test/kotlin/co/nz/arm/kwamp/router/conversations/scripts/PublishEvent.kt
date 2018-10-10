@@ -1,8 +1,8 @@
-package co.nz.arm.kwamp.conversations.scripts
+package co.nz.arm.kwamp.router.conversations.scripts
 
-import co.nz.arm.kwamp.conversations.infrastructure.Conversation
-import co.nz.arm.kwamp.conversations.infrastructure.TestConnection
-import co.nz.arm.kwamp.conversations.infrastructure.defaultRouter
+import co.nz.arm.kwamp.router.conversations.infrastructure.Conversation
+import co.nz.arm.kwamp.router.conversations.infrastructure.TestConnection
+import co.nz.arm.kwamp.router.conversations.infrastructure.defaultRouter
 import co.nz.arm.kwamp.core.Uri
 import co.nz.arm.kwamp.core.messages.*
 import io.kotlintest.be
@@ -17,7 +17,13 @@ class PublishEvent : StringSpec({
         val clientB = TestConnection()
         val clientC = TestConnection()
         val clientD = TestConnection()
-        Conversation(defaultRouter(), clientA, clientB, clientC, clientD) {
+        Conversation(
+            defaultRouter(),
+            clientA,
+            clientB,
+            clientC,
+            clientD
+        ) {
             clientA.startsASession()
             clientB.startsASession()
             clientC.startsASession()

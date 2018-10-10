@@ -1,4 +1,4 @@
-package co.nz.arm.kwamp.conversations.infrastructure
+package co.nz.arm.kwamp.router.conversations.infrastructure
 
 import co.nz.arm.kwamp.core.Uri
 import co.nz.arm.kwamp.router.Realm

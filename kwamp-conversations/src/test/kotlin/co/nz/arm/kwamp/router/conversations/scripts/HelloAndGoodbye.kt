@@ -1,8 +1,8 @@
-package co.nz.arm.kwamp.conversations.scripts
+package co.nz.arm.kwamp.router.conversations.scripts
 
-import co.nz.arm.kwamp.conversations.infrastructure.Conversation
-import co.nz.arm.kwamp.conversations.infrastructure.TestConnection
-import co.nz.arm.kwamp.conversations.infrastructure.defaultRouter
+import co.nz.arm.kwamp.router.conversations.infrastructure.Conversation
+import co.nz.arm.kwamp.router.conversations.infrastructure.TestConnection
+import co.nz.arm.kwamp.router.conversations.infrastructure.defaultRouter
 import co.nz.arm.kwamp.core.Uri
 import co.nz.arm.kwamp.core.WampClose
 import co.nz.arm.kwamp.core.messages.Goodbye
@@ -17,7 +17,10 @@ import io.kotlintest.specs.StringSpec
 class HelloGoodbye : StringSpec({
     "Test Hello and Goodbye" {
         val client = TestConnection()
-        Conversation(defaultRouter(), client) {
+        Conversation(
+            defaultRouter(),
+            client
+        ) {
             client willSend { Hello(Uri("default"), emptyMap()) }
             client shouldReceiveMessage { message: Welcome ->
                 message.details should haveKey("agent")

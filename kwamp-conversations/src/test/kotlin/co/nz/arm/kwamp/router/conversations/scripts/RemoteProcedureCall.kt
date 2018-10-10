@@ -1,8 +1,8 @@
-package co.nz.arm.kwamp.conversations.scripts
+package co.nz.arm.kwamp.router.conversations.scripts
 
-import co.nz.arm.kwamp.conversations.infrastructure.Conversation
-import co.nz.arm.kwamp.conversations.infrastructure.TestConnection
-import co.nz.arm.kwamp.conversations.infrastructure.defaultRouter
+import co.nz.arm.kwamp.router.conversations.infrastructure.Conversation
+import co.nz.arm.kwamp.router.conversations.infrastructure.TestConnection
+import co.nz.arm.kwamp.router.conversations.infrastructure.defaultRouter
 import co.nz.arm.kwamp.core.Uri
 import co.nz.arm.kwamp.core.messages.*
 import io.kotlintest.be
@@ -16,7 +16,11 @@ class Rpc : StringSpec({
     "Test Remote Procedure Call" {
         val clientA = TestConnection()
         val clientB = TestConnection()
-        Conversation(defaultRouter(), clientA, clientB) {
+        Conversation(
+            defaultRouter(),
+            clientA,
+            clientB
+        ) {
             clientA.startsASession()
             clientB.startsASession()
 

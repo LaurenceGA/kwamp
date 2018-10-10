@@ -1,8 +1,8 @@
-package co.nz.arm.kwamp.conversations.scripts
+package co.nz.arm.kwamp.router.conversations.scripts
 
-import co.nz.arm.kwamp.conversations.infrastructure.Conversation
-import co.nz.arm.kwamp.conversations.infrastructure.TestConnection
-import co.nz.arm.kwamp.conversations.infrastructure.defaultRouter
+import co.nz.arm.kwamp.router.conversations.infrastructure.Conversation
+import co.nz.arm.kwamp.router.conversations.infrastructure.TestConnection
+import co.nz.arm.kwamp.router.conversations.infrastructure.defaultRouter
 import co.nz.arm.kwamp.core.Uri
 import co.nz.arm.kwamp.core.messages.Subscribe
 import co.nz.arm.kwamp.core.messages.Subscribed
@@ -15,7 +15,10 @@ import io.kotlintest.specs.StringSpec
 class SubUnSub : StringSpec({
     "Test Subscribing and unsubscribing" {
         val client = TestConnection()
-        Conversation(defaultRouter(), client) {
+        Conversation(
+            defaultRouter(),
+            client
+        ) {
             client.startsASession()
 
             var subscription: Long? = null
