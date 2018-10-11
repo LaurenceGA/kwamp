@@ -3,6 +3,9 @@ package co.nz.arm.kwamp.core.messages
 import co.nz.arm.kwamp.core.Uri
 import co.nz.arm.kwamp.core.primaryConstructorValues
 
+/**
+ * During serialization messages are created reflectively using [generateFactory] based on their primary constructor
+ */
 sealed class Message(val messageType: MessageType) {
     fun asList(): List<Any?> = listOf(messageType).plus(this.primaryConstructorValues().filter { it != null })
 }
