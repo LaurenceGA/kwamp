@@ -1,4 +1,4 @@
-package co.nz.arm.kwamp.core
+package com.laurencegarmstrong.kwamp.core
 
 import io.kotlintest.data.forall
 import io.kotlintest.shouldBe

@@ -1,10 +1,10 @@
-package co.nz.arm.kwamp.core.serialization
+package com.laurencegarmstrong.kwamp.core.serialization
 
-import co.nz.arm.kwamp.core.InvalidMessageException
-import co.nz.arm.kwamp.core.Uri
-import co.nz.arm.kwamp.core.isWhole
-import co.nz.arm.kwamp.core.messages.Message
-import co.nz.arm.kwamp.core.messages.MessageType
+import com.laurencegarmstrong.kwamp.core.InvalidMessageException
+import com.laurencegarmstrong.kwamp.core.Uri
+import com.laurencegarmstrong.kwamp.core.isWhole
+import com.laurencegarmstrong.kwamp.core.messages.Message
+import com.laurencegarmstrong.kwamp.core.messages.MessageType
 import com.daveanthonythomas.moshipack.MoshiPack
 
 class MessagePackSerializer : MessageSerializer {

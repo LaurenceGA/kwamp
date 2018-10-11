@@ -1,8 +1,8 @@
-package co.nz.arm.kwamp.core.messages
+package com.laurencegarmstrong.kwamp.core.messages
 
-import co.nz.arm.kwamp.core.InvalidMessageException
 import com.beust.klaxon.Converter
 import com.beust.klaxon.JsonValue
+import com.laurencegarmstrong.kwamp.core.InvalidMessageException
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
@@ -37,8 +37,11 @@ enum class MessageType(val id: Int, val factory: (List<Any>) -> Message) {
         private fun toIndexedFactory(messageType: MessageType) = Pair(messageType.id, messageType.factory)
         private fun toIndexedIdentity(messageType: MessageType) = Pair(messageType.id, messageType)
 
-        fun getFactory(id: Int) = factories[id] ?: throw InvalidMessageException("Unknown message type '$id'")
-        fun getMessageType(id: Int) = messageTypes[id] ?: throw InvalidMessageException("Unknown message type '$id'")
+        fun getFactory(id: Int) = factories[id]
+            ?: throw InvalidMessageException("Unknown message type '$id'")
+
+        fun getMessageType(id: Int) = messageTypes[id]
+            ?: throw InvalidMessageException("Unknown message type '$id'")
     }
 
     object MessageTypeConverter : Converter {

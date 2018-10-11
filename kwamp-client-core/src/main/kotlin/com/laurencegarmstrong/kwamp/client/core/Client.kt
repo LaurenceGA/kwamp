@@ -1,9 +1,9 @@
 package com.laurencegarmstrong.kwamp.client.core
 
-import co.nz.arm.kwamp.core.*
-import co.nz.arm.kwamp.core.messages.*
-import co.nz.arm.kwamp.core.serialization.JsonMessageSerializer
-import co.nz.arm.kwamp.core.serialization.MessagePackSerializer
+import com.laurencegarmstrong.kwamp.core.*
+import com.laurencegarmstrong.kwamp.core.messages.*
+import com.laurencegarmstrong.kwamp.core.serialization.JsonMessageSerializer
+import com.laurencegarmstrong.kwamp.core.serialization.MessagePackSerializer
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.SendChannel

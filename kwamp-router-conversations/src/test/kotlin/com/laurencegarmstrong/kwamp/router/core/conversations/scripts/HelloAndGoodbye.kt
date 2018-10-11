@@ -1,13 +1,13 @@
 package com.laurencegarmstrong.kwamp.router.core.conversations.scripts
 
+import com.laurencegarmstrong.kwamp.core.Uri
+import com.laurencegarmstrong.kwamp.core.WampClose
+import com.laurencegarmstrong.kwamp.core.messages.Goodbye
+import com.laurencegarmstrong.kwamp.core.messages.Hello
+import com.laurencegarmstrong.kwamp.core.messages.Welcome
 import com.laurencegarmstrong.kwamp.router.core.conversations.infrastructure.Conversation
 import com.laurencegarmstrong.kwamp.router.core.conversations.infrastructure.TestConnection
 import com.laurencegarmstrong.kwamp.router.core.conversations.infrastructure.defaultRouter
-import co.nz.arm.kwamp.core.Uri
-import co.nz.arm.kwamp.core.WampClose
-import co.nz.arm.kwamp.core.messages.Goodbye
-import co.nz.arm.kwamp.core.messages.Hello
-import co.nz.arm.kwamp.core.messages.Welcome
 import io.kotlintest.be
 import io.kotlintest.matchers.haveKey
 import io.kotlintest.matchers.haveKeys

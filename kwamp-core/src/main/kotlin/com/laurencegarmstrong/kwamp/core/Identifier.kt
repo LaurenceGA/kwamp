@@ -1,4 +1,4 @@
-package co.nz.arm.kwamp.core
+package com.laurencegarmstrong.kwamp.core
 
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ThreadLocalRandom

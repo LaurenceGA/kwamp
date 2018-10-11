@@ -1,7 +1,7 @@
-package co.nz.arm.kwamp.core
+package com.laurencegarmstrong.kwamp.core
 
-import co.nz.arm.kwamp.core.messages.Message
-import co.nz.arm.kwamp.core.serialization.MessageSerializer
+import com.laurencegarmstrong.kwamp.core.messages.Message
+import com.laurencegarmstrong.kwamp.core.serialization.MessageSerializer
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.SendChannel

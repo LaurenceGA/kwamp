@@ -1,7 +1,7 @@
-package co.nz.arm.kwamp.core.messages
+package com.laurencegarmstrong.kwamp.core.messages
 
-import co.nz.arm.kwamp.core.Uri
-import co.nz.arm.kwamp.core.primaryConstructorValues
+import com.laurencegarmstrong.kwamp.core.Uri
+import com.laurencegarmstrong.kwamp.core.primaryConstructorValues
 
 /**
  * During serialization messages are created reflectively using [generateFactory] based on their primary constructor

@@ -1,10 +1,10 @@
 package com.laurencegarmstrong.kwamp.router.core.conversations.scripts
 
+import com.laurencegarmstrong.kwamp.core.Uri
+import com.laurencegarmstrong.kwamp.core.messages.*
 import com.laurencegarmstrong.kwamp.router.core.conversations.infrastructure.Conversation
 import com.laurencegarmstrong.kwamp.router.core.conversations.infrastructure.TestConnection
 import com.laurencegarmstrong.kwamp.router.core.conversations.infrastructure.defaultRouter
-import co.nz.arm.kwamp.core.Uri
-import co.nz.arm.kwamp.core.messages.*
 import io.kotlintest.be
 import io.kotlintest.matchers.collections.shouldContainExactly
 import io.kotlintest.matchers.maps.shouldContainExactly
@@ -52,7 +52,15 @@ class PublishEvent : StringSpec({
 
             val eventArgs = listOf(1, 2, "three")
             val eventArgsKw = mapOf("one" to 1, "two" to 2)
-            clientA willSend { Publish(123L, mapOf("acknowledge" to true), testTopic, eventArgs, eventArgsKw) }
+            clientA willSend {
+                Publish(
+                    123L,
+                    mapOf("acknowledge" to true),
+                    testTopic,
+                    eventArgs,
+                    eventArgsKw
+                )
+            }
             var publicationId: Long? = null
             clientA shouldReceiveMessage { message: Published ->
                 message.requestId should be(123L)

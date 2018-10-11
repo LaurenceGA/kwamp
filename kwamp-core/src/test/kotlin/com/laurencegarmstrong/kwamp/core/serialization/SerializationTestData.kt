@@ -1,7 +1,7 @@
-package co.nz.arm.kwamp.core.serialization
+package com.laurencegarmstrong.kwamp.core.serialization
 
-import co.nz.arm.kwamp.core.Uri
-import co.nz.arm.kwamp.core.messages.*
+import com.laurencegarmstrong.kwamp.core.Uri
+import com.laurencegarmstrong.kwamp.core.messages.*
 import io.kotlintest.tables.row
 
 private val detailsDict = mapOf("details" to "detail")
@@ -10,23 +10,40 @@ private val optionsDict = mapOf("options" to "option")
 private const val optionsDictRaw = "{\"options\": \"option\"}"
 val messageData = listOf(
     row(
-        Hello(Uri("testRealm"), detailsDict),
+        Hello(
+            Uri("testRealm"),
+            detailsDict
+        ),
         "[1, \"testRealm\", $detailsDictRaw]"
     ),
     row(
-        Welcome(123, detailsDict),
+        Welcome(
+            123,
+            detailsDict
+        ),
         "[2, 123, $detailsDictRaw]"
     ),
     row(
-        Abort(detailsDict, Uri("reason")),
+        Abort(
+            detailsDict,
+            Uri("reason")
+        ),
         "[3, $detailsDictRaw, \"reason\"]"
     ),
     row(
-        Goodbye(detailsDict, Uri("reason")),
+        Goodbye(
+            detailsDict,
+            Uri("reason")
+        ),
         "[6, $detailsDictRaw, \"reason\"]"
     ),
     row(
-        Error(MessageType.ABORT, 123, detailsDict, Uri("error")),
+        Error(
+            MessageType.ABORT,
+            123,
+            detailsDict,
+            Uri("error")
+        ),
         "[8, 3, 123, $detailsDictRaw, \"error\"]"
     ),
 //            row(Error(5, 123, "details", Uri("error"), listOf("arg1", 2, null)),
@@ -45,7 +62,11 @@ val messageData = listOf(
         "[8, 3, 123, $detailsDictRaw, \"error\", [\"arg1\", 2.0], {\"arg3\": \"val3\", \"arg4\": 4.0}]"
     ),
     row(
-        Publish(123, optionsDict, Uri("topic")),
+        Publish(
+            123,
+            optionsDict,
+            Uri("topic")
+        ),
         "[16, 123, $optionsDictRaw, \"topic\"]"
     ),
     row(
@@ -53,7 +74,11 @@ val messageData = listOf(
         "[17, 123, 456]"
     ),
     row(
-        Subscribe(123, optionsDict, Uri("topic")),
+        Subscribe(
+            123,
+            optionsDict,
+            Uri("topic")
+        ),
         "[32, 123, $optionsDictRaw, \"topic\"]"
     ),
     row(
@@ -69,19 +94,34 @@ val messageData = listOf(
         "[35, 123]"
     ),
     row(
-        Event(123, 456, detailsDict),
+        Event(
+            123,
+            456,
+            detailsDict
+        ),
         "[36, 123, 456, $detailsDictRaw]"
     ),
     row(
-        Call(123, optionsDict, Uri("procedure")),
+        Call(
+            123,
+            optionsDict,
+            Uri("procedure")
+        ),
         "[48, 123, $optionsDictRaw, \"procedure\"]"
     ),
     row(
-        Result(123, detailsDict),
+        Result(
+            123,
+            detailsDict
+        ),
         "[50, 123, $detailsDictRaw]"
     ),
     row(
-        Register(123, optionsDict, Uri("procedure")),
+        Register(
+            123,
+            optionsDict,
+            Uri("procedure")
+        ),
         "[64, 123, $optionsDictRaw, \"procedure\"]"
     ),
     row(
@@ -97,11 +137,18 @@ val messageData = listOf(
         "[67, 123]"
     ),
     row(
-        Invocation(123, 456, optionsDict),
+        Invocation(
+            123,
+            456,
+            optionsDict
+        ),
         "[68, 123, 456, $optionsDictRaw]"
     ),
     row(
-        Yield(123, optionsDict),
+        Yield(
+            123,
+            optionsDict
+        ),
         "[70, 123, $optionsDictRaw]"
     )
 )

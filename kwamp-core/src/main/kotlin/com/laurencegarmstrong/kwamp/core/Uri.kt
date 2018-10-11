@@ -1,4 +1,4 @@
-package co.nz.arm.kwamp.core
+package com.laurencegarmstrong.kwamp.core
 
 import com.beust.klaxon.Converter
 import com.beust.klaxon.JsonValue

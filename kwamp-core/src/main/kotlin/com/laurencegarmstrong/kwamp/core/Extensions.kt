@@ -1,4 +1,4 @@
-package co.nz.arm.kwamp.core
+package com.laurencegarmstrong.kwamp.core
 
 import org.apache.commons.lang3.ClassUtils
 import kotlin.reflect.KClass
@@ -16,6 +16,7 @@ fun List<Any>.splitAt(index: Int) = Pair(subList(0, index), subList(index, size)
 fun Any.canBeAppliedToType(parameter: KParameter) = this::class.isSubclassOf(parameter.type.jvmErasure)
         || ClassUtils.isAssignable(this::class.java, parameter.type.jvmErasure.java)
 
+@Suppress("UNCHECKED_CAST")
 fun Any.readProperty(propName: String): Any? =
     ((this::class as KClass<Any>).declaredMemberProperties.first { it.name == propName }).get(this)
 

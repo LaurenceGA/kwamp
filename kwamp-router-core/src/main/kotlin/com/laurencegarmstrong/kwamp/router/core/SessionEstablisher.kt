@@ -1,10 +1,10 @@
 package com.laurencegarmstrong.kwamp.router.core
 
-import co.nz.arm.kwamp.core.Connection
-import co.nz.arm.kwamp.core.NoSuchRealmException
-import co.nz.arm.kwamp.core.ProtocolViolationException
-import co.nz.arm.kwamp.core.Uri
-import co.nz.arm.kwamp.core.messages.Hello
+import com.laurencegarmstrong.kwamp.core.Connection
+import com.laurencegarmstrong.kwamp.core.NoSuchRealmException
+import com.laurencegarmstrong.kwamp.core.ProtocolViolationException
+import com.laurencegarmstrong.kwamp.core.Uri
+import com.laurencegarmstrong.kwamp.core.messages.Hello
 import java.util.concurrent.ConcurrentHashMap
 
 class SessionEstablisher(

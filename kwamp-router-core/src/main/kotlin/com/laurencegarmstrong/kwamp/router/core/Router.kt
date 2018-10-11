@@ -1,7 +1,7 @@
 package com.laurencegarmstrong.kwamp.router.core
 
-import co.nz.arm.kwamp.core.Connection
-import co.nz.arm.kwamp.core.Uri
+import com.laurencegarmstrong.kwamp.core.Connection
+import com.laurencegarmstrong.kwamp.core.Uri
 import java.util.concurrent.ConcurrentHashMap
 
 class Router {

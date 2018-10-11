@@ -1,7 +1,7 @@
 package com.laurencegarmstrong.kwamp.router.core
 
-import co.nz.arm.kwamp.core.*
-import co.nz.arm.kwamp.core.messages.*
+import com.laurencegarmstrong.kwamp.core.*
+import com.laurencegarmstrong.kwamp.core.messages.*
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 
@@ -21,7 +21,8 @@ class Dealer(
         session: WampSession,
         registrationMessage: Register
     ) {
-        if (registrationMessage.procedure in procedures) throw ProcedureAlreadyExistsException(registrationMessage.requestId)
+        if (registrationMessage.procedure in procedures)
+            throw ProcedureAlreadyExistsException(registrationMessage.requestId)
 
         linearIdGenerator.newId().also { registrationId ->
             procedureLock.withLock {

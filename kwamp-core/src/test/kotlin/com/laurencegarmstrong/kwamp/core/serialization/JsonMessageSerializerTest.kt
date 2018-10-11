@@ -1,8 +1,8 @@
-package co.nz.arm.kwamp.core.serialization
+package com.laurencegarmstrong.kwamp.core.serialization
 
-import co.nz.arm.kwamp.core.InvalidMessageException
 import com.beust.klaxon.Klaxon
 import com.beust.klaxon.KlaxonException
+import com.laurencegarmstrong.kwamp.core.InvalidMessageException
 import io.kotlintest.assertSoftly
 import io.kotlintest.data.forall
 import io.kotlintest.shouldBe

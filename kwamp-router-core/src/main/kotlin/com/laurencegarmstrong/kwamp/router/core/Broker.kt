@@ -1,11 +1,11 @@
 package com.laurencegarmstrong.kwamp.router.core
 
-import co.nz.arm.kwamp.core.NoSuchSubscriptionException
-import co.nz.arm.kwamp.core.RandomIdGenerator
-import co.nz.arm.kwamp.core.Uri
-import co.nz.arm.kwamp.core.messages.Publish
-import co.nz.arm.kwamp.core.messages.Subscribe
-import co.nz.arm.kwamp.core.messages.Unsubscribe
+import com.laurencegarmstrong.kwamp.core.NoSuchSubscriptionException
+import com.laurencegarmstrong.kwamp.core.RandomIdGenerator
+import com.laurencegarmstrong.kwamp.core.Uri
+import com.laurencegarmstrong.kwamp.core.messages.Publish
+import com.laurencegarmstrong.kwamp.core.messages.Subscribe
+import com.laurencegarmstrong.kwamp.core.messages.Unsubscribe
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 

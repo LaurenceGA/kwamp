@@ -1,8 +1,9 @@
 package com.laurencegarmstrong.kwamp.router.example
 
 import co.nz.arm.kwamp.core.*
-import co.nz.arm.kwamp.core.serialization.JsonMessageSerializer
-import co.nz.arm.kwamp.core.serialization.MessagePackSerializer
+import com.laurencegarmstrong.kwamp.core.*
+import com.laurencegarmstrong.kwamp.core.serialization.JsonMessageSerializer
+import com.laurencegarmstrong.kwamp.core.serialization.MessagePackSerializer
 import com.laurencegarmstrong.kwamp.router.core.Realm
 import com.laurencegarmstrong.kwamp.router.core.Router
 import io.ktor.application.Application

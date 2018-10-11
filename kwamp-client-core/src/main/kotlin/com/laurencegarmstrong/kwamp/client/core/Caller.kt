@@ -1,9 +1,9 @@
 package com.laurencegarmstrong.kwamp.client.core
 
-import co.nz.arm.kwamp.core.Connection
-import co.nz.arm.kwamp.core.RandomIdGenerator
-import co.nz.arm.kwamp.core.Uri
-import co.nz.arm.kwamp.core.messages.*
+import com.laurencegarmstrong.kwamp.core.Connection
+import com.laurencegarmstrong.kwamp.core.RandomIdGenerator
+import com.laurencegarmstrong.kwamp.core.Uri
+import com.laurencegarmstrong.kwamp.core.messages.*
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.GlobalScope
@@ -31,7 +31,15 @@ class Caller(
     ) =
         randomIdGenerator.newId().let { requestId ->
             GlobalScope.launch {
-                connection.send(Call(requestId, emptyMap(), procedure, arguments, argumentsKw))
+                connection.send(
+                    Call(
+                        requestId,
+                        emptyMap(),
+                        procedure,
+                        arguments,
+                        argumentsKw
+                    )
+                )
             }
             DeferredCallResult(CompletableDeferred<CallResult>().also {
                 calls[requestId] = it

@@ -1,11 +1,11 @@
-package co.nz.arm.kwamp.core.serialization
+package com.laurencegarmstrong.kwamp.core.serialization
 
-import co.nz.arm.kwamp.core.InvalidMessageException
-import co.nz.arm.kwamp.core.Uri
-import co.nz.arm.kwamp.core.isWhole
-import co.nz.arm.kwamp.core.messages.Message
-import co.nz.arm.kwamp.core.messages.MessageType
 import com.beust.klaxon.*
+import com.laurencegarmstrong.kwamp.core.InvalidMessageException
+import com.laurencegarmstrong.kwamp.core.Uri
+import com.laurencegarmstrong.kwamp.core.isWhole
+import com.laurencegarmstrong.kwamp.core.messages.Message
+import com.laurencegarmstrong.kwamp.core.messages.MessageType
 import java.io.StringReader
 import java.nio.charset.Charset
 
@@ -45,7 +45,7 @@ class JsonMessageSerializer : MessageSerializer {
 }
 
 internal fun Klaxon.parseArrayWithMapConverter(reader: StringReader) =
-    converter(co.nz.arm.kwamp.core.serialization.MAP_CONVERTER).fromJsonArray(parseJsonArray(reader))
+    converter(MAP_CONVERTER).fromJsonArray(parseJsonArray(reader))
 
 internal fun Klaxon.fromJsonArray(jsonArray: JsonArray<*>) = jsonArray.map(this::convertJsonObject)
 

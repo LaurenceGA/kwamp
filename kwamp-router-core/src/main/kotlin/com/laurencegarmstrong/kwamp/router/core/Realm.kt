@@ -1,7 +1,7 @@
 package com.laurencegarmstrong.kwamp.router.core
 
-import co.nz.arm.kwamp.core.*
-import co.nz.arm.kwamp.core.messages.*
+import com.laurencegarmstrong.kwamp.core.*
+import com.laurencegarmstrong.kwamp.core.messages.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.util.concurrent.ConcurrentHashMap
@@ -45,8 +45,12 @@ class Realm(
         session: WampSession
     ) {
         when (message) {
-            is Hello -> throw ProtocolViolationException("Received Hello message after session established")
-            is Welcome -> throw ProtocolViolationException("Receive Welcome message from client")
+            is Hello -> throw ProtocolViolationException(
+                "Received Hello message after session established"
+            )
+            is Welcome -> throw ProtocolViolationException(
+                "Receive Welcome message from client"
+            )
             is Abort -> session.connection.close("Abort from client")
             is Goodbye -> messageSender.sendGoodbye(session.connection)
 

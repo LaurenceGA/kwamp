@@ -1,8 +1,8 @@
-package co.nz.arm.kwamp.core.messages
+package com.laurencegarmstrong.kwamp.core.messages
 
-import co.nz.arm.kwamp.core.InvalidMessageException
-import co.nz.arm.kwamp.core.canBeAppliedToType
-import co.nz.arm.kwamp.core.isWhole
+import com.laurencegarmstrong.kwamp.core.InvalidMessageException
+import com.laurencegarmstrong.kwamp.core.canBeAppliedToType
+import com.laurencegarmstrong.kwamp.core.isWhole
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
@@ -40,7 +40,12 @@ private fun canApplyValuesToParameters(values: List<Any>, parameters: List<KPara
 }
 
 private fun getUnaryParameterConstructor(input: Any, parameter: KParameter): KFunction<Any> = try {
-    parameter.type.jvmErasure.constructors.first { areValidParameterValues(listOf(input), it.parameters) }
+    parameter.type.jvmErasure.constructors.first {
+        areValidParameterValues(
+            listOf(input),
+            it.parameters
+        )
+    }
 } catch (e: NoSuchElementException) {
     throw IllegalArgumentException(
         "Couldn't create type ${parameter.type.jvmErasure.simpleName} from value $input (${input::class.simpleName})",

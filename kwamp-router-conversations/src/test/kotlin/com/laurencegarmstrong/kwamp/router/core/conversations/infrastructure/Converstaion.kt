@@ -1,12 +1,12 @@
 package com.laurencegarmstrong.kwamp.router.core.conversations.infrastructure
 
-import co.nz.arm.kwamp.core.Connection
-import co.nz.arm.kwamp.core.Uri
-import co.nz.arm.kwamp.core.messages.Hello
-import co.nz.arm.kwamp.core.messages.Message
-import co.nz.arm.kwamp.core.messages.Welcome
-import co.nz.arm.kwamp.core.serialization.JsonMessageSerializer
-import co.nz.arm.kwamp.core.serialization.MessageSerializer
+import com.laurencegarmstrong.kwamp.core.Connection
+import com.laurencegarmstrong.kwamp.core.Uri
+import com.laurencegarmstrong.kwamp.core.messages.Hello
+import com.laurencegarmstrong.kwamp.core.messages.Message
+import com.laurencegarmstrong.kwamp.core.messages.Welcome
+import com.laurencegarmstrong.kwamp.core.serialization.JsonMessageSerializer
+import com.laurencegarmstrong.kwamp.core.serialization.MessageSerializer
 import com.laurencegarmstrong.kwamp.router.core.Router
 import io.kotlintest.assertSoftly
 import io.kotlintest.matchers.beInstanceOf

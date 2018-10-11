@@ -1,9 +1,9 @@
-package co.nz.arm.kwamp.core
+package com.laurencegarmstrong.kwamp.core
 
-import co.nz.arm.kwamp.core.messages.Dict
-import co.nz.arm.kwamp.core.messages.Error
-import co.nz.arm.kwamp.core.messages.Message
-import co.nz.arm.kwamp.core.messages.MessageType
+import com.laurencegarmstrong.kwamp.core.messages.Dict
+import com.laurencegarmstrong.kwamp.core.messages.Error
+import com.laurencegarmstrong.kwamp.core.messages.Message
+import com.laurencegarmstrong.kwamp.core.messages.MessageType
 import kotlin.reflect.KClass
 
 enum class WampError(uri: String) {
@@ -71,7 +71,14 @@ open class WampErrorException(
     private val argumentsKw: Dict? = null
 ) :
     WampException(error) {
-    fun getErrorMessage() = Error(requestType, requestId, details, error.uri, arguments, argumentsKw)
+    fun getErrorMessage() = Error(
+        requestType,
+        requestId,
+        details,
+        error.uri,
+        arguments,
+        argumentsKw
+    )
 }
 
 class ProcedureAlreadyExistsException(requestId: Long) :

@@ -1,4 +1,4 @@
-package co.nz.arm.kwamp.core
+package com.laurencegarmstrong.kwamp.core
 
 enum class WampClose(uri: String) {
     // The Peer is shutting down completely - used as a GOODBYE (or ABORT) reason.

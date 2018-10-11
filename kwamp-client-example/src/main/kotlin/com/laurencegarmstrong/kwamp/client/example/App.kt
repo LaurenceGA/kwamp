@@ -1,10 +1,10 @@
 package com.laurencegarmstrong.kwamp.client.example
 
-import co.nz.arm.kwamp.core.Uri
-import co.nz.arm.kwamp.core.WAMP_DEFAULT
-import co.nz.arm.kwamp.core.WAMP_JSON
-import co.nz.arm.kwamp.core.WAMP_MSG_PACK
 import com.laurencegarmstrong.kwamp.client.core.Client
+import com.laurencegarmstrong.kwamp.core.Uri
+import com.laurencegarmstrong.kwamp.core.WAMP_DEFAULT
+import com.laurencegarmstrong.kwamp.core.WAMP_JSON
+import com.laurencegarmstrong.kwamp.core.WAMP_MSG_PACK
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.features.websocket.WebSockets

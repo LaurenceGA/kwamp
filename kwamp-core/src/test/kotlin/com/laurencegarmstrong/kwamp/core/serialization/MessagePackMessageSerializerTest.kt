@@ -1,7 +1,7 @@
-package co.nz.arm.kwamp.core.serialization
+package com.laurencegarmstrong.kwamp.core.serialization
 
-import co.nz.arm.kwamp.core.InvalidMessageException
 import com.daveanthonythomas.moshipack.MoshiPack
+import com.laurencegarmstrong.kwamp.core.InvalidMessageException
 import io.kotlintest.data.forall
 import io.kotlintest.shouldBe
 import io.kotlintest.shouldThrow

@@ -1,6 +1,6 @@
-package co.nz.arm.kwamp.core.serialization
+package com.laurencegarmstrong.kwamp.core.serialization
 
-import co.nz.arm.kwamp.core.messages.Message
+import com.laurencegarmstrong.kwamp.core.messages.Message
 
 interface MessageSerializer {
     fun deserialize(rawMessage: ByteArray): Message

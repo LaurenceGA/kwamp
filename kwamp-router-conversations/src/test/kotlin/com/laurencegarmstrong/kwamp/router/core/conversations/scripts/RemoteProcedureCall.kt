@@ -1,10 +1,10 @@
 package com.laurencegarmstrong.kwamp.router.core.conversations.scripts
 
+import com.laurencegarmstrong.kwamp.core.Uri
+import com.laurencegarmstrong.kwamp.core.messages.*
 import com.laurencegarmstrong.kwamp.router.core.conversations.infrastructure.Conversation
 import com.laurencegarmstrong.kwamp.router.core.conversations.infrastructure.TestConnection
 import com.laurencegarmstrong.kwamp.router.core.conversations.infrastructure.defaultRouter
-import co.nz.arm.kwamp.core.Uri
-import co.nz.arm.kwamp.core.messages.*
 import io.kotlintest.be
 import io.kotlintest.matchers.collections.shouldContainExactly
 import io.kotlintest.matchers.containExactly
@@ -24,13 +24,27 @@ class Rpc : StringSpec({
             clientA.startsASession()
             clientB.startsASession()
 
-            clientA willSend { Register(123L, emptyMap(), Uri("clientA.proc")) }
+            clientA willSend {
+                Register(
+                    123L,
+                    emptyMap(),
+                    Uri("clientA.proc")
+                )
+            }
             clientA shouldReceiveMessage { message: Registered ->
                 message.requestId should be(123L)
                 message.registration should be(1L)
             }
 
-            clientB willSend { Call(456L, emptyMap(), Uri("clientA.proc"), listOf("arg1", 2), mapOf("hello" to 3)) }
+            clientB willSend {
+                Call(
+                    456L,
+                    emptyMap(),
+                    Uri("clientA.proc"),
+                    listOf("arg1", 2),
+                    mapOf("hello" to 3)
+                )
+            }
             var requestId: Long? = null
             clientA shouldReceiveMessage { message: Invocation ->
                 requestId = message.requestId
@@ -41,7 +55,14 @@ class Rpc : StringSpec({
                 message.argumentsKw!! should containExactly<String, Any?>(mapOf("hello" to 3))
             }
 
-            clientA willSend { Yield(requestId!!, emptyMap(), listOf("result1", 4), mapOf("world" to 5)) }
+            clientA willSend {
+                Yield(
+                    requestId!!,
+                    emptyMap(),
+                    listOf("result1", 4),
+                    mapOf("world" to 5)
+                )
+            }
             clientB shouldReceiveMessage { message: Result ->
                 message.requestId should be(456L)
                 message.arguments shouldNotBe null
