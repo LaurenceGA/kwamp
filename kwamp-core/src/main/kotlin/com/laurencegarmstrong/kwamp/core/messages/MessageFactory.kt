@@ -65,6 +65,7 @@ private fun tryToConvert(item: Any, parameter: KParameter): Any {
             when (parameter.type.jvmErasure) {
                 Long::class -> item.toLong()
                 Int::class -> item.toInt()
+                MessageType::class -> MessageType.getMessageType(item.toInt())
                 else -> throw e
             }
         } else if (parameter.type.jvmErasure == MessageType::class && item is Int) {
