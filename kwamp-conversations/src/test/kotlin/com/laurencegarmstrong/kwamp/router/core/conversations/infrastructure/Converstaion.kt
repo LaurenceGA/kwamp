@@ -1,4 +1,4 @@
-package co.nz.arm.kwamp.router.conversations.infrastructure
+package com.laurencegarmstrong.kwamp.router.core.conversations.infrastructure
 
 import co.nz.arm.kwamp.core.Connection
 import co.nz.arm.kwamp.core.Uri
@@ -7,7 +7,7 @@ import co.nz.arm.kwamp.core.messages.Message
 import co.nz.arm.kwamp.core.messages.Welcome
 import co.nz.arm.kwamp.core.serialization.JsonMessageSerializer
 import co.nz.arm.kwamp.core.serialization.MessageSerializer
-import co.nz.arm.kwamp.router.Router
+import com.laurencegarmstrong.kwamp.router.core.Router
 import io.kotlintest.assertSoftly
 import io.kotlintest.matchers.beInstanceOf
 import io.kotlintest.should

@@ -1,6 +1,6 @@
 rootProject.name = 'kwamp'
 include 'kwamp-core'
-include 'kwamp-router'
+include 'kwamp-router-core'
 include 'kwamp-router-example'
 include 'kwamp-client-core'
 include 'kwamp-client-example'

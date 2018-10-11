@@ -3,8 +3,8 @@ package com.laurencegarmstrong.kwamp.router.example
 import co.nz.arm.kwamp.core.*
 import co.nz.arm.kwamp.core.serialization.JsonMessageSerializer
 import co.nz.arm.kwamp.core.serialization.MessagePackSerializer
-import co.nz.arm.kwamp.router.Realm
-import co.nz.arm.kwamp.router.Router
+import com.laurencegarmstrong.kwamp.router.core.Realm
+import com.laurencegarmstrong.kwamp.router.core.Router
 import io.ktor.application.Application
 import io.ktor.application.install
 import io.ktor.application.log
@@ -24,7 +24,9 @@ import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
 import java.time.Duration
 
-private val router = Router().also { it.addRealm(Realm(Uri("default"))) }
+private val router = Router().apply {
+    addRealm(Realm(Uri("default")))
+}
 private const val websocketPath = "/connect"
 
 fun Application.main() {

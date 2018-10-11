@@ -1,8 +1,8 @@
-package co.nz.arm.kwamp.router.conversations.scripts
+package com.laurencegarmstrong.kwamp.router.core.conversations.scripts
 
-import co.nz.arm.kwamp.router.conversations.infrastructure.Conversation
-import co.nz.arm.kwamp.router.conversations.infrastructure.TestConnection
-import co.nz.arm.kwamp.router.conversations.infrastructure.defaultRouter
+import com.laurencegarmstrong.kwamp.router.core.conversations.infrastructure.Conversation
+import com.laurencegarmstrong.kwamp.router.core.conversations.infrastructure.TestConnection
+import com.laurencegarmstrong.kwamp.router.core.conversations.infrastructure.defaultRouter
 import co.nz.arm.kwamp.core.Uri
 import co.nz.arm.kwamp.core.WampClose
 import co.nz.arm.kwamp.core.messages.Goodbye
