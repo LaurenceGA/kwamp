@@ -5,7 +5,7 @@ plugins {
 }
 
 application {
-    mainClassName = "nz.co.arm.kwamp.client.example.App"
+    mainClassName = "com.laurencegarmstrong.kwamp.client.example.App"
 }
 
 repositories {

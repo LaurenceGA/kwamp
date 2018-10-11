@@ -1,4 +1,4 @@
-package nz.co.arm.kwamp.client.app
+package com.laurencegarmstrong.kwamp.client.example
 
 import co.nz.arm.kwamp.core.Uri
 import co.nz.arm.kwamp.core.WAMP_DEFAULT

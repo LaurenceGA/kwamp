@@ -30,7 +30,7 @@ subprojects {
         plugin<KotlinPluginWrapper>()
     }
 
-    group = "com.laurence_armstrong.kwamp"
+    group = "com.laurencegarmstrong.kwamp"
     version = "1.0.0"
 
     repositories {

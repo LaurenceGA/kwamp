@@ -1,4 +1,4 @@
-package com.laurence_armstrong.kwamp.router.example
+package com.laurencegarmstrong.kwamp.router.example
 
 import co.nz.arm.kwamp.core.*
 import co.nz.arm.kwamp.core.serialization.JsonMessageSerializer
