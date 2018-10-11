@@ -4,6 +4,7 @@ import co.nz.arm.kwamp.core.Uri
 import co.nz.arm.kwamp.core.WAMP_DEFAULT
 import co.nz.arm.kwamp.core.WAMP_JSON
 import co.nz.arm.kwamp.core.WAMP_MSG_PACK
+import com.laurencegarmstrong.kwamp.client.core.Client
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.features.websocket.WebSockets
@@ -15,7 +16,6 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import nz.co.arm.kwamp.client.Client
 import org.slf4j.LoggerFactory
 
 object App {
