@@ -1,4 +1,4 @@
-package co.nz.arm.kwamp.conversations.infrastructure
+package co.nz.arm.kwamp.router.conversations.infrastructure
 
 import co.nz.arm.kwamp.core.Connection
 import co.nz.arm.kwamp.core.Uri
@@ -11,37 +11,31 @@ import co.nz.arm.kwamp.router.Router
 import io.kotlintest.assertSoftly
 import io.kotlintest.matchers.beInstanceOf
 import io.kotlintest.should
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 
+const val RECEIVE_TIMEOUT = 10000L
+
 class Conversation(
     router: Router,
     vararg clients: TestConnection,
-    conversationDefinition: ConversationCanvas.() -> Unit
+    conversationDefinition: Conversation.() -> Unit
 ) {
-    private val canvas: ConversationCanvas = ConversationCanvas().apply(conversationDefinition)
-
     init {
-        clients.forEach { testConnection ->
-            GlobalScope.launch {
-                router.registerConnection(testConnection.connection)
+        runBlocking {
+            clients.forEach { testConnection ->
+                launch {
+                    router.registerConnection(testConnection.connection)
+                }
             }
         }
+        conversationDefinition()
     }
 
-    fun execute() = canvas.actions.forEach { action -> action() }
-}
-
-const val RECEIVE_TIMEOUT = 3000L
-
-class ConversationCanvas() {
-    val actions: MutableList<() -> Unit> = mutableListOf()
-
     infix fun TestConnection.willSend(messageSupplier: () -> Message) {
-        actions += { runBlocking { send(messageSupplier()) } }
+        runBlocking { send(messageSupplier()) }
     }
 
     fun TestConnection.startsASession() {
@@ -50,16 +44,14 @@ class ConversationCanvas() {
     }
 
     inline infix fun <reified T : Message> TestConnection.shouldReceiveMessage(crossinline messageVerifier: (message: T) -> Unit) {
-        actions += {
-            runBlocking {
-                withTimeout(RECEIVE_TIMEOUT) {
-                    val message = receive()
-                    if (message !is T) {
-                        message should beInstanceOf<T>()
-                    } else {
-                        assertSoftly {
-                            messageVerifier(message)
-                        }
+        runBlocking {
+            withTimeout(RECEIVE_TIMEOUT) {
+                val message = receive()
+                if (message !is T) {
+                    message should beInstanceOf<T>()
+                } else {
+                    assertSoftly {
+                        messageVerifier(message)
                     }
                 }
             }
@@ -67,12 +59,10 @@ class ConversationCanvas() {
     }
 
     inline fun <reified T : Message> TestConnection.shouldReceiveMessage() {
-        actions += {
-            runBlocking {
-                withTimeout(RECEIVE_TIMEOUT) {
-                    val message = receive()
-                    message should beInstanceOf<T>()
-                }
+        runBlocking {
+            withTimeout(RECEIVE_TIMEOUT) {
+                val message = receive()
+                message should beInstanceOf<T>()
             }
         }
     }
@@ -95,7 +85,5 @@ class TestConnection(
         }
     }
 
-    fun receive() = runBlocking {
-        messageSerializer.deserialize(outgoing.receive())
-    }
+    suspend fun receive() = messageSerializer.deserialize(outgoing.receive())
 }
