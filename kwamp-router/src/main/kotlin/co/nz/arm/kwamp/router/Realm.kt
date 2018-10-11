@@ -93,7 +93,13 @@ data class WampSession(val id: Long, val connection: Connection) {
             connection.send(
                 Welcome(
                     id,
-                    mapOf("agent" to "KWAMP", "roles" to mapOf("broker" to mapOf<String, Any?>(), "dealer" to mapOf()))
+                    mapOf(
+                        "agent" to "KWAMP",
+                        "roles" to mapOf<String, Any?>(
+                            "broker" to emptyMap<String, Any?>()
+                            , "dealer" to emptyMap<String, Any?>()
+                        )
+                    )
                 )
             )
         }
