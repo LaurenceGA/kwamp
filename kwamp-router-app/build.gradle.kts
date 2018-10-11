@@ -5,9 +5,6 @@ plugins {
     application
 }
 
-group = "co.nz.arm"
-version = "1.0.0"
-
 
 application {
     mainClassName = "io.ktor.server.netty.DevelopmentEngine"

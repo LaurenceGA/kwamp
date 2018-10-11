@@ -1,8 +1,5 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-group = "nz.co.arm"
-version = "1.0.0"
-
 val logbackVersion = "1.2.1"
 
 dependencies {

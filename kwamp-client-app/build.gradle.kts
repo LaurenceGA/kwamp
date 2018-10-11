@@ -4,9 +4,6 @@ plugins {
     application
 }
 
-group = "nz.co.arm"
-version = "1.0.0"
-
 application {
     mainClassName = "nz.co.arm.kwamp.client.app.App"
 }

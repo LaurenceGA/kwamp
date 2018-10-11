@@ -15,9 +15,6 @@ buildscript {
     }
 }
 
-group = "co.nz.arm"
-version = "1.0.0"
-
 plugins {
     base
     java
@@ -32,6 +29,9 @@ subprojects {
     apply {
         plugin<KotlinPluginWrapper>()
     }
+
+    group = "com.laurence_armstrong.kwamp"
+    version = "1.0.0"
 
     repositories {
         mavenCentral()
