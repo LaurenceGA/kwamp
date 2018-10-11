@@ -15,7 +15,7 @@ class Client(
     incoming: ReceiveChannel<ByteArray>,
     outgoing: SendChannel<ByteArray>,
     protocol: String = WAMP_DEFAULT,
-    realm: String
+    realm: Uri
 ) {
     private val log = LoggerFactory.getLogger(Client::class.java)!!
     //TODO bubble close function up to transport layer
@@ -47,8 +47,18 @@ class Client(
     }
 
     private fun handleMessage(message: Message) {
-        when(message) {
+        when (message) {
             is Result -> caller.result(message)
+            is Error -> handleError(message)
+
+            else -> throw NotImplementedError("Message type ${message.messageType} not implemented")
+        }
+    }
+
+    private fun handleError(errorMessage: Error) {
+        when (errorMessage.requestType) {
+            MessageType.CALL -> caller.error(errorMessage)
+            else -> throw NotImplementedError("Error with request type ${errorMessage.requestType} not implemented")
         }
     }
 
@@ -59,9 +69,9 @@ class Client(
             else -> throw IllegalArgumentException("Unsupported sub protocol '${protocol}'")
         }
 
-    private fun joinRealm(realmUri: String) {
+    private fun joinRealm(realmUri: Uri) {
         runBlocking {
-            connection.send(Hello(Uri(realmUri), emptyMap()))
+            connection.send(Hello(realmUri, emptyMap()))
             connection.withNextMessage { message: Welcome ->
                 log.info("Session established. ID: ${message.session}")
                 //TODO thread safety?
@@ -72,8 +82,8 @@ class Client(
 
     //TODO make extension on Client?
     fun call(
-        procedure: String,
+        procedure: Uri,
         arguments: List<Any?>? = null,
         argumentsKw: Dict? = null
-    ) = caller.call(Uri(procedure), arguments, argumentsKw)
+    ) = caller.call(procedure, arguments, argumentsKw)
 }

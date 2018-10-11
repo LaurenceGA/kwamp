@@ -1,5 +1,6 @@
 package nz.co.arm.kwamp.client.app
 
+import co.nz.arm.kwamp.core.Uri
 import co.nz.arm.kwamp.core.WAMP_DEFAULT
 import co.nz.arm.kwamp.core.WAMP_JSON
 import co.nz.arm.kwamp.core.WAMP_MSG_PACK
@@ -24,8 +25,9 @@ object App {
     fun main(args: Array<String>) {
         val wampClient = createWebsocketWampClient()
 
+        val call = wampClient.call(Uri("test.proc"))
         runBlocking {
-            println(wampClient.call("test.proc").await())
+            println(call.await())
         }
     }
 
@@ -33,7 +35,7 @@ object App {
         val wampIncoming = Channel<ByteArray>()
         val wampOutgoing = Channel<ByteArray>()
         establishWebsocketConnection(wampIncoming, wampOutgoing)
-        return Client(wampIncoming, wampOutgoing, realm = "default")
+        return Client(wampIncoming, wampOutgoing, realm = Uri("default"))
     }
 
     private fun establishWebsocketConnection(
