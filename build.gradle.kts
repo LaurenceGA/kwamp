@@ -23,6 +23,7 @@ plugins {
 val kotlinVersion: String by extra
 val kotlinTestVersion = "3.1.10"
 val coroutinesVersion = "0.30.2-eap13"
+val logbackVersion = "1.2.1"
 
 subprojects {
     apply {
@@ -50,6 +51,7 @@ subprojects {
         implementation(kotlin("stdlib", kotlinVersion))
         implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
         implementation(kotlin("reflect", kotlinVersion))
+        implementation("ch.qos.logback:logback-classic:$logbackVersion")
 
         testImplementation("io.kotlintest:kotlintest-runner-junit5:$kotlinTestVersion")
     }

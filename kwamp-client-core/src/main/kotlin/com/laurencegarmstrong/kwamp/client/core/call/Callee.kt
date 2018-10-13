@@ -16,6 +16,7 @@ internal class Callee(
     private val randomIdGenerator: RandomIdGenerator
 ) {
     private val pendingRegistrations = ConcurrentHashMap<Long, CompletableDeferred<Registered>>()
+    private val pendingUnregistrations = ConcurrentHashMap<Long, CompletableDeferred<Unregistered>>()
     private val registrations = ConcurrentHashMap<Long, CallHandler>()
 
     fun register(
@@ -23,40 +24,65 @@ internal class Callee(
         handler: CallHandler
     ): RegistrationHandle =
         runBlocking {
-            val registered = createRegistration(randomIdGenerator.newId(), procedure)
+            val registered = createRegistration(procedure)
             registrations[registered.registration] = handler
             RegistrationHandle { unregister(registered.registration) }
         }
 
-    private suspend fun createRegistration(requestId: Long, procedure: Uri): Registered {
-        sendRegister(requestId, procedure)
-        return newPendingRegistration(requestId).await()  //TODO timeout maybe?
-    }
-
-    //TODO use correct exception
-    fun receiveRegistered(registered: Registered) = pendingRegistrations[registered.requestId]?.complete(registered)
-        ?: throw ProtocolViolationException("No register request with id ${registered.requestId}")
-
-    private suspend fun sendRegister(requestId: Long, procedure: Uri) {
-        connection.send(
-            Register(
-                requestId,
-                emptyMap(),
-                procedure
+    private suspend fun createRegistration(procedure: Uri): Registered {
+        randomIdGenerator.newId().also { requestId ->
+            connection.send(
+                Register(
+                    requestId,
+                    emptyMap(),
+                    procedure
+                )
             )
-        )
+            return newPendingMessage(requestId, pendingRegistrations).await()  //TODO timeout maybe?
+        }
     }
 
-    private fun newPendingRegistration(requestId: Long) =
-        CompletableDeferred<Registered>().also { deferredRegistered ->
-            pendingRegistrations[requestId] = deferredRegistered
-            deferredRegistered.invokeOnCompletion {
-                pendingRegistrations.remove(requestId)
+    private fun <T : Message> newPendingMessage(
+        requestId: Long,
+        pendingMessageHolder: ConcurrentHashMap<Long, CompletableDeferred<T>>
+    ) =
+        CompletableDeferred<T>().also { deferredMessage ->
+            pendingMessageHolder[requestId] = deferredMessage
+            deferredMessage.invokeOnCompletion {
+                pendingMessageHolder.remove(requestId)
             }
         }
 
+    //TODO use more generic listeners here? Subscribe to message type/requestId
+    //TODO use correct exception
+    fun receiveRegistered(registered: Registered) =
+        pendingRegistrations[registered.requestId]?.complete(registered)
+            ?: throw ProtocolViolationException("No register request with id ${registered.requestId}")
+
+    //TODO use correct exception
+    fun receiveUnregistered(unregistered: Unregistered) =
+        pendingUnregistrations[unregistered.requestId]?.complete(unregistered)
+            ?: throw ProtocolViolationException("No register request with id ${unregistered.requestId}")
+
     private fun unregister(registrationId: Long) {
-        //TODO implement
+        runBlocking {
+            //TODO consider current invocations
+            performUnregister(registrationId)
+            registrations.remove(registrationId)
+        }
+
+    }
+
+    private suspend fun performUnregister(registrationId: Long) {
+        randomIdGenerator.newId().also { requestId ->
+            connection.send(
+                Unregister(
+                    requestId,
+                    registrationId
+                )
+            )
+            newPendingMessage(requestId, pendingUnregistrations).await()  //TODO timeout maybe?
+        }
     }
 
     fun invokeProcedure(invocationMessage: Invocation) {

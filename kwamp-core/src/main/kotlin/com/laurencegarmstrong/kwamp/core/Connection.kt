@@ -6,6 +6,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.channels.consumeEach
+import org.slf4j.LoggerFactory
 
 class Connection(
     private val incoming: ReceiveChannel<ByteArray>,
@@ -13,6 +14,8 @@ class Connection(
     private val closeConnection: suspend (message: String) -> Unit,
     private val messageSerializer: MessageSerializer
 ) : MessageSerializer by messageSerializer {
+    private val logger = LoggerFactory.getLogger(Connection::class.java)!!
+
     suspend fun close(message: String) {
         while (outgoing.isFull) {
             // Wait until messages are sent through the channel
@@ -45,9 +48,10 @@ class Connection(
     }
 
     private suspend fun <R> processRawMessage(message: ByteArray, action: suspend (Message) -> R): R =
-        action(deserialize(message))
+        action(deserialize(message).also { logger.info("Received $it") })
 
     suspend fun send(message: Message) {
+        logger.info("Sending $message")
         outgoing.send(serialize(message))
     }
 }
