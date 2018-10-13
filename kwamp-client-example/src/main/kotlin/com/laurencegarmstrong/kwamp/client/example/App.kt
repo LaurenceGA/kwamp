@@ -1,6 +1,8 @@
 package com.laurencegarmstrong.kwamp.client.example
 
 import com.laurencegarmstrong.kwamp.client.core.Client
+import com.laurencegarmstrong.kwamp.client.core.call.CallResult
+import com.laurencegarmstrong.kwamp.client.core.call.RegistrationHandle
 import com.laurencegarmstrong.kwamp.core.Uri
 import com.laurencegarmstrong.kwamp.core.WAMP_DEFAULT
 import com.laurencegarmstrong.kwamp.core.WAMP_JSON
@@ -25,7 +27,14 @@ object App {
     fun main(args: Array<String>) {
         val wampClient = createWebsocketWampClient()
 
-        val call = wampClient.call(Uri("test.proc"))
+        var registrationHandle: RegistrationHandle? = null
+        registrationHandle = wampClient.register(Uri("test.proc")) { arguments, argumentsKw ->
+//            registrationHandle!!.unregister()
+            CallResult(arguments, argumentsKw)
+        }
+        println("registered")
+
+        val call = wampClient.call(Uri("test.proc.await"))
         runBlocking {
             println(call.await())
         }

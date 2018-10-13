@@ -1,5 +1,8 @@
 package com.laurencegarmstrong.kwamp.client.core
 
+import com.laurencegarmstrong.kwamp.client.core.call.Callee
+import com.laurencegarmstrong.kwamp.client.core.call.Caller
+import com.laurencegarmstrong.kwamp.client.core.call.CallHandler
 import com.laurencegarmstrong.kwamp.core.*
 import com.laurencegarmstrong.kwamp.core.messages.*
 import com.laurencegarmstrong.kwamp.core.serialization.JsonMessageSerializer
@@ -23,6 +26,7 @@ class Client(
     private var sessionId: Long? = null
     private val randomIdGenerator = RandomIdGenerator()
     private val caller = Caller(connection, randomIdGenerator)
+    private val callee = Callee(connection, randomIdGenerator)
 
     init {
         joinRealm(realm)
@@ -46,9 +50,15 @@ class Client(
         }
     }
 
+    fun register(procedure: Uri, handler: CallHandler) =
+        callee.register(procedure, handler)
+
     private fun handleMessage(message: Message) {
         when (message) {
             is Result -> caller.result(message)
+            is Registered -> callee.receiveRegistered(message)
+            is Invocation -> callee.invokeProcedure(message)
+
             is Error -> handleError(message)
 
             else -> throw NotImplementedError("Message type ${message.messageType} not implemented")
@@ -58,6 +68,7 @@ class Client(
     private fun handleError(errorMessage: Error) {
         when (errorMessage.requestType) {
             MessageType.CALL -> caller.error(errorMessage)
+
             else -> throw NotImplementedError("Error with request type ${errorMessage.requestType} not implemented")
         }
     }

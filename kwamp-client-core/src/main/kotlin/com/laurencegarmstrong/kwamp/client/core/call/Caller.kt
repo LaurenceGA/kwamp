@@ -1,4 +1,4 @@
-package com.laurencegarmstrong.kwamp.client.core
+package com.laurencegarmstrong.kwamp.client.core.call
 
 import com.laurencegarmstrong.kwamp.core.Connection
 import com.laurencegarmstrong.kwamp.core.RandomIdGenerator
@@ -10,7 +10,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.util.concurrent.ConcurrentHashMap
 
-class Caller(
+internal class Caller(
     private val connection: Connection,
     private val randomIdGenerator: RandomIdGenerator
 ) {
@@ -78,17 +78,3 @@ class DeferredCallResult(private val deferredResult: Deferred<CallResult>) {
             callback(error)
         }
 }
-
-data class CallResult(val arguments: List<Any?>? = null, val argumentsKw: Dict? = null)
-
-data class CallError(val error: Uri, val details: Dict, val arguments: List<Any?>?, val argumentsKw: Dict?) :
-    Throwable(message = error.text)
-
-internal fun Error.toCallException() =
-    if (requestType == MessageType.CALL)
-        CallError(
-            error,
-            details,
-            arguments,
-            argumentsKw
-        ) else throw IllegalArgumentException("Request message type must be CALL to to convert to call exception, but got $requestType")
