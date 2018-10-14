@@ -13,13 +13,10 @@ repositories {
 }
 
 val ktorVersion = "0.9.5-rc13"
-val logbackVersion = "1.2.1"
 
 dependencies {
     implementation(project(":kwamp-client-core"))
 
     implementation("io.ktor:ktor-client-websocket:$ktorVersion")
     implementation("io.ktor:ktor-client-cio:$ktorVersion")
-
-    implementation("ch.qos.logback:logback-classic:$logbackVersion")
 }

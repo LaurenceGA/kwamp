@@ -2,7 +2,6 @@ package com.laurencegarmstrong.kwamp.client.example
 
 import com.laurencegarmstrong.kwamp.client.core.Client
 import com.laurencegarmstrong.kwamp.client.core.call.CallResult
-import com.laurencegarmstrong.kwamp.client.core.call.RegistrationHandle
 import com.laurencegarmstrong.kwamp.core.Uri
 import com.laurencegarmstrong.kwamp.core.WAMP_DEFAULT
 import com.laurencegarmstrong.kwamp.core.WAMP_JSON
@@ -27,12 +26,17 @@ object App {
     fun main(args: Array<String>) {
         val wampClient = createWebsocketWampClient()
 
-        var registrationHandle: RegistrationHandle? = null
-        registrationHandle = wampClient.register(Uri("test.proc")) { arguments, argumentsKw ->
-//            registrationHandle!!.unregister()
+        var counter = 0
+        val registrationHandle = wampClient.register(Uri("test.proc")) { arguments, argumentsKw ->
+            counter++
             CallResult(arguments, argumentsKw)
         }
         println("registered")
+
+        while (counter < 2) {
+        }
+        println("Over 2 invocations")
+        registrationHandle.unregister()
 
         val call = wampClient.call(Uri("test.proc.await"))
         runBlocking {
@@ -58,14 +62,12 @@ object App {
                 client.ws(host = "localhost", port = 8080, path = "/connect") {
                     GlobalScope.launch {
                         wampOutgoing.consumeEach { message ->
-                            log.info("Sending: ${message.toString(Charsets.UTF_8)}")
                             send(Frame.Text(message.toString(Charsets.UTF_8)))
                         }
                     }
 
                     incoming.consumeEach { frame ->
                         if (frame is Frame.Text && protocol == WAMP_JSON) {
-                            log.info("Received: ${frame.readText()}")
                             wampIncoming.send(frame.readText().toByteArray())
                         } else if (frame is Frame.Binary && protocol == WAMP_MSG_PACK) {
                             wampIncoming.send(frame.buffer.array())

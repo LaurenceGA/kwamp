@@ -1,8 +1,8 @@
 package com.laurencegarmstrong.kwamp.client.core
 
+import com.laurencegarmstrong.kwamp.client.core.call.CallHandler
 import com.laurencegarmstrong.kwamp.client.core.call.Callee
 import com.laurencegarmstrong.kwamp.client.core.call.Caller
-import com.laurencegarmstrong.kwamp.client.core.call.CallHandler
 import com.laurencegarmstrong.kwamp.core.*
 import com.laurencegarmstrong.kwamp.core.messages.*
 import com.laurencegarmstrong.kwamp.core.serialization.JsonMessageSerializer
@@ -56,7 +56,10 @@ class Client(
     private fun handleMessage(message: Message) {
         when (message) {
             is Result -> caller.result(message)
+
             is Registered -> callee.receiveRegistered(message)
+            is Unregistered -> callee.receiveUnregistered(message)
+
             is Invocation -> callee.invokeProcedure(message)
 
             is Error -> handleError(message)

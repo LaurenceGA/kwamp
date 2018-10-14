@@ -69,7 +69,6 @@ private suspend fun Application.startWampSession(session: DefaultWebSocketServer
 
         GlobalScope.launch {
             wampOutgoing.consumeEach { message ->
-                log.info("Sending: ${message.toString(Charsets.UTF_8)}")
                 send(Frame.Text(message.toString(Charsets.UTF_8)))
             }
             log.info("Websocket no longer forwarding messages")
@@ -77,7 +76,6 @@ private suspend fun Application.startWampSession(session: DefaultWebSocketServer
 
         incoming.consumeEach { frame ->
             if (frame is Frame.Text && protocol == WAMP_JSON) {
-                log.info("Received: ${frame.readText()}")
                 wampIncoming.send(frame.readText().toByteArray())
             } else if (frame is Frame.Binary && protocol == WAMP_MSG_PACK) {
                 wampIncoming.send(frame.buffer.array())
