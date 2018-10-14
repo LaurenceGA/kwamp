@@ -3,6 +3,7 @@ package com.laurencegarmstrong.kwamp.core.serialization
 import com.beust.klaxon.Klaxon
 import com.beust.klaxon.KlaxonException
 import com.laurencegarmstrong.kwamp.core.InvalidMessageException
+import com.laurencegarmstrong.kwamp.core.serialization.json.JsonMessageSerializer
 import io.kotlintest.assertSoftly
 import io.kotlintest.data.forall
 import io.kotlintest.shouldBe

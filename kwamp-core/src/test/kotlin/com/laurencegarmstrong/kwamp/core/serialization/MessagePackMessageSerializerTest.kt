@@ -2,6 +2,7 @@ package com.laurencegarmstrong.kwamp.core.serialization
 
 import com.daveanthonythomas.moshipack.MoshiPack
 import com.laurencegarmstrong.kwamp.core.InvalidMessageException
+import com.laurencegarmstrong.kwamp.core.serialization.messagepack.MessagePackSerializer
 import io.kotlintest.data.forall
 import io.kotlintest.shouldBe
 import io.kotlintest.shouldThrow

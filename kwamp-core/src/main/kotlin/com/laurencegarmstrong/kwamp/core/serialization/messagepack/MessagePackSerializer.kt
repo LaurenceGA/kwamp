@@ -1,4 +1,4 @@
-package com.laurencegarmstrong.kwamp.core.serialization
+package com.laurencegarmstrong.kwamp.core.serialization.messagepack
 
 import com.laurencegarmstrong.kwamp.core.InvalidMessageException
 import com.laurencegarmstrong.kwamp.core.Uri
@@ -6,6 +6,7 @@ import com.laurencegarmstrong.kwamp.core.isWhole
 import com.laurencegarmstrong.kwamp.core.messages.Message
 import com.laurencegarmstrong.kwamp.core.messages.MessageType
 import com.daveanthonythomas.moshipack.MoshiPack
+import com.laurencegarmstrong.kwamp.core.serialization.MessageSerializer
 
 class MessagePackSerializer : MessageSerializer {
     override fun deserialize(rawMessage: ByteArray): Message {

@@ -5,8 +5,8 @@ import com.laurencegarmstrong.kwamp.client.core.call.Callee
 import com.laurencegarmstrong.kwamp.client.core.call.Caller
 import com.laurencegarmstrong.kwamp.core.*
 import com.laurencegarmstrong.kwamp.core.messages.*
-import com.laurencegarmstrong.kwamp.core.serialization.JsonMessageSerializer
-import com.laurencegarmstrong.kwamp.core.serialization.MessagePackSerializer
+import com.laurencegarmstrong.kwamp.core.serialization.json.JsonMessageSerializer
+import com.laurencegarmstrong.kwamp.core.serialization.messagepack.MessagePackSerializer
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.SendChannel
