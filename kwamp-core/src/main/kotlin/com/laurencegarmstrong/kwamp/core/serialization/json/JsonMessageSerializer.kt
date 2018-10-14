@@ -2,7 +2,6 @@ package com.laurencegarmstrong.kwamp.core.serialization.json
 
 import com.beust.klaxon.*
 import com.laurencegarmstrong.kwamp.core.InvalidMessageException
-import com.laurencegarmstrong.kwamp.core.Uri
 import com.laurencegarmstrong.kwamp.core.isWhole
 import com.laurencegarmstrong.kwamp.core.messages.Message
 import com.laurencegarmstrong.kwamp.core.messages.MessageType
@@ -40,8 +39,8 @@ class JsonMessageSerializer : MessageSerializer {
             ?: throw InvalidMessageException("Message type must be an integer")
 
     override fun serialize(message: Message) = Klaxon()
-        .converter(Uri.UriConverter)
-        .converter(MessageType.MessageTypeConverter)
+        .converter(UriConverter)
+        .converter(MessageTypeConverter)
         .toJsonString(message.asList()).toByteArray()
 }
 

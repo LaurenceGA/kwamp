@@ -1,12 +1,6 @@
 package com.laurencegarmstrong.kwamp.core.messages
 
-import com.beust.klaxon.Converter
-import com.beust.klaxon.JsonValue
 import com.laurencegarmstrong.kwamp.core.InvalidMessageException
-import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.JsonReader
-import com.squareup.moshi.JsonWriter
-import com.squareup.moshi.ToJson
 
 enum class MessageType(val id: Int, val factory: (List<Any>) -> Message) {
     HELLO(1, generateFactory(Hello::class)),
@@ -42,19 +36,5 @@ enum class MessageType(val id: Int, val factory: (List<Any>) -> Message) {
 
         fun getMessageType(id: Int) = messageTypes[id]
             ?: throw InvalidMessageException("Unknown message type '$id'")
-    }
-
-    object MessageTypeConverter : Converter {
-        override fun canConvert(cls: Class<*>) = cls == MessageType::class.java
-        override fun fromJson(jv: JsonValue): Any = false
-        override fun toJson(value: Any) = "${(value as MessageType).id}"
-    }
-
-    object MessageTypeJsonAdapter : JsonAdapter<MessageType>() {
-        override fun fromJson(reader: JsonReader?): MessageType? = null
-        @ToJson
-        override fun toJson(writer: JsonWriter?, messageType: MessageType?) {
-            writer!!.value(messageType!!.id)
-        }
     }
 }

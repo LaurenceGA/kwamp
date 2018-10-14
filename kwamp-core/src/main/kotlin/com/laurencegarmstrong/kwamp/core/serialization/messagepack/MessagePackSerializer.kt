@@ -1,11 +1,10 @@
 package com.laurencegarmstrong.kwamp.core.serialization.messagepack
 
+import com.daveanthonythomas.moshipack.MoshiPack
 import com.laurencegarmstrong.kwamp.core.InvalidMessageException
-import com.laurencegarmstrong.kwamp.core.Uri
 import com.laurencegarmstrong.kwamp.core.isWhole
 import com.laurencegarmstrong.kwamp.core.messages.Message
 import com.laurencegarmstrong.kwamp.core.messages.MessageType
-import com.daveanthonythomas.moshipack.MoshiPack
 import com.laurencegarmstrong.kwamp.core.serialization.MessageSerializer
 
 class MessagePackSerializer : MessageSerializer {
@@ -37,7 +36,7 @@ class MessagePackSerializer : MessageSerializer {
 
     override fun serialize(message: Message): ByteArray =
         MoshiPack({
-            add(MessageType.MessageTypeJsonAdapter)
-            add(Uri.UriJsonAdapter)
+            add(MessageTypeJsonAdapter)
+            add(UriJsonAdapter)
         }).packToByteArray(message.asList())
 }
