@@ -47,9 +47,6 @@ enum class WampError(uri: String) {
 open class WampException(val error: WampError, message: String? = null, cause: Throwable? = null) :
     Exception(message, cause)
 
-class InvalidUriException(message: String? = null, cause: Throwable? = null) :
-    WampException(WampError.INVALID_URI, message = message, cause = cause)
-
 open class ProtocolViolationException(message: String? = null, cause: Throwable? = null) :
     WampException(WampError.PROTOCOL_VIOLATION, message = message, cause = cause)
 
@@ -79,6 +76,24 @@ open class WampErrorException(
         arguments,
         argumentsKw
     )
+}
+
+class InvalidUriException(message: String?) :
+    WampException(WampError.INVALID_URI, message = message)
+
+//TODO reflection at the moment... Should change this requestId getting?
+//TODO what if there is no requestId?
+class InvalidUriErrorException(message: Message) :
+    WampErrorException(
+        WampError.INVALID_URI,
+        requestType = message.messageType,
+        requestId = tryGetRequestId(message)
+    )
+
+internal fun tryGetRequestId(message: Message) = try {
+    message.readProperty("requestId") as Long
+} catch (noElement: NoSuchElementException) {
+    0L
 }
 
 class ProcedureAlreadyExistsException(requestId: Long) :

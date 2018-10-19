@@ -3,6 +3,7 @@ package com.laurencegarmstrong.kwamp.router.core
 import com.laurencegarmstrong.kwamp.core.NoSuchSubscriptionException
 import com.laurencegarmstrong.kwamp.core.RandomIdGenerator
 import com.laurencegarmstrong.kwamp.core.Uri
+import com.laurencegarmstrong.kwamp.core.UriPattern
 import com.laurencegarmstrong.kwamp.core.messages.Publish
 import com.laurencegarmstrong.kwamp.core.messages.Subscribe
 import com.laurencegarmstrong.kwamp.core.messages.Unsubscribe
@@ -13,7 +14,7 @@ const val ACKNOWLEDGE_OPTION = "acknowledge"
 
 class Broker(private val messageSender: MessageSender, private val randomIdGenerator: RandomIdGenerator) {
     private val subscriptionLock = ReentrantLock()
-    private val topicSubscriptions = HashMap<Uri, MutableList<Long>>()
+    private val topicSubscriptions = HashMap<UriPattern, MutableList<Long>>()
     private val subscriptions = HashMap<Long, Subscription>()
 
     fun subscribe(session: WampSession, subscriptionMessage: Subscribe) {
@@ -26,7 +27,7 @@ class Broker(private val messageSender: MessageSender, private val randomIdGener
         messageSender.sendSubscribed(session.connection, subscriptionMessage.requestId, subscriptionId)
     }
 
-    private fun findExistingSubscription(subscriberSession: WampSession, topic: Uri) =
+    private fun findExistingSubscription(subscriberSession: WampSession, topic: UriPattern) =
         topicSubscriptions[topic]?.find { subscriptions[it]!!.session == subscriberSession }
 
     private fun newSubscription(session: WampSession, subscriptionMessage: Subscribe) =
@@ -79,13 +80,13 @@ class Broker(private val messageSender: MessageSender, private val randomIdGener
         }
 
     private fun getTopicSubscriptions(topic: Uri) =
-        topicSubscriptions[topic]?.map { subscriptionId ->
+        topicSubscriptions.get(topic)?.map { subscriptionId ->
             subscriptions[subscriptionId]!!
         } ?: emptyList()
 }
 
 data class Subscription(
-    val topic: Uri,
+    val topic: UriPattern,
     val session: WampSession,
     val subscriptionId: Long
 )

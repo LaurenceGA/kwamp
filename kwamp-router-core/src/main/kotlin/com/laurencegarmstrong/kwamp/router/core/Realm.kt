@@ -24,19 +24,28 @@ class Realm(
 
     suspend fun join(connection: Connection) = startSession(connection)
 
-    private suspend fun startSession(connection: Connection) = sessions.newSession(connection).apply {
-        connection.forEachMessage {
-            try {
-                handleMessage(it, this)
-            } catch (nonFatalError: WampErrorException) {
-                messageSender.sendExceptionError(connection, nonFatalError)
-            }
+    private suspend fun startSession(connection: Connection) = sessions.newSession(connection).also { session ->
+        GlobalScope.launch {
+            session.listenForMessages()
+        }
+    }
+
+    private suspend fun WampSession.listenForMessages() {
+        connection.forEachMessage(exceptionHandler(connection)) {
+            handleMessage(it, this)
         }.invokeOnCompletion { fatalException ->
             when (fatalException) {
                 is ProtocolViolationException -> messageSender.sendAbort(connection, fatalException)
                 else -> fatalException?.run { printStackTrace() }
             }
             sessions.endSession(id)
+        }
+    }
+
+    private fun exceptionHandler(connection: Connection): (Throwable) -> Unit = { throwable ->
+        when (throwable) {
+            is WampErrorException -> messageSender.sendExceptionError(connection, throwable)
+            else -> throw throwable
         }
     }
 

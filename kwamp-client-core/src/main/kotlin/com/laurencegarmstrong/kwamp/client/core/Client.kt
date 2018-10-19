@@ -33,7 +33,7 @@ class Client(
 
         //TODO handle errors gracefully
         GlobalScope.launch {
-            connection.forEachMessage {
+            connection.forEachMessage(exceptionHandler(connection)) {
                 try {
                     handleMessage(it)
                 } catch (nonFatalError: WampErrorException) {
@@ -47,6 +47,14 @@ class Client(
 //                }
 //                sessions.endSession(id)
             }
+        }
+    }
+
+    private fun exceptionHandler(connection: Connection): (Throwable) -> Unit = { throwable ->
+        when (throwable) {
+            is WampErrorException -> {
+            }//messageSender.sendExceptionError(connection, throwable)
+            else -> throw throwable
         }
     }
 
