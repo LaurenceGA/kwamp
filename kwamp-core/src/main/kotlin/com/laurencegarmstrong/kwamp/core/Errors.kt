@@ -82,7 +82,7 @@ class InvalidUriException(message: String?) :
     WampException(WampError.INVALID_URI, message = message)
 
 //TODO reflection at the moment... Should change this requestId getting?
-//TODO what if there is no requestId?
+//TODO what if there is no requestId (HELLO, ABORT, GOODBYE, ERROR)?
 class InvalidUriErrorException(message: Message) :
     WampErrorException(
         WampError.INVALID_URI,
