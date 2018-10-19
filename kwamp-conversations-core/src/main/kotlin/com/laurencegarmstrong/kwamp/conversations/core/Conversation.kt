@@ -84,6 +84,7 @@ open class ConversationCanvas {
     fun asDict(map: Any?) = map!! as HashMap<String, Any?>
 }
 
+//TODO put this in the client conversations package
 class ClientConversationCanvas(
     val router: TestConnection,
     val realm: Uri
