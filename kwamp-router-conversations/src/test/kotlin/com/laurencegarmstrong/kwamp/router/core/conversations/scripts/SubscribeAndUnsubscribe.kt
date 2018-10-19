@@ -1,13 +1,13 @@
 package com.laurencegarmstrong.kwamp.router.core.conversations.scripts
 
+import com.laurencegarmstrong.kwamp.conversations.core.RouterConversation
+import com.laurencegarmstrong.kwamp.conversations.core.TestConnection
+import com.laurencegarmstrong.kwamp.conversations.core.defaultRouter
 import com.laurencegarmstrong.kwamp.core.Uri
 import com.laurencegarmstrong.kwamp.core.messages.Subscribe
 import com.laurencegarmstrong.kwamp.core.messages.Subscribed
 import com.laurencegarmstrong.kwamp.core.messages.Unsubscribe
 import com.laurencegarmstrong.kwamp.core.messages.Unsubscribed
-import com.laurencegarmstrong.kwamp.router.core.conversations.infrastructure.Conversation
-import com.laurencegarmstrong.kwamp.router.core.conversations.infrastructure.TestConnection
-import com.laurencegarmstrong.kwamp.router.core.conversations.infrastructure.defaultRouter
 import io.kotlintest.be
 import io.kotlintest.should
 import io.kotlintest.specs.StringSpec
@@ -15,7 +15,7 @@ import io.kotlintest.specs.StringSpec
 class SubUnSub : StringSpec({
     "Test Subscribing and unsubscribing" {
         val client = TestConnection()
-        Conversation(
+        RouterConversation(
             defaultRouter(),
             client
         ) {

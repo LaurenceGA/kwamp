@@ -48,7 +48,7 @@ object App {
         val wampIncoming = Channel<ByteArray>()
         val wampOutgoing = Channel<ByteArray>()
         establishWebsocketConnection(wampIncoming, wampOutgoing)
-        return Client(wampIncoming, wampOutgoing, realm = Uri("default"))
+        return Client(wampIncoming, wampOutgoing, Uri("default"))
     }
 
     private fun establishWebsocketConnection(

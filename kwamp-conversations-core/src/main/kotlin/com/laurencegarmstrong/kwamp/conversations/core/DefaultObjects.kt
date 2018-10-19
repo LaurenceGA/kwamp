@@ -1,4 +1,4 @@
-package com.laurencegarmstrong.kwamp.router.core.conversations.infrastructure
+package com.laurencegarmstrong.kwamp.conversations.core
 
 import com.laurencegarmstrong.kwamp.core.Uri
 import com.laurencegarmstrong.kwamp.router.core.Realm

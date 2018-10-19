@@ -1,13 +1,13 @@
 package com.laurencegarmstrong.kwamp.router.core.conversations.scripts
 
+import com.laurencegarmstrong.kwamp.conversations.core.RouterConversation
+import com.laurencegarmstrong.kwamp.conversations.core.TestConnection
+import com.laurencegarmstrong.kwamp.conversations.core.defaultRouter
 import com.laurencegarmstrong.kwamp.core.Uri
 import com.laurencegarmstrong.kwamp.core.WampClose
 import com.laurencegarmstrong.kwamp.core.messages.Goodbye
 import com.laurencegarmstrong.kwamp.core.messages.Hello
 import com.laurencegarmstrong.kwamp.core.messages.Welcome
-import com.laurencegarmstrong.kwamp.router.core.conversations.infrastructure.Conversation
-import com.laurencegarmstrong.kwamp.router.core.conversations.infrastructure.TestConnection
-import com.laurencegarmstrong.kwamp.router.core.conversations.infrastructure.defaultRouter
 import io.kotlintest.be
 import io.kotlintest.matchers.haveKey
 import io.kotlintest.matchers.haveKeys
@@ -15,9 +15,9 @@ import io.kotlintest.should
 import io.kotlintest.specs.StringSpec
 
 class HelloGoodbye : StringSpec({
-    "Test Hello and Goodbye" {
+    "A router can receive and respond to a client's Hello and Goodbye" {
         val client = TestConnection()
-        Conversation(
+        RouterConversation(
             defaultRouter(),
             client
         ) {
