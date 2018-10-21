@@ -22,6 +22,10 @@ open class UriPattern(val text: String) {
     override fun hashCode(): Int {
         return text.hashCode()
     }
+
+    override fun toString(): String {
+        return text
+    }
 }
 
 class Uri(text: String) : UriPattern(text) {

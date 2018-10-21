@@ -20,13 +20,18 @@ class Client(
     realm: Uri,
     protocol: String = WAMP_DEFAULT
 ) {
-    private val log = LoggerFactory.getLogger(Client::class.java)!!
+    private val log = LoggerFactory.getLogger(Client::class.java)!! //TODO make this cleaner extension?
     //TODO bubble close function up to transport layer
     private val connection = Connection(incoming, outgoing, {}, getSerializer(protocol))
+
     private var sessionId: Long? = null
+
     private val randomIdGenerator = RandomIdGenerator()
-    private val caller = Caller(connection, randomIdGenerator)
-    private val callee = Callee(connection, randomIdGenerator)
+
+    private val requestListenersHandler = MessageListenersHandler()
+
+    private val caller = Caller(connection, randomIdGenerator, requestListenersHandler)
+    private val callee = Callee(connection, randomIdGenerator, requestListenersHandler)
 
     init {
         joinRealm(realm)
@@ -62,6 +67,8 @@ class Client(
         callee.register(procedure, handler)
 
     private fun handleMessage(message: Message) {
+        requestListenersHandler.notifyListeners(message)
+
         when (message) {
             is Result -> caller.result(message)
 
@@ -71,8 +78,6 @@ class Client(
             is Invocation -> callee.invokeProcedure(message)
 
             is Error -> handleError(message)
-
-            else -> throw NotImplementedError("Message type ${message.messageType} not implemented")
         }
     }
 
@@ -88,18 +93,16 @@ class Client(
         when (protocol) {
             WAMP_JSON -> JsonMessageSerializer()
             WAMP_MSG_PACK -> MessagePackSerializer()
-            else -> throw IllegalArgumentException("Unsupported sub protocol '${protocol}'")
+            else -> throw IllegalArgumentException("Unsupported sub protocol '$protocol'")
         }
 
-    private fun joinRealm(realmUri: Uri) {
-        runBlocking {
-            connection.send(Hello(realmUri, emptyMap()))
-            connection.withNextMessage { message: Welcome ->
-                log.info("Session established. ID: ${message.session}")
-                //TODO thread safety?
-                sessionId = message.session
-            }.join()
-        }
+    private fun joinRealm(realmUri: Uri) = runBlocking {
+        connection.send(Hello(realmUri, emptyMap()))
+        connection.withNextMessage { message: Welcome ->
+            log.info("Session established. ID: ${message.session}")
+            //TODO thread safety?
+            sessionId = message.session
+        }.join()
     }
 
     //TODO make extension on Client?
@@ -108,4 +111,12 @@ class Client(
         arguments: List<Any?>? = null,
         argumentsKw: Dict? = null
     ) = caller.call(procedure, arguments, argumentsKw)
+
+    fun disconnect(closeReason: Uri = WampClose.SYSTEM_SHUTDOWN.uri) = runBlocking {
+        connection.send(Goodbye(emptyMap(), closeReason))
+
+        requestListenersHandler.registerListener<Goodbye>().await().also { message ->
+            log.info("Router replied goodbye reason: ${message.reason}")
+        }
+    }
 }

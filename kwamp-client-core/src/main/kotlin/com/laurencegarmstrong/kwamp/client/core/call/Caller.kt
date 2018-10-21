@@ -1,5 +1,6 @@
 package com.laurencegarmstrong.kwamp.client.core.call
 
+import com.laurencegarmstrong.kwamp.client.core.MessageListenersHandler
 import com.laurencegarmstrong.kwamp.core.Connection
 import com.laurencegarmstrong.kwamp.core.RandomIdGenerator
 import com.laurencegarmstrong.kwamp.core.Uri
@@ -12,7 +13,8 @@ import java.util.concurrent.ConcurrentHashMap
 
 internal class Caller(
     private val connection: Connection,
-    private val randomIdGenerator: RandomIdGenerator
+    private val randomIdGenerator: RandomIdGenerator,
+    val requestListenersHandler: MessageListenersHandler
 ) {
     private val calls: ConcurrentHashMap<Long, CompletableDeferred<CallResult>> = ConcurrentHashMap()
 

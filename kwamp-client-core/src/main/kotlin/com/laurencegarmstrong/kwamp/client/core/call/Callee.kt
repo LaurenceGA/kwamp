@@ -1,5 +1,6 @@
 package com.laurencegarmstrong.kwamp.client.core.call
 
+import com.laurencegarmstrong.kwamp.client.core.MessageListenersHandler
 import com.laurencegarmstrong.kwamp.core.Connection
 import com.laurencegarmstrong.kwamp.core.ProtocolViolationException
 import com.laurencegarmstrong.kwamp.core.RandomIdGenerator
@@ -13,7 +14,8 @@ import java.util.concurrent.ConcurrentHashMap
 
 internal class Callee(
     private val connection: Connection,
-    private val randomIdGenerator: RandomIdGenerator
+    private val randomIdGenerator: RandomIdGenerator,
+    val requestListenersHandler: MessageListenersHandler
 ) {
     private val pendingRegistrations = ConcurrentHashMap<Long, CompletableDeferred<Registered>>()
     private val pendingUnregistrations = ConcurrentHashMap<Long, CompletableDeferred<Unregistered>>()

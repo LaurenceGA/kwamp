@@ -15,6 +15,10 @@ sealed class Message(val messageType: MessageType) {
     }
 }
 
+interface RequestMessage {
+    val requestId: Long
+}
+
 typealias Dict = Map<String, Any?>
 
 data class Hello(val realm: Uri, val details: Dict) : Message(MessageType.HELLO)
@@ -27,30 +31,30 @@ data class Goodbye(val details: Dict, val reason: Uri) : Message(MessageType.GOO
 
 data class Error(
     val requestType: MessageType,
-    val requestId: Long,
+    override val requestId: Long,
     val details: Dict,
     val error: Uri,
     val arguments: List<Any?>? = null,
     val argumentsKw: Dict? = null
-) : Message(MessageType.ERROR)
+) : Message(MessageType.ERROR), RequestMessage
 
 data class Publish(
-    val requestId: Long,
+    override val requestId: Long,
     val options: Dict,
     val topic: Uri,
     val arguments: List<Any?>? = null,
     val argumentsKw: Dict? = null
-) : Message(MessageType.PUBLISH)
+) : Message(MessageType.PUBLISH), RequestMessage
 
-data class Published(val requestId: Long, val publication: Long) : Message(MessageType.PUBLISHED)
+data class Published(override val requestId: Long, val publication: Long) : Message(MessageType.PUBLISHED), RequestMessage
 
-data class Subscribe(val requestId: Long, val options: Dict, val topic: UriPattern) : Message(MessageType.SUBSCRIBE)
+data class Subscribe(override val requestId: Long, val options: Dict, val topic: UriPattern) : Message(MessageType.SUBSCRIBE), RequestMessage
 
-data class Subscribed(val requestId: Long, val subscription: Long) : Message(MessageType.SUBSCRIBED)
+data class Subscribed(override val requestId: Long, val subscription: Long) : Message(MessageType.SUBSCRIBED), RequestMessage
 
-data class Unsubscribe(val requestId: Long, val subscription: Long) : Message(MessageType.UNSUBSCRIBE)
+data class Unsubscribe(override val requestId: Long, val subscription: Long) : Message(MessageType.UNSUBSCRIBE), RequestMessage
 
-data class Unsubscribed(val requestId: Long) : Message(MessageType.UNSUBSCRIBED)
+data class Unsubscribed(override val requestId: Long) : Message(MessageType.UNSUBSCRIBED), RequestMessage
 
 data class Event(
     val subscription: Long,
@@ -61,39 +65,39 @@ data class Event(
 ) : Message(MessageType.EVENT)
 
 data class Call(
-    val requestId: Long,
+    override val requestId: Long,
     val options: Dict,
     val procedure: Uri,
     val arguments: List<Any?>? = null,
     val argumentsKw: Dict? = null
-) : Message(MessageType.CALL)
+) : Message(MessageType.CALL), RequestMessage
 
 data class Result(
-    val requestId: Long,
+    override val requestId: Long,
     val details: Dict,
     val arguments: List<Any?>? = null,
     val argumentsKw: Dict? = null
-) : Message(MessageType.RESULT)
+) : Message(MessageType.RESULT), RequestMessage
 
-data class Register(val requestId: Long, val options: Dict, val procedure: Uri) : Message(MessageType.REGISTER)
+data class Register(override val requestId: Long, val options: Dict, val procedure: Uri) : Message(MessageType.REGISTER), RequestMessage
 
-data class Registered(val requestId: Long, val registration: Long) : Message(MessageType.REGISTERED)
+data class Registered(override val requestId: Long, val registration: Long) : Message(MessageType.REGISTERED), RequestMessage
 
-data class Unregister(val requestId: Long, val registration: Long) : Message(MessageType.UNREGISTER)
+data class Unregister(override val requestId: Long, val registration: Long) : Message(MessageType.UNREGISTER), RequestMessage
 
-data class Unregistered(val requestId: Long) : Message(MessageType.UNREGISTERED)
+data class Unregistered(override val requestId: Long) : Message(MessageType.UNREGISTERED), RequestMessage
 
 data class Invocation(
-    val requestId: Long,
+    override val requestId: Long,
     val registration: Long,
     val details: Dict,
     val arguments: List<Any?>? = null,
     val argumentsKw: Dict? = null
-) : Message(MessageType.INVOCATION)
+) : Message(MessageType.INVOCATION), RequestMessage
 
 data class Yield(
-    val requestId: Long,
+    override val requestId: Long,
     val options: Dict,
     val arguments: List<Any?>? = null,
     val argumentsKw: Dict? = null
-) : Message(MessageType.YIELD)
+) : Message(MessageType.YIELD), RequestMessage
