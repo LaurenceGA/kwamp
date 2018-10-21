@@ -17,8 +17,8 @@ import org.slf4j.LoggerFactory
 class Client(
     incoming: ReceiveChannel<ByteArray>,
     outgoing: SendChannel<ByteArray>,
-    protocol: String = WAMP_DEFAULT,
-    realm: Uri
+    realm: Uri,
+    protocol: String = WAMP_DEFAULT
 ) {
     private val log = LoggerFactory.getLogger(Client::class.java)!!
     //TODO bubble close function up to transport layer

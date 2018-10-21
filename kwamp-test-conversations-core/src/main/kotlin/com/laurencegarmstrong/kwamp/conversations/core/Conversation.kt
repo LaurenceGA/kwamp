@@ -1,27 +1,26 @@
-package com.laurencegarmstrong.kwamp.router.core.conversations.infrastructure
+package com.laurencegarmstrong.kwamp.conversations.core
 
+import com.laurencegarmstrong.kwamp.client.core.Client
 import com.laurencegarmstrong.kwamp.core.Connection
 import com.laurencegarmstrong.kwamp.core.Uri
 import com.laurencegarmstrong.kwamp.core.messages.Hello
 import com.laurencegarmstrong.kwamp.core.messages.Message
 import com.laurencegarmstrong.kwamp.core.messages.Welcome
-import com.laurencegarmstrong.kwamp.core.serialization.json.JsonMessageSerializer
 import com.laurencegarmstrong.kwamp.core.serialization.MessageSerializer
+import com.laurencegarmstrong.kwamp.core.serialization.json.JsonMessageSerializer
 import com.laurencegarmstrong.kwamp.router.core.Router
 import io.kotlintest.assertSoftly
 import io.kotlintest.matchers.beInstanceOf
 import io.kotlintest.should
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withTimeout
 
 const val RECEIVE_TIMEOUT = 10000L
 
-class Conversation(
+class RouterConversation(
     router: Router,
     vararg clients: TestConnection,
-    conversationDefinition: Conversation.() -> Unit
+    conversationDefinition: ConversationCanvas.() -> Unit
 ) {
     init {
         runBlocking {
@@ -31,9 +30,21 @@ class Conversation(
                 }
             }
         }
-        conversationDefinition()
+        ConversationCanvas().conversationDefinition()
     }
+}
 
+class ClientConversation(
+    testRouter: TestConnection,
+    realm: Uri = Uri("default"),
+    conversationDefinition: ClientConversationCanvas.() -> Unit
+) {
+    init {
+        ClientConversationCanvas(testRouter, realm).conversationDefinition()
+    }
+}
+
+open class ConversationCanvas {
     infix fun TestConnection.willSend(messageSupplier: () -> Message) {
         runBlocking { send(messageSupplier()) }
     }
@@ -71,12 +82,20 @@ class Conversation(
     fun asDict(map: Any?) = map!! as HashMap<String, Any?>
 }
 
+//TODO put this in the client conversations package
+class ClientConversationCanvas(
+    val router: TestConnection,
+    val realm: Uri
+) : ConversationCanvas(), CoroutineScope by GlobalScope {
+    fun newTestClient() = Client(router.incoming, router.outgoing, realm)
+}
+
 class TestConnection(
     private val messageSerializer: MessageSerializer = JsonMessageSerializer(),
     channelCapacity: Int = 5
 ) {
-    private val incoming = Channel<ByteArray>(channelCapacity)
-    private val outgoing = Channel<ByteArray>(channelCapacity)
+    val incoming = Channel<ByteArray>(channelCapacity)
+    val outgoing = Channel<ByteArray>(channelCapacity)
     val connection = Connection(incoming, outgoing, { }, messageSerializer)
 
     fun send(message: Message) {

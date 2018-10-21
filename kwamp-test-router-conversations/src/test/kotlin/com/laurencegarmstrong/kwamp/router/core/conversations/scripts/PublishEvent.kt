@@ -1,10 +1,10 @@
 package com.laurencegarmstrong.kwamp.router.core.conversations.scripts
 
+import com.laurencegarmstrong.kwamp.conversations.core.RouterConversation
+import com.laurencegarmstrong.kwamp.conversations.core.TestConnection
+import com.laurencegarmstrong.kwamp.conversations.core.defaultRouter
 import com.laurencegarmstrong.kwamp.core.Uri
 import com.laurencegarmstrong.kwamp.core.messages.*
-import com.laurencegarmstrong.kwamp.router.core.conversations.infrastructure.Conversation
-import com.laurencegarmstrong.kwamp.router.core.conversations.infrastructure.TestConnection
-import com.laurencegarmstrong.kwamp.router.core.conversations.infrastructure.defaultRouter
 import io.kotlintest.be
 import io.kotlintest.matchers.collections.shouldContainExactly
 import io.kotlintest.matchers.maps.shouldContainExactly
@@ -17,7 +17,7 @@ class PublishEvent : StringSpec({
         val clientB = TestConnection()
         val clientC = TestConnection()
         val clientD = TestConnection()
-        Conversation(
+        RouterConversation(
             defaultRouter(),
             clientA,
             clientB,
