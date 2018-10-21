@@ -5,8 +5,8 @@ import com.laurencegarmstrong.kwamp.client.core.call.Callee
 import com.laurencegarmstrong.kwamp.client.core.call.Caller
 import com.laurencegarmstrong.kwamp.core.*
 import com.laurencegarmstrong.kwamp.core.messages.*
-import com.laurencegarmstrong.kwamp.core.serialization.JsonMessageSerializer
-import com.laurencegarmstrong.kwamp.core.serialization.MessagePackSerializer
+import com.laurencegarmstrong.kwamp.core.serialization.json.JsonMessageSerializer
+import com.laurencegarmstrong.kwamp.core.serialization.messagepack.MessagePackSerializer
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.SendChannel
@@ -33,7 +33,7 @@ class Client(
 
         //TODO handle errors gracefully
         GlobalScope.launch {
-            connection.forEachMessage {
+            connection.forEachMessage(exceptionHandler(connection)) {
                 try {
                     handleMessage(it)
                 } catch (nonFatalError: WampErrorException) {
@@ -47,6 +47,14 @@ class Client(
 //                }
 //                sessions.endSession(id)
             }
+        }
+    }
+
+    private fun exceptionHandler(connection: Connection): (Throwable) -> Unit = { throwable ->
+        when (throwable) {
+            is WampErrorException -> {
+            }//messageSender.sendExceptionError(connection, throwable)
+            else -> throw throwable
         }
     }
 

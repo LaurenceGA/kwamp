@@ -1,13 +1,18 @@
 package com.laurencegarmstrong.kwamp.core.messages
 
-import com.laurencegarmstrong.kwamp.core.Uri
-import com.laurencegarmstrong.kwamp.core.primaryConstructorValues
+import com.laurencegarmstrong.kwamp.core.*
 
 /**
  * During serialization messages are created reflectively using [generateFactory] based on their primary constructor
  */
 sealed class Message(val messageType: MessageType) {
-    fun asList(): List<Any?> = listOf(messageType).plus(this.primaryConstructorValues().filter { it != null })
+    fun asList(): List<Any?> = listOf(messageType) + this.primaryConstructorValues().filter { it != null }
+    fun validateUris(strict: Boolean = false) = try {
+        this.primaryConstructorValues().mapNotNull { it as? UriPattern }
+            .forEach(if (strict) UriPattern::ensureStrict else UriPattern::ensureValid)
+    } catch (invalidUri: InvalidUriException) {
+        throw InvalidUriErrorException(this)
+    }
 }
 
 typealias Dict = Map<String, Any?>
@@ -39,7 +44,7 @@ data class Publish(
 
 data class Published(val requestId: Long, val publication: Long) : Message(MessageType.PUBLISHED)
 
-data class Subscribe(val requestId: Long, val options: Dict, val topic: Uri) : Message(MessageType.SUBSCRIBE)
+data class Subscribe(val requestId: Long, val options: Dict, val topic: UriPattern) : Message(MessageType.SUBSCRIBE)
 
 data class Subscribed(val requestId: Long, val subscription: Long) : Message(MessageType.SUBSCRIBED)
 

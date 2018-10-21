@@ -5,7 +5,7 @@ import com.laurencegarmstrong.kwamp.core.Uri
 import com.laurencegarmstrong.kwamp.core.messages.Hello
 import com.laurencegarmstrong.kwamp.core.messages.Message
 import com.laurencegarmstrong.kwamp.core.messages.Welcome
-import com.laurencegarmstrong.kwamp.core.serialization.JsonMessageSerializer
+import com.laurencegarmstrong.kwamp.core.serialization.json.JsonMessageSerializer
 import com.laurencegarmstrong.kwamp.core.serialization.MessageSerializer
 import com.laurencegarmstrong.kwamp.router.core.Router
 import io.kotlintest.assertSoftly

@@ -16,16 +16,16 @@ fun generateFactory(messageClass: KClass<out Message>): (objectArray: List<Any>)
     messageClass::primaryConstructor.get()!!.callBy(parameters.zip(mappedInputList).toMap())
 }
 
-private fun acceptableNumberOfParameters(parameters: List<KParameter>) =
-    numberOfNonOptional(parameters)..parameters.size
-
-private fun numberOfNonOptional(parameters: List<KParameter>) = parameters.count { !it.isOptional }
-
 private fun mapInputListTypesToParameters(inputList: List<Any>, parameters: List<KParameter>) =
     if (inputList.size in acceptableNumberOfParameters(parameters))
         conformArrayObjectsToConstructor(inputList, parameters)
     else
         throw InvalidMessageException("Not enough parameters in message")
+
+private fun acceptableNumberOfParameters(parameters: List<KParameter>) =
+    numberOfNonOptional(parameters)..parameters.size
+
+private fun numberOfNonOptional(parameters: List<KParameter>) = parameters.count { !it.isOptional }
 
 private fun conformArrayObjectsToConstructor(inputArray: List<Any>, parameters: List<KParameter>) =
     inputArray.mapIndexed { index, item ->
@@ -35,8 +35,23 @@ private fun conformArrayObjectsToConstructor(inputArray: List<Any>, parameters: 
             tryToConvert(item, parameters[index])
     }
 
-private fun canApplyValuesToParameters(values: List<Any>, parameters: List<KParameter>) = values.indices.all { i ->
-    values[i].canBeAppliedToType(parameters[i])
+private fun tryToConvert(item: Any, parameter: KParameter): Any {
+    return try {
+        getUnaryParameterConstructor(item, parameter).call(item)
+    } catch (e: IllegalArgumentException) {
+        if (item is Double && item.isWhole()) {
+            when (parameter.type.jvmErasure) {
+                Long::class -> item.toLong()
+                Int::class -> item.toInt()
+                MessageType::class -> MessageType.getMessageType(item.toInt())
+                else -> throw e
+            }
+        } else if (parameter.type.jvmErasure == MessageType::class && item is Int) {
+            MessageType.getMessageType(item)
+        } else {
+            throw InvalidMessageException(e.message, e)
+        }
+    }
 }
 
 private fun getUnaryParameterConstructor(input: Any, parameter: KParameter): KFunction<Any> = try {
@@ -57,21 +72,6 @@ private fun areValidParameterValues(objectArray: List<Any>, constructorParameter
     objectArray.size in acceptableNumberOfParameters(constructorParameters)
             && canApplyValuesToParameters(objectArray, constructorParameters)
 
-private fun tryToConvert(item: Any, parameter: KParameter): Any {
-    return try {
-        getUnaryParameterConstructor(item, parameter).call(item)
-    } catch (e: IllegalArgumentException) {
-        if (item is Double && item.isWhole()) {
-            when (parameter.type.jvmErasure) {
-                Long::class -> item.toLong()
-                Int::class -> item.toInt()
-                MessageType::class -> MessageType.getMessageType(item.toInt())
-                else -> throw e
-            }
-        } else if (parameter.type.jvmErasure == MessageType::class && item is Int) {
-            MessageType.getMessageType(item)
-        } else {
-            throw InvalidMessageException(e.message, e)
-        }
-    }
+private fun canApplyValuesToParameters(values: List<Any>, parameters: List<KParameter>) = values.indices.all { i ->
+    values[i].canBeAppliedToType(parameters[i])
 }

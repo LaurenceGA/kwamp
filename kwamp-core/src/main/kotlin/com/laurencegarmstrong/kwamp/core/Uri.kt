@@ -1,26 +1,32 @@
 package com.laurencegarmstrong.kwamp.core
 
-import com.beust.klaxon.Converter
-import com.beust.klaxon.JsonValue
-import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.JsonReader
-import com.squareup.moshi.JsonWriter
-import com.squareup.moshi.ToJson
+open class UriPattern(val text: String) {
+    // A Uri Pattern can contain empty components. E.G "a.b..d"
+    protected open val relaxedRegex = Regex("""^(([^\s.#]+\.)|\.)*([^\s.#]+)?$""")
+    protected open val strictRegex = Regex("""^(([0-9a-z_]+\.)|\.)*([0-9a-z_]+)?$""")
 
-//TODO validate construction (S5.1.1) and return WampError.INVALID_URI on failure
-data class Uri(val text: String) {
-    object UriConverter : Converter {
-        override fun canConvert(cls: Class<*>) = cls == Uri::class.java
-        override fun fromJson(jv: JsonValue): Any = false
-        override fun toJson(value: Any) = "\"${(value as Uri).text}\""
+    protected fun matchesRegex(regex: Regex) {
+        if (regex doesNotMatch text) throw InvalidUriException("${this::class.simpleName} much match regular expression ${regex.pattern}")
     }
 
-    object UriJsonAdapter : JsonAdapter<Uri>() {
-        override fun fromJson(reader: JsonReader?): Uri? = null
-        @ToJson
-        override fun toJson(writer: JsonWriter?, uri: Uri?) {
-            writer!!.value(uri!!.text)
-        }
+    fun ensureValid() = matchesRegex(relaxedRegex)
+    fun ensureStrict() = matchesRegex(strictRegex)
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is UriPattern) return false
+
+        return text == other.text
+    }
+
+    override fun hashCode(): Int {
+        return text.hashCode()
     }
 }
 
+class Uri(text: String) : UriPattern(text) {
+    override val relaxedRegex = Regex("""^([^\s.#]+\.)*([^\s.#]+)$""")
+    override val strictRegex = Regex("""^([0-9a-z_]+\.)*([0-9a-z_]+)$""")
+}
+
+infix fun Regex.doesNotMatch(text: String) = !(this matches text)
