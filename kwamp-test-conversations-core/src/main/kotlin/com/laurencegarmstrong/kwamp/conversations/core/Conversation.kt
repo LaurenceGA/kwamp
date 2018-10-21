@@ -12,10 +12,8 @@ import com.laurencegarmstrong.kwamp.router.core.Router
 import io.kotlintest.assertSoftly
 import io.kotlintest.matchers.beInstanceOf
 import io.kotlintest.should
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withTimeout
 
 const val RECEIVE_TIMEOUT = 10000L
 
@@ -88,7 +86,7 @@ open class ConversationCanvas {
 class ClientConversationCanvas(
     val router: TestConnection,
     val realm: Uri
-) : ConversationCanvas() {
+) : ConversationCanvas(), CoroutineScope by GlobalScope {
     fun newTestClient() = Client(router.incoming, router.outgoing, realm)
 }
 
