@@ -28,10 +28,10 @@ class Client(
 
     private val randomIdGenerator = RandomIdGenerator()
 
-    private val requestListenersHandler = MessageListenersHandler()
+    private val messageListenersHandler = MessageListenersHandler()
 
-    private val caller = Caller(connection, randomIdGenerator, requestListenersHandler)
-    private val callee = Callee(connection, randomIdGenerator, requestListenersHandler)
+    private val caller = Caller(connection, randomIdGenerator, messageListenersHandler)
+    private val callee = Callee(connection, randomIdGenerator, messageListenersHandler)
 
     init {
         joinRealm(realm)
@@ -67,11 +67,9 @@ class Client(
         callee.register(procedure, handler)
 
     private fun handleMessage(message: Message) {
-        requestListenersHandler.notifyListeners(message)
+        messageListenersHandler.notifyListeners(message)
 
         when (message) {
-            is Result -> caller.result(message)
-
             is Registered -> callee.receiveRegistered(message)
             is Unregistered -> callee.receiveUnregistered(message)
 
@@ -83,9 +81,9 @@ class Client(
 
     private fun handleError(errorMessage: Error) {
         when (errorMessage.requestType) {
-            MessageType.CALL -> caller.error(errorMessage)
+//            MessageType.CALL -> caller.error(errorMessage)
 
-            else -> throw NotImplementedError("Error with request type ${errorMessage.requestType} not implemented")
+//            else -> throw NotImplementedError("Error with request type ${errorMessage.requestType} not implemented")
         }
     }
 
@@ -115,7 +113,7 @@ class Client(
     fun disconnect(closeReason: Uri = WampClose.SYSTEM_SHUTDOWN.uri) = runBlocking {
         connection.send(Goodbye(emptyMap(), closeReason))
 
-        requestListenersHandler.registerListener<Goodbye>().await().also { message ->
+        messageListenersHandler.registerListener<Goodbye>().await().also { message ->
             log.info("Router replied goodbye reason: ${message.reason}")
         }
     }

@@ -4,7 +4,10 @@ import com.laurencegarmstrong.kwamp.client.core.MessageListenersHandler
 import com.laurencegarmstrong.kwamp.core.Connection
 import com.laurencegarmstrong.kwamp.core.RandomIdGenerator
 import com.laurencegarmstrong.kwamp.core.Uri
-import com.laurencegarmstrong.kwamp.core.messages.*
+import com.laurencegarmstrong.kwamp.core.messages.Call
+import com.laurencegarmstrong.kwamp.core.messages.Dict
+import com.laurencegarmstrong.kwamp.core.messages.Error
+import com.laurencegarmstrong.kwamp.core.messages.Result
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.GlobalScope
@@ -14,10 +17,8 @@ import java.util.concurrent.ConcurrentHashMap
 internal class Caller(
     private val connection: Connection,
     private val randomIdGenerator: RandomIdGenerator,
-    val requestListenersHandler: MessageListenersHandler
+    private val messageListenersHandler: MessageListenersHandler
 ) {
-    private val calls: ConcurrentHashMap<Long, CompletableDeferred<CallResult>> = ConcurrentHashMap()
-
     fun call(
         procedure: Uri,
         arguments: List<Any?>?,
@@ -43,26 +44,40 @@ internal class Caller(
                     )
                 )
             }
-            DeferredCallResult(CompletableDeferred<CallResult>().also {
-                calls[requestId] = it
-            })
+
+            deferredResultWithListeners(requestId)
         }
 
+    private fun deferredResultWithListeners(requestId: Long): DeferredCallResult {
+        val completableResult = CompletableDeferred<CallResult>()
 
-    fun result(resultMessage: Result) {
-        calls.remove(resultMessage.requestId)?.complete(
-            CallResult(
-                resultMessage.arguments,
-                resultMessage.argumentsKw
-            )
-        )
-            ?: throw IllegalStateException("Could find request id ${resultMessage.requestId} in calls")
+        applyListenersToCompletableResult(completableResult, requestId)
+
+        return DeferredCallResult(completableResult)
     }
 
-    fun error(errorMessage: Error) {
-        calls.remove(errorMessage.requestId)?.cancel(errorMessage.toCallException())
-            ?: throw IllegalStateException("Could find request id ${errorMessage.requestId} in calls")
+    private fun applyListenersToCompletableResult(
+        completableResult: CompletableDeferred<CallResult>,
+        requestId: Long
+    ) = GlobalScope.launch {
+        val deferredResultMessage = messageListenersHandler.registerListener<Result>(requestId)
+        val deferredErrorMessage = messageListenersHandler.registerListener<Error>(requestId)
+        launch {
+            val resultMessage = deferredResultMessage.await()
+            deferredErrorMessage.cancel()
+            completableResult.complete(resultMessageToCallResult(resultMessage))
+        }
+        launch {
+            val errorMessage = deferredErrorMessage.await()
+            deferredResultMessage.cancel()
+            completableResult.cancel(errorMessage.toCallException())
+        }
     }
+
+    private fun resultMessageToCallResult(resultMessage: Result) = CallResult(
+        resultMessage.arguments,
+        resultMessage.argumentsKw
+    )
 }
 
 class DeferredCallResult(private val deferredResult: Deferred<CallResult>) {

@@ -29,6 +29,7 @@ object App {
         var counter = 0
         val registrationHandle = wampClient.register(Uri("test.proc")) { arguments, argumentsKw ->
             counter++
+            println(counter)
             CallResult(arguments, argumentsKw)
         }
         println("registered")
@@ -42,6 +43,8 @@ object App {
         runBlocking {
             println(call.await())
         }
+
+        wampClient.disconnect()
     }
 
     private fun createWebsocketWampClient(): Client {

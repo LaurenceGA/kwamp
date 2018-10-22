@@ -11,26 +11,42 @@ import kotlin.reflect.KClass
 
 class MessageListenersHandler {
     private val requestIdListeners =
-        ConcurrentHashMap<Long, CompletableDeferred<Message>>()
+        ConcurrentHashMap<RequestListenerKey, CompletableDeferred<Message>>()
     private val typeListeners =
         ConcurrentHashMap<KClass<out Message>, CompletableDeferred<Message>>()
 
     fun notifyListeners(message: Message) {
-        if (message is RequestMessage) requestIdListeners.remove(message.requestId)?.complete(message)
+        if (message is RequestMessage)
+            requestIdListeners.remove(RequestListenerKey(message.requestId, message::class))?.complete(message)
         typeListeners.remove(message::class)?.complete(message)
     }
 
     inline fun <reified T : Message> registerListener() = registerTypeListener(T::class)
 
-    fun <T : Message> registerTypeListener(messageType: KClass<T>): Deferred<T> = GlobalScope.async {
-        registerToMessageListenerMap(typeListeners, messageType).await() as? T
-            ?: throw IllegalStateException("not meant to happen")
+    inline fun <reified T : Message> registerListener(requestId: Long): Deferred<T> =
+        registerListener(requestId, T::class)
+
+    @Suppress("UNCHECKED_CAST")
+    fun <T : Message> registerTypeListener(messageType: KClass<out T>): Deferred<T> = GlobalScope.async {
+        registerToMessageListenerMap(typeListeners, messageType).await() as T
+    }.apply {
+        invokeOnCompletion {
+            typeListeners.remove(messageType)
+        }
     }
 
-    fun <T : Message> registerListener(requestId: Long): Deferred<T> = GlobalScope.async {
-        registerToMessageListenerMap(requestIdListeners, requestId).await() as? T
-            ?: throw IllegalStateException("not meant to happen")
-    }
+    @Suppress("UNCHECKED_CAST")
+    fun <T : Message> registerListener(requestId: Long, messageType: KClass<out T>): Deferred<T> =
+        GlobalScope.async {
+            registerToMessageListenerMap(
+                requestIdListeners,
+                RequestListenerKey(requestId, messageType)
+            ).await() as T
+        }.apply {
+            invokeOnCompletion {
+                requestIdListeners.remove(RequestListenerKey(requestId, messageType))
+            }
+        }
 
     private fun <T> registerToMessageListenerMap(
         listenerMap: MutableMap<T, CompletableDeferred<Message>>,
@@ -43,3 +59,5 @@ class MessageListenersHandler {
         return completableDeferredMessage
     }
 }
+
+data class RequestListenerKey(val requestId: Long, val messageType: KClass<out Message>)

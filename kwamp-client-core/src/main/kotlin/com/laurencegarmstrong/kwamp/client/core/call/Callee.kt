@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap
 internal class Callee(
     private val connection: Connection,
     private val randomIdGenerator: RandomIdGenerator,
-    val requestListenersHandler: MessageListenersHandler
+    private val requestListenersHandler: MessageListenersHandler
 ) {
     private val pendingRegistrations = ConcurrentHashMap<Long, CompletableDeferred<Registered>>()
     private val pendingUnregistrations = ConcurrentHashMap<Long, CompletableDeferred<Unregistered>>()
