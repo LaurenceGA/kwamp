@@ -14,7 +14,6 @@ internal class Callee(
     private val randomIdGenerator: RandomIdGenerator,
     private val messageListenersHandler: MessageListenersHandler
 ) {
-    private val pendingUnregistrations = ConcurrentHashMap<Long, CompletableDeferred<Unregistered>>()
     private val registrations = ConcurrentHashMap<Long, CallHandler>()
 
     fun register(
@@ -63,22 +62,6 @@ internal class Callee(
         }
     }
 
-    private fun <T : Message> newPendingMessage(
-        requestId: Long,
-        pendingMessageHolder: ConcurrentHashMap<Long, CompletableDeferred<T>>
-    ) =
-        CompletableDeferred<T>().also { deferredMessage ->
-            pendingMessageHolder[requestId] = deferredMessage
-            deferredMessage.invokeOnCompletion {
-                pendingMessageHolder.remove(requestId)
-            }
-        }
-
-    //TODO use correct exception
-    fun receiveUnregistered(unregistered: Unregistered) =
-        pendingUnregistrations[unregistered.requestId]?.complete(unregistered)
-            ?: throw ProtocolViolationException("No register request with id ${unregistered.requestId}")
-
     private fun unregister(registrationId: Long) {
         runBlocking {
             //TODO consider current invocations
@@ -96,7 +79,30 @@ internal class Callee(
                     registrationId
                 )
             )
-            newPendingMessage(requestId, pendingUnregistrations).await()  //TODO timeout maybe?
+            deferredUnregisteredWithListeners(requestId).await()
+        }
+    }
+
+    private fun deferredUnregisteredWithListeners(requestId: Long): Deferred<Unregistered> =
+        CompletableDeferred<Unregistered>().also {
+            applyListenersToCompletableUnregistered(it, requestId)
+        }
+
+    private fun applyListenersToCompletableUnregistered(
+        completableResult: CompletableDeferred<Unregistered>,
+        requestId: Long
+    ) = GlobalScope.launch {
+        val deferredUnregisteredMessage = messageListenersHandler.registerListener<Unregistered>(requestId)
+        val deferredErrorMessage = messageListenersHandler.registerListener<Error>(requestId)
+        launch {
+            val registeredMessage = deferredUnregisteredMessage.await()
+            deferredErrorMessage.cancel()
+            completableResult.complete(registeredMessage)
+        }
+        launch {
+            val errorMessage = deferredErrorMessage.await()
+            deferredUnregisteredMessage.cancel()
+            completableResult.cancel(errorMessage.toCallException())
         }
     }
 
