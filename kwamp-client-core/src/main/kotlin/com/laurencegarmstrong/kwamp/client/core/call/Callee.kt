@@ -6,18 +6,14 @@ import com.laurencegarmstrong.kwamp.core.ProtocolViolationException
 import com.laurencegarmstrong.kwamp.core.RandomIdGenerator
 import com.laurencegarmstrong.kwamp.core.Uri
 import com.laurencegarmstrong.kwamp.core.messages.*
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import java.util.concurrent.ConcurrentHashMap
 
 internal class Callee(
     private val connection: Connection,
     private val randomIdGenerator: RandomIdGenerator,
-    private val requestListenersHandler: MessageListenersHandler
+    private val messageListenersHandler: MessageListenersHandler
 ) {
-    private val pendingRegistrations = ConcurrentHashMap<Long, CompletableDeferred<Registered>>()
     private val pendingUnregistrations = ConcurrentHashMap<Long, CompletableDeferred<Unregistered>>()
     private val registrations = ConcurrentHashMap<Long, CallHandler>()
 
@@ -40,7 +36,30 @@ internal class Callee(
                     procedure
                 )
             )
-            return newPendingMessage(requestId, pendingRegistrations).await()  //TODO timeout maybe?
+            return deferredRegisteredWithListeners(requestId).await()
+        }
+    }
+
+    private fun deferredRegisteredWithListeners(requestId: Long): Deferred<Registered> =
+        CompletableDeferred<Registered>().also {
+            applyListenersToCompletableRegistered(it, requestId)
+        }
+
+    private fun applyListenersToCompletableRegistered(
+        completableResult: CompletableDeferred<Registered>,
+        requestId: Long
+    ) = GlobalScope.launch {
+        val deferredRegisteredMessage = messageListenersHandler.registerListener<Registered>(requestId)
+        val deferredErrorMessage = messageListenersHandler.registerListener<Error>(requestId)
+        launch {
+            val registeredMessage = deferredRegisteredMessage.await()
+            deferredErrorMessage.cancel()
+            completableResult.complete(registeredMessage)
+        }
+        launch {
+            val errorMessage = deferredErrorMessage.await()
+            deferredRegisteredMessage.cancel()
+            completableResult.cancel(errorMessage.toCallException())
         }
     }
 
@@ -54,12 +73,6 @@ internal class Callee(
                 pendingMessageHolder.remove(requestId)
             }
         }
-
-    //TODO use more generic listeners here? Subscribe to message type/requestId
-    //TODO use correct exception
-    fun receiveRegistered(registered: Registered) =
-        pendingRegistrations[registered.requestId]?.complete(registered)
-            ?: throw ProtocolViolationException("No register request with id ${registered.requestId}")
 
     //TODO use correct exception
     fun receiveUnregistered(unregistered: Unregistered) =

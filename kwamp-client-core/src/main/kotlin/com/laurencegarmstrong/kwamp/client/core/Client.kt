@@ -70,12 +70,11 @@ class Client(
         messageListenersHandler.notifyListeners(message)
 
         when (message) {
-            is Registered -> callee.receiveRegistered(message)
             is Unregistered -> callee.receiveUnregistered(message)
 
             is Invocation -> callee.invokeProcedure(message)
 
-            is Error -> handleError(message)
+            is Error -> handleError(message)    // Need to check request type?
         }
     }
 
