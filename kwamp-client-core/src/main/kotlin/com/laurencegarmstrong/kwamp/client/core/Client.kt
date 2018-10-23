@@ -1,8 +1,6 @@
 package com.laurencegarmstrong.kwamp.client.core
 
-import com.laurencegarmstrong.kwamp.client.core.call.CallHandler
-import com.laurencegarmstrong.kwamp.client.core.call.Callee
-import com.laurencegarmstrong.kwamp.client.core.call.Caller
+import com.laurencegarmstrong.kwamp.client.core.call.*
 import com.laurencegarmstrong.kwamp.core.*
 import com.laurencegarmstrong.kwamp.core.messages.*
 import com.laurencegarmstrong.kwamp.core.serialization.json.JsonMessageSerializer
@@ -14,13 +12,25 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 
-class Client(
+interface Client {
+    fun register(procedure: Uri, handler: CallHandler): RegistrationHandle
+
+    fun call(
+        procedure: Uri,
+        arguments: List<Any?>? = null,
+        argumentsKw: Dict? = null
+    ): DeferredCallResult
+
+    fun disconnect(closeReason: Uri = WampClose.SYSTEM_SHUTDOWN.uri): Goodbye
+}
+
+class ClientImpl(
     incoming: ReceiveChannel<ByteArray>,
     outgoing: SendChannel<ByteArray>,
     realm: Uri,
     protocol: String = WAMP_DEFAULT
-) {
-    private val log = LoggerFactory.getLogger(Client::class.java)!! //TODO make this cleaner extension?
+) : Client {
+    private val log = LoggerFactory.getLogger(ClientImpl::class.java)!! //TODO make this cleaner extension?
     //TODO bubble close function up to transport layer
     private val connection = Connection(incoming, outgoing, {}, getSerializer(protocol))
 
@@ -63,7 +73,7 @@ class Client(
         }
     }
 
-    fun register(procedure: Uri, handler: CallHandler) =
+    override fun register(procedure: Uri, handler: CallHandler) =
         callee.register(procedure, handler)
 
     private fun handleMessage(message: Message) {
@@ -101,13 +111,13 @@ class Client(
     }
 
     //TODO make extension on Client?
-    fun call(
+    override fun call(
         procedure: Uri,
-        arguments: List<Any?>? = null,
-        argumentsKw: Dict? = null
+        arguments: List<Any?>?,
+        argumentsKw: Dict?
     ) = caller.call(procedure, arguments, argumentsKw)
 
-    fun disconnect(closeReason: Uri = WampClose.SYSTEM_SHUTDOWN.uri) = runBlocking {
+    override fun disconnect(closeReason: Uri) = runBlocking {
         connection.send(Goodbye(emptyMap(), closeReason))
 
         messageListenersHandler.registerListener<Goodbye>().await().also { message ->

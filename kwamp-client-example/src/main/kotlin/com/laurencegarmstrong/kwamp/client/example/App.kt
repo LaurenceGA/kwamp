@@ -1,6 +1,6 @@
 package com.laurencegarmstrong.kwamp.client.example
 
-import com.laurencegarmstrong.kwamp.client.core.Client
+import com.laurencegarmstrong.kwamp.client.core.ClientImpl
 import com.laurencegarmstrong.kwamp.client.core.call.CallResult
 import com.laurencegarmstrong.kwamp.core.Uri
 import com.laurencegarmstrong.kwamp.core.WAMP_DEFAULT
@@ -47,11 +47,11 @@ object App {
         wampClient.disconnect()
     }
 
-    private fun createWebsocketWampClient(): Client {
+    private fun createWebsocketWampClient(): ClientImpl {
         val wampIncoming = Channel<ByteArray>()
         val wampOutgoing = Channel<ByteArray>()
         establishWebsocketConnection(wampIncoming, wampOutgoing)
-        return Client(wampIncoming, wampOutgoing, Uri("default"))
+        return ClientImpl(wampIncoming, wampOutgoing, Uri("default"))
     }
 
     private fun establishWebsocketConnection(
