@@ -21,7 +21,7 @@ interface Client {
         argumentsKw: Dict? = null
     ): DeferredCallResult
 
-    fun disconnect(closeReason: Uri = WampClose.SYSTEM_SHUTDOWN.uri): Goodbye
+    fun disconnect(closeReason: Uri = WampClose.SYSTEM_SHUTDOWN.uri): Uri
 }
 
 class ClientImpl(
@@ -120,8 +120,9 @@ class ClientImpl(
     override fun disconnect(closeReason: Uri) = runBlocking {
         connection.send(Goodbye(emptyMap(), closeReason))
 
-        messageListenersHandler.registerListener<Goodbye>().await().also { message ->
+        messageListenersHandler.registerListener<Goodbye>().await().let { message ->
             log.info("Router replied goodbye reason: ${message.reason}")
+            message.reason
         }
     }
 }

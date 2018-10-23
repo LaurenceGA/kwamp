@@ -133,8 +133,8 @@ class ClientConversationCanvas(
         return client
     }
 
-    fun TestClient.connect() {
-        this.connect(realm)
+    fun TestClient.connect(testRealm: Uri = realm) {
+        this.connect(testRealm)
     }
 }
 
@@ -157,9 +157,8 @@ class TestClient : Client {
     override fun call(procedure: Uri, arguments: List<Any?>?, argumentsKw: Dict?) =
         client?.call(procedure, arguments, argumentsKw) ?: throw ClientNotConnected()
 
-    override fun disconnect(closeReason: Uri): Goodbye {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun disconnect(closeReason: Uri) =
+        client?.disconnect(closeReason) ?: throw ClientNotConnected()
 }
 
 class ClientNotConnected : IllegalStateException()

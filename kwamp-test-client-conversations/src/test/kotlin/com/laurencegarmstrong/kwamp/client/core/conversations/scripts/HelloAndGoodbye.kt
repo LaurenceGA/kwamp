@@ -1,8 +1,8 @@
 package com.laurencegarmstrong.kwamp.client.core.conversations.scripts
 
 import com.laurencegarmstrong.kwamp.conversations.core.ClientConversation
-import com.laurencegarmstrong.kwamp.conversations.core.RECEIVE_TIMEOUT
-import com.laurencegarmstrong.kwamp.conversations.core.TestConnection
+import com.laurencegarmstrong.kwamp.conversations.core.TestClient
+import com.laurencegarmstrong.kwamp.core.Uri
 import com.laurencegarmstrong.kwamp.core.WampClose
 import com.laurencegarmstrong.kwamp.core.messages.Goodbye
 import com.laurencegarmstrong.kwamp.core.messages.Hello
@@ -10,44 +10,37 @@ import com.laurencegarmstrong.kwamp.core.messages.Welcome
 import io.kotlintest.be
 import io.kotlintest.should
 import io.kotlintest.specs.StringSpec
-import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withTimeout
 
 class HelloAndGoodbye : StringSpec({
     "A client can say Hello and Goodbye" {
-        ClientConversation(TestConnection()) {
-            val createClientJob = async {
-                //TODO push wait down a level to helper function
-                withTimeout(RECEIVE_TIMEOUT) {
-                    newTestClient()
-                }
-            }
-            router shouldReceiveMessage { message: Hello ->
-                message.realm should be(realm)
-            }
+        ClientConversation {
+            val client = TestClient()
+            val testRealm = Uri("some.realm")
 
-            router willSend { Welcome(123L, emptyMap()) }
-
-            val client = runBlocking {
-                createClientJob.await()
+            val connectionJob = launchWithTimeout {
+                client.connect(testRealm)
             }
+            client shouldHaveSentMessage { message: Hello ->
+                message.realm should be(testRealm)
+            }
+            client willBeSentRouterMessage { Welcome(123L, emptyMap()) }
 
-            val disconnectJob = async {
-                withTimeout(RECEIVE_TIMEOUT) {
-                    client.disconnect()
-                }
+            runBlocking {
+                connectionJob.join()
             }
 
-            router shouldReceiveMessage { message: Goodbye ->
+            val disconnectionJob = asyncWithTimeout {
+                client.disconnect()
+            }
+
+            client shouldHaveSentMessage { message: Goodbye ->
                 message.reason should be(WampClose.SYSTEM_SHUTDOWN.uri)
             }
 
-            router willSend { Goodbye(emptyMap(), WampClose.GOODBYE_AND_OUT.uri) }
+            client willBeSentRouterMessage { Goodbye(emptyMap(), WampClose.GOODBYE_AND_OUT.uri) }
 
-            runBlocking {
-                disconnectJob.await()
-            }
+            runBlocking { disconnectionJob.await() } should be(WampClose.GOODBYE_AND_OUT.uri)
         }
     }
 })
