@@ -94,7 +94,7 @@ class RemoteProcedureCall : StringSpec({
             client willBeSentRouterMessage {
                 Invocation(invocationRequestId2, registrationId, emptyMap())
             }
-            // exception here or something
+            //TODO exception here or something
 //            client shouldHaveSentMessage { message: Error ->
 //                message.requestId should be(invocationRequestId2)
 //                message.requestType should be(MessageType.CALL)
