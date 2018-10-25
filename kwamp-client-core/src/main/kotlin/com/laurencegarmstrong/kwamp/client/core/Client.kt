@@ -22,6 +22,13 @@ interface Client {
     ): DeferredCallResult
 
     fun disconnect(closeReason: Uri = WampClose.SYSTEM_SHUTDOWN.uri): Uri
+
+    fun publish(
+        topic: Uri,
+        arguments: List<Any?>? = null,
+        argumentsKw: Dict? = null,
+        onPublished: ((Long) -> Unit)? = null
+    )
 }
 
 class ClientImpl(
@@ -123,6 +130,23 @@ class ClientImpl(
         messageListenersHandler.registerListener<Goodbye>().await().let { message ->
             log.info("Router replied goodbye reason: ${message.reason}")
             message.reason
+        }
+    }
+
+    override fun publish(topic: Uri, arguments: List<Any?>?, argumentsKw: Dict?, onPublished: ((Long) -> Unit)?) {
+        runBlocking {
+            randomIdGenerator.newId().also { requestId ->
+                val optionsMap = if (onPublished != null) mapOf("acknowledge" to true) else emptyMap()
+                connection.send(Publish(requestId, optionsMap, topic, arguments, argumentsKw))
+
+                if (onPublished != null) {
+                    launch {
+                        val published =
+                            messageListenersHandler.registerListener<Published>(requestId).await()
+                        onPublished(published.publication)
+                    }
+                }
+            }
         }
     }
 }

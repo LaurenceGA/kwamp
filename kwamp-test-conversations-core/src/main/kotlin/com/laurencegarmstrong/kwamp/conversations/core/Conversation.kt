@@ -3,10 +3,12 @@ package com.laurencegarmstrong.kwamp.conversations.core
 import com.laurencegarmstrong.kwamp.client.core.Client
 import com.laurencegarmstrong.kwamp.client.core.ClientImpl
 import com.laurencegarmstrong.kwamp.client.core.call.CallHandler
-import com.laurencegarmstrong.kwamp.client.core.call.DeferredCallResult
 import com.laurencegarmstrong.kwamp.core.Connection
 import com.laurencegarmstrong.kwamp.core.Uri
-import com.laurencegarmstrong.kwamp.core.messages.*
+import com.laurencegarmstrong.kwamp.core.messages.Dict
+import com.laurencegarmstrong.kwamp.core.messages.Hello
+import com.laurencegarmstrong.kwamp.core.messages.Message
+import com.laurencegarmstrong.kwamp.core.messages.Welcome
 import com.laurencegarmstrong.kwamp.core.serialization.MessageSerializer
 import com.laurencegarmstrong.kwamp.core.serialization.json.JsonMessageSerializer
 import com.laurencegarmstrong.kwamp.router.core.Router
@@ -101,6 +103,11 @@ class ClientConversationCanvas(
             withTimeout(timeout, block)
         }
 
+    fun <T> runBlockingWithTimeout(timeout: Long = RECEIVE_TIMEOUT, block: suspend CoroutineScope.() -> T) =
+        runBlocking {
+            withTimeout(timeout, block)
+        }
+
     inline infix fun <reified T : Message> TestClient.shouldHaveSentMessage(crossinline messageVerifier: (message: T) -> Unit) {
         runBlocking {
             withTimeout(RECEIVE_TIMEOUT) {
@@ -159,6 +166,10 @@ class TestClient : Client {
 
     override fun disconnect(closeReason: Uri) =
         client?.disconnect(closeReason) ?: throw ClientNotConnected()
+
+    override fun publish(topic: Uri, arguments: List<Any?>?, argumentsKw: Dict?, onPublished: ((Long) -> Unit)?) {
+        client?.publish(topic, arguments, argumentsKw, onPublished) ?: throw ClientNotConnected()
+    }
 }
 
 class ClientNotConnected : IllegalStateException()
