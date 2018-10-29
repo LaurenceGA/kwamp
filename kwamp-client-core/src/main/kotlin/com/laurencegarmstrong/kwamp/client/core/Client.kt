@@ -1,6 +1,7 @@
 package com.laurencegarmstrong.kwamp.client.core
 
 import com.laurencegarmstrong.kwamp.client.core.call.*
+import com.laurencegarmstrong.kwamp.client.core.pubsub.Publisher
 import com.laurencegarmstrong.kwamp.core.*
 import com.laurencegarmstrong.kwamp.core.messages.*
 import com.laurencegarmstrong.kwamp.core.serialization.json.JsonMessageSerializer
@@ -49,6 +50,8 @@ class ClientImpl(
 
     private val caller = Caller(connection, randomIdGenerator, messageListenersHandler)
     private val callee = Callee(connection, randomIdGenerator, messageListenersHandler)
+
+    private val publisher = Publisher(connection, randomIdGenerator, messageListenersHandler)
 
     init {
         joinRealm(realm)
@@ -133,20 +136,6 @@ class ClientImpl(
         }
     }
 
-    override fun publish(topic: Uri, arguments: List<Any?>?, argumentsKw: Dict?, onPublished: ((Long) -> Unit)?) {
-        runBlocking {
-            randomIdGenerator.newId().also { requestId ->
-                val optionsMap = if (onPublished != null) mapOf("acknowledge" to true) else emptyMap()
-                connection.send(Publish(requestId, optionsMap, topic, arguments, argumentsKw))
-
-                if (onPublished != null) {
-                    launch {
-                        val published =
-                            messageListenersHandler.registerListener<Published>(requestId).await()
-                        onPublished(published.publication)
-                    }
-                }
-            }
-        }
-    }
+    override fun publish(topic: Uri, arguments: List<Any?>?, argumentsKw: Dict?, onPublished: ((Long) -> Unit)?) =
+        publisher.publish(topic, arguments, argumentsKw, onPublished)
 }

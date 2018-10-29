@@ -26,6 +26,12 @@ object App {
     fun main(args: Array<String>) {
         val wampClient = createWebsocketWampClient()
 
+        for (i in 0..5) {
+            wampClient.publish(Uri("test.pub"), listOf(i)) {
+                println("Publication id for $i is $it")
+            }
+        }
+
         var counter = 0
         val registrationHandle = wampClient.register(Uri("test.proc")) { arguments, argumentsKw ->
             counter++
