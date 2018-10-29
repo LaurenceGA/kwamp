@@ -46,13 +46,17 @@ data class Publish(
     val argumentsKw: Dict? = null
 ) : Message(MessageType.PUBLISH), RequestMessage
 
-data class Published(override val requestId: Long, val publication: Long) : Message(MessageType.PUBLISHED), RequestMessage
+data class Published(override val requestId: Long, val publication: Long) : Message(MessageType.PUBLISHED),
+    RequestMessage
 
-data class Subscribe(override val requestId: Long, val options: Dict, val topic: UriPattern) : Message(MessageType.SUBSCRIBE), RequestMessage
+data class Subscribe(override val requestId: Long, val options: Dict, val topic: UriPattern) :
+    Message(MessageType.SUBSCRIBE), RequestMessage
 
-data class Subscribed(override val requestId: Long, val subscription: Long) : Message(MessageType.SUBSCRIBED), RequestMessage
+data class Subscribed(override val requestId: Long, val subscription: Long) : Message(MessageType.SUBSCRIBED),
+    RequestMessage
 
-data class Unsubscribe(override val requestId: Long, val subscription: Long) : Message(MessageType.UNSUBSCRIBE), RequestMessage
+data class Unsubscribe(override val requestId: Long, val subscription: Long) : Message(MessageType.UNSUBSCRIBE),
+    RequestMessage
 
 data class Unsubscribed(override val requestId: Long) : Message(MessageType.UNSUBSCRIBED), RequestMessage
 
@@ -79,11 +83,14 @@ data class Result(
     val argumentsKw: Dict? = null
 ) : Message(MessageType.RESULT), RequestMessage
 
-data class Register(override val requestId: Long, val options: Dict, val procedure: Uri) : Message(MessageType.REGISTER), RequestMessage
+data class Register(override val requestId: Long, val options: Dict, val procedure: Uri) :
+    Message(MessageType.REGISTER), RequestMessage
 
-data class Registered(override val requestId: Long, val registration: Long) : Message(MessageType.REGISTERED), RequestMessage
+data class Registered(override val requestId: Long, val registration: Long) : Message(MessageType.REGISTERED),
+    RequestMessage
 
-data class Unregister(override val requestId: Long, val registration: Long) : Message(MessageType.UNREGISTER), RequestMessage
+data class Unregister(override val requestId: Long, val registration: Long) : Message(MessageType.UNREGISTER),
+    RequestMessage
 
 data class Unregistered(override val requestId: Long) : Message(MessageType.UNREGISTERED), RequestMessage
 

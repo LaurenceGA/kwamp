@@ -1,8 +1,11 @@
 package com.laurencegarmstrong.kwamp.core
 
-import io.kotlintest.*
+import io.kotlintest.be
 import io.kotlintest.data.forall
 import io.kotlintest.matchers.string.beEmpty
+import io.kotlintest.should
+import io.kotlintest.shouldNot
+import io.kotlintest.shouldThrow
 import io.kotlintest.specs.StringSpec
 import io.kotlintest.tables.row
 
