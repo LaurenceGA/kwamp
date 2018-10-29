@@ -4,7 +4,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 buildscript {
     var kotlinVersion: String by extra
-    kotlinVersion = "1.3.0-rc-146"
+    kotlinVersion = "1.3.0"
 
     repositories {
         mavenCentral()
@@ -22,7 +22,7 @@ plugins {
 
 val kotlinVersion: String by extra
 val kotlinTestVersion = "3.1.10"
-val coroutinesVersion = "0.30.2-eap13"
+val coroutinesVersion = "1.0.0"
 val logbackVersion = "1.2.1"
 
 subprojects {
