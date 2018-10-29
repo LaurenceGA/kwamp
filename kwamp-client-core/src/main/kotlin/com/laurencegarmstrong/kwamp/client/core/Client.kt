@@ -1,7 +1,9 @@
 package com.laurencegarmstrong.kwamp.client.core
 
 import com.laurencegarmstrong.kwamp.client.core.call.*
+import com.laurencegarmstrong.kwamp.client.core.pubsub.EventHandler
 import com.laurencegarmstrong.kwamp.client.core.pubsub.Publisher
+import com.laurencegarmstrong.kwamp.client.core.pubsub.Subscriber
 import com.laurencegarmstrong.kwamp.core.*
 import com.laurencegarmstrong.kwamp.core.messages.*
 import com.laurencegarmstrong.kwamp.core.serialization.json.JsonMessageSerializer
@@ -30,6 +32,8 @@ interface Client {
         argumentsKw: Dict? = null,
         onPublished: ((Long) -> Unit)? = null
     )
+
+    fun subscribe(topicPattern: UriPattern, eventHandler: EventHandler)
 }
 
 class ClientImpl(
@@ -52,6 +56,7 @@ class ClientImpl(
     private val callee = Callee(connection, randomIdGenerator, messageListenersHandler)
 
     private val publisher = Publisher(connection, randomIdGenerator, messageListenersHandler)
+    private val subscriber = Subscriber(connection, randomIdGenerator, messageListenersHandler)
 
     init {
         joinRealm(realm)
@@ -91,6 +96,7 @@ class ClientImpl(
 
         when (message) {
             is Invocation -> callee.invokeProcedure(message)
+            is Event -> subscriber.receiveEvent(message)
 
             is Error -> handleError(message)    // Need to check request type?
         }
@@ -136,6 +142,17 @@ class ClientImpl(
         }
     }
 
-    override fun publish(topic: Uri, arguments: List<Any?>?, argumentsKw: Dict?, onPublished: ((Long) -> Unit)?) =
-        publisher.publish(topic, arguments, argumentsKw, onPublished)
+    override fun publish(
+        topic: Uri,
+        arguments: List<Any?>?,
+        argumentsKw: Dict?,
+        onPublished: ((Long) -> Unit)?
+    ) = publisher.publish(topic, arguments, argumentsKw, onPublished)
+
+    override fun subscribe(
+        topicPattern: UriPattern,
+        eventHandler: EventHandler
+    ) {
+        subscriber.subscribe(topicPattern, eventHandler)
+    }
 }

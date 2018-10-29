@@ -2,8 +2,8 @@ package com.laurencegarmstrong.kwamp.client.core.conversations.scripts
 
 import com.laurencegarmstrong.kwamp.conversations.core.ClientConversation
 import com.laurencegarmstrong.kwamp.core.Uri
-import com.laurencegarmstrong.kwamp.core.messages.Publish
-import com.laurencegarmstrong.kwamp.core.messages.Published
+import com.laurencegarmstrong.kwamp.core.UriPattern
+import com.laurencegarmstrong.kwamp.core.messages.*
 import io.kotlintest.be
 import io.kotlintest.matchers.collections.shouldContainExactly
 import io.kotlintest.matchers.containExactly
@@ -14,7 +14,7 @@ import io.kotlintest.specs.StringSpec
 import kotlinx.coroutines.CompletableDeferred
 
 class PublishAndSubscribe : StringSpec({
-    "A Client publish an event unacknowledged" {
+    "A Client can publish an event unacknowledged" {
         ClientConversation {
             val client = newConnectedTestClient()
             val testTopic = Uri("test.topic")
@@ -33,7 +33,7 @@ class PublishAndSubscribe : StringSpec({
         }
     }
 
-    "A Client publish an event and have it acknowledged" {
+    "A Client can publish an event and have it acknowledged" {
         ClientConversation {
             val client = newConnectedTestClient()
             val testTopic = Uri("test.topic")
@@ -61,6 +61,47 @@ class PublishAndSubscribe : StringSpec({
 
             runBlockingWithTimeout {
                 deferredPublicationId.await() should be(publicationId)
+            }
+        }
+    }
+
+    "A Client subscribe to a topic and receive events" {
+        ClientConversation {
+            val client = newConnectedTestClient()
+
+            val numOfEvents = 2
+            val completions = mutableListOf<CompletableDeferred<Int>>()
+            for (i in 0..numOfEvents) {
+                completions.add(CompletableDeferred())
+            }
+
+            val testSubUriPattern = UriPattern("test.sub")
+            launchWithTimeout {
+                client.subscribe(testSubUriPattern) { arguments, argumentsKw ->
+                    val index = arguments!![0] as Int
+                    completions[index].complete(index)
+                }
+            }
+
+            var requestId: Long? = null
+            client shouldHaveSentMessage { message: Subscribe ->
+                message.topic should be(testSubUriPattern)
+                requestId = message.requestId
+            }
+
+            client willBeSentRouterMessage { Subscribed(requestId!!, 123L) }
+
+            val eventArgumentsKw = mapOf("one" to 1, "two" to "two")
+            for (i in 0..numOfEvents) {
+                client willBeSentRouterMessage {
+                    Event(123L, i.toLong(), emptyMap(), listOf(i.toLong()), eventArgumentsKw)
+                }
+            }
+
+            for (i in 0..numOfEvents) {
+                runBlockingWithTimeout {
+                    completions[i].await() should be(i)
+                }
             }
         }
     }

@@ -3,8 +3,10 @@ package com.laurencegarmstrong.kwamp.conversations.core
 import com.laurencegarmstrong.kwamp.client.core.Client
 import com.laurencegarmstrong.kwamp.client.core.ClientImpl
 import com.laurencegarmstrong.kwamp.client.core.call.CallHandler
+import com.laurencegarmstrong.kwamp.client.core.pubsub.EventHandler
 import com.laurencegarmstrong.kwamp.core.Connection
 import com.laurencegarmstrong.kwamp.core.Uri
+import com.laurencegarmstrong.kwamp.core.UriPattern
 import com.laurencegarmstrong.kwamp.core.messages.Dict
 import com.laurencegarmstrong.kwamp.core.messages.Hello
 import com.laurencegarmstrong.kwamp.core.messages.Message
@@ -167,9 +169,13 @@ class TestClient : Client {
     override fun disconnect(closeReason: Uri) =
         client?.disconnect(closeReason) ?: throw ClientNotConnected()
 
-    override fun publish(topic: Uri, arguments: List<Any?>?, argumentsKw: Dict?, onPublished: ((Long) -> Unit)?) {
+    override fun publish(topic: Uri, arguments: List<Any?>?, argumentsKw: Dict?, onPublished: ((Long) -> Unit)?) =
         client?.publish(topic, arguments, argumentsKw, onPublished) ?: throw ClientNotConnected()
-    }
+
+
+    override fun subscribe(topicPattern: UriPattern, eventHandler: EventHandler) =
+        client?.subscribe(topicPattern, eventHandler) ?: throw ClientNotConnected()
+
 }
 
 class ClientNotConnected : IllegalStateException()

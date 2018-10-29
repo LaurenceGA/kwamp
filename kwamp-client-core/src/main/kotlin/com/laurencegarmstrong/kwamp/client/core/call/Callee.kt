@@ -127,7 +127,6 @@ internal class Callee(
 
 typealias CallHandler = (arguments: List<Any?>?, argumentsKw: Dict?) -> CallResult
 
-
 class RegistrationHandle(private val unregisterCallback: () -> Unit) {
     fun unregister() = unregisterCallback()
 }

@@ -1,6 +1,7 @@
 package com.laurencegarmstrong.kwamp.core.serialization
 
 import com.laurencegarmstrong.kwamp.core.Uri
+import com.laurencegarmstrong.kwamp.core.UriPattern
 import com.laurencegarmstrong.kwamp.core.messages.*
 import io.kotlintest.tables.row
 
@@ -77,9 +78,17 @@ val messageData = listOf(
         Subscribe(
             123,
             optionsDict,
-            Uri("topic")
+            Uri("topic.test")
         ),
-        "[32, 123, $optionsDictRaw, \"topic\"]"
+        "[32, 123, $optionsDictRaw, \"topic.test\"]"
+    ),
+    row(
+        Subscribe(
+            123,
+            optionsDict,
+            UriPattern("topic..test")
+        ),
+        "[32, 123, $optionsDictRaw, \"topic..test\"]"
     ),
     row(
         Subscribed(123, 456),
