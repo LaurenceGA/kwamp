@@ -38,5 +38,6 @@ class MessagePackSerializer : MessageSerializer {
         MoshiPack({
             add(MessageTypeJsonAdapter)
             add(UriJsonAdapter)
+            add(UriPatternJsonAdapter)
         }).packToByteArray(message.asList())
 }
