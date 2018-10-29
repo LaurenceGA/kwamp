@@ -4,6 +4,7 @@ import com.laurencegarmstrong.kwamp.client.core.call.*
 import com.laurencegarmstrong.kwamp.client.core.pubsub.EventHandler
 import com.laurencegarmstrong.kwamp.client.core.pubsub.Publisher
 import com.laurencegarmstrong.kwamp.client.core.pubsub.Subscriber
+import com.laurencegarmstrong.kwamp.client.core.pubsub.SubscriptionHandle
 import com.laurencegarmstrong.kwamp.core.*
 import com.laurencegarmstrong.kwamp.core.messages.*
 import com.laurencegarmstrong.kwamp.core.serialization.json.JsonMessageSerializer
@@ -33,7 +34,7 @@ interface Client {
         onPublished: ((Long) -> Unit)? = null
     )
 
-    fun subscribe(topicPattern: UriPattern, eventHandler: EventHandler)
+    fun subscribe(topicPattern: UriPattern, eventHandler: EventHandler): SubscriptionHandle
 }
 
 class ClientImpl(
@@ -88,9 +89,6 @@ class ClientImpl(
         }
     }
 
-    override fun register(procedure: Uri, handler: CallHandler) =
-        callee.register(procedure, handler)
-
     private fun handleMessage(message: Message) {
         messageListenersHandler.notifyListeners(message)
 
@@ -126,6 +124,9 @@ class ClientImpl(
         }.join()
     }
 
+    override fun register(procedure: Uri, handler: CallHandler) =
+        callee.register(procedure, handler)
+
     //TODO make extension on Client?
     override fun call(
         procedure: Uri,
@@ -152,7 +153,5 @@ class ClientImpl(
     override fun subscribe(
         topicPattern: UriPattern,
         eventHandler: EventHandler
-    ) {
-        subscriber.subscribe(topicPattern, eventHandler)
-    }
+    ) = subscriber.subscribe(topicPattern, eventHandler)
 }
