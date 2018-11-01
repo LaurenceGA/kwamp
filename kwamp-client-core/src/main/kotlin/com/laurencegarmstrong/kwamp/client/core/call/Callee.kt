@@ -1,10 +1,7 @@
 package com.laurencegarmstrong.kwamp.client.core.call
 
 import com.laurencegarmstrong.kwamp.client.core.MessageListenersHandler
-import com.laurencegarmstrong.kwamp.core.Connection
-import com.laurencegarmstrong.kwamp.core.ProtocolViolationException
-import com.laurencegarmstrong.kwamp.core.RandomIdGenerator
-import com.laurencegarmstrong.kwamp.core.Uri
+import com.laurencegarmstrong.kwamp.core.*
 import com.laurencegarmstrong.kwamp.core.messages.*
 import kotlinx.coroutines.*
 import java.util.concurrent.ConcurrentHashMap
@@ -58,7 +55,7 @@ internal class Callee(
         launch {
             val errorMessage = deferredErrorMessage.await()
             deferredRegisteredMessage.cancel()
-            completableResult.cancel(errorMessage.toCallException())
+            completableResult.completeExceptionally(errorMessage.toWampErrorException())
         }
     }
 
@@ -102,7 +99,7 @@ internal class Callee(
         launch {
             val errorMessage = deferredErrorMessage.await()
             deferredUnregisteredMessage.cancel()
-            completableResult.cancel(errorMessage.toCallException())
+            completableResult.completeExceptionally(errorMessage.toWampErrorException())
         }
     }
 

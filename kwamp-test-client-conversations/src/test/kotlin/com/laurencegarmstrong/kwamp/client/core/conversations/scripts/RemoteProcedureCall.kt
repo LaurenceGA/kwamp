@@ -6,6 +6,7 @@ import com.laurencegarmstrong.kwamp.conversations.core.ClientConversation
 import com.laurencegarmstrong.kwamp.conversations.core.ClientConversationCanvas
 import com.laurencegarmstrong.kwamp.conversations.core.TestClient
 import com.laurencegarmstrong.kwamp.core.Uri
+import com.laurencegarmstrong.kwamp.core.WampErrorException
 import com.laurencegarmstrong.kwamp.core.messages.*
 import io.kotlintest.be
 import io.kotlintest.matchers.collections.shouldContainExactly
@@ -100,6 +101,69 @@ class RemoteProcedureCall : StringSpec({
 //                message.requestType should be(MessageType.CALL)
 //                message.error should be(WampError.NO_SUCH_PROCEDURE.uri)
 //            }
+        }
+    }
+
+    "A Client can receive an exception if a call fails" {
+        ClientConversation {
+            val client = newConnectedTestClient()
+
+            val testProcedure = Uri("test.proc")
+
+            val callArguments = listOf(1, 2, "peanut")
+            val callArgumentsKw = mapOf(
+                "one" to 1,
+                "three" to "two"
+            )
+            val deferredCallResult = client.call(testProcedure, callArguments, callArgumentsKw)
+            var callRequestId: Long? = null
+            client shouldHaveSentMessage { message: Call ->
+                message.procedure should be(testProcedure)
+                message.arguments shouldContainExactly callArguments
+                message.argumentsKw!! should containExactly<String, Any?>(callArgumentsKw)
+                callRequestId = message.requestId
+            }
+
+            val invocationErrorArguments = listOf(3, 4, "didn't work")
+            val invocationErrorArgumentsKw = mapOf(
+                "five" to 7,
+                "six" to "nope"
+            )
+            val invocationErrorUri = Uri("nope.did.not.work")
+            println("ROUTER SENDING ERROR")
+            client willBeSentRouterMessage {
+                Error(
+                    MessageType.CALL,
+                    callRequestId!!,
+                    emptyMap(),
+                    invocationErrorUri,
+                    invocationErrorArguments,
+                    invocationErrorArgumentsKw
+                )
+            }
+            println("ROUTER SENT ERROR")
+
+//            deferredCallResult.invokeOnError { error ->
+//                println("ONERROR")
+//                error.requestId should be(callRequestId!!)
+//                error.requestType should be(MessageType.CALL)
+//                error.arguments shouldContainExactly invocationErrorArguments
+//                error.argumentsKw!! should containExactly<String, Any?>(invocationErrorArgumentsKw)
+//            }
+
+            runBlocking {
+                try {
+                    println("WAITING")
+                    deferredCallResult.await()
+                    println("DONE WAITING")
+                } catch (error: WampErrorException) {
+                    println("CAUGHT EXCEPTION")
+                    error.requestId should be(callRequestId!!)
+                    error.requestType should be(MessageType.CALL)
+                    error.arguments shouldContainExactly invocationErrorArguments
+                    error.argumentsKw!! should containExactly<String, Any?>(invocationErrorArgumentsKw)
+                }
+            }
         }
     }
 })

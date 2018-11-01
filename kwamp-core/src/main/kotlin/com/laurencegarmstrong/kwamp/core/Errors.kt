@@ -44,11 +44,11 @@ enum class WampError(uri: String) {
     val uri = Uri(uri)
 }
 
-open class WampException(val error: WampError, message: String? = null, cause: Throwable? = null) :
+open class WampException(val error: Uri, message: String? = null, cause: Throwable? = null) :
     Exception(message, cause)
 
 open class ProtocolViolationException(message: String? = null, cause: Throwable? = null) :
-    WampException(WampError.PROTOCOL_VIOLATION, message = message, cause = cause)
+    WampException(WampError.PROTOCOL_VIOLATION.uri, message = message, cause = cause)
 
 class InvalidMessageException(message: String? = null, cause: Throwable? = null) :
     ProtocolViolationException(message = message, cause = cause)
@@ -57,35 +57,43 @@ class UnexpectedMessageException(expected: KClass<out Message>, actual: KClass<o
     ProtocolViolationException(message = "Expected ${expected.simpleName}, but got ${actual.simpleName}")
 
 class NoSuchRealmException(message: String? = null, cause: Throwable? = null) :
-    WampException(WampError.NO_SUCH_REALM, message = message, cause = cause)
+    WampException(WampError.NO_SUCH_REALM.uri, message = message, cause = cause)
 
 open class WampErrorException(
-    error: WampError,
+    error: Uri,
     val requestType: MessageType,
     val requestId: Long,
-    private val details: Dict = emptyMap(),
-    private val arguments: List<Any?>? = null,
-    private val argumentsKw: Dict? = null
-) :
-    WampException(error) {
+    val details: Dict = emptyMap(),
+    val arguments: List<Any?>? = null,
+    val argumentsKw: Dict? = null
+) : WampException(error) {
     fun getErrorMessage() = Error(
         requestType,
         requestId,
         details,
-        error.uri,
+        error,
         arguments,
         argumentsKw
     )
 }
 
+fun Error.toWampErrorException() = WampErrorException(
+    error,
+    requestType,
+    requestId,
+    details,
+    arguments,
+    argumentsKw
+)
+
 class InvalidUriException(message: String?) :
-    WampException(WampError.INVALID_URI, message = message)
+    WampException(WampError.INVALID_URI.uri, message = message)
 
 //TODO reflection at the moment... Should change this requestId getting?
 //TODO what if there is no requestId (HELLO, ABORT, GOODBYE, ERROR)?
 class InvalidUriErrorException(message: Message) :
     WampErrorException(
-        WampError.INVALID_URI,
+        WampError.INVALID_URI.uri,
         requestType = message.messageType,
         requestId = tryGetRequestId(message)
     )
@@ -97,13 +105,17 @@ internal fun tryGetRequestId(message: Message) = try {
 }
 
 class ProcedureAlreadyExistsException(requestId: Long) :
-    WampErrorException(WampError.PROCEDURE_ALREADY_EXISTS, requestType = MessageType.REGISTER, requestId = requestId)
+    WampErrorException(
+        WampError.PROCEDURE_ALREADY_EXISTS.uri,
+        requestType = MessageType.REGISTER,
+        requestId = requestId
+    )
 
 class NoSuchRegistrationErrorException(requestId: Long) :
-    WampErrorException(WampError.NO_SUCH_REGISTRATION, requestType = MessageType.UNREGISTER, requestId = requestId)
+    WampErrorException(WampError.NO_SUCH_REGISTRATION.uri, requestType = MessageType.UNREGISTER, requestId = requestId)
 
 class NoSuchProcedureException(requestId: Long) :
-    WampErrorException(WampError.NO_SUCH_PROCEDURE, requestType = MessageType.CALL, requestId = requestId)
+    WampErrorException(WampError.NO_SUCH_PROCEDURE.uri, requestType = MessageType.CALL, requestId = requestId)
 
 class NoSuchSubscriptionException(requestId: Long) :
-    WampErrorException(WampError.NO_SUCH_SUBSCRIPTION, requestType = MessageType.UNSUBSCRIBE, requestId = requestId)
+    WampErrorException(WampError.NO_SUCH_SUBSCRIPTION.uri, requestType = MessageType.UNSUBSCRIBE, requestId = requestId)

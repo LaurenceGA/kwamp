@@ -4,9 +4,9 @@ import com.laurencegarmstrong.kwamp.client.core.MessageListenersHandler
 import com.laurencegarmstrong.kwamp.core.Connection
 import com.laurencegarmstrong.kwamp.core.RandomIdGenerator
 import com.laurencegarmstrong.kwamp.core.Uri
+import com.laurencegarmstrong.kwamp.core.WampErrorException
 import com.laurencegarmstrong.kwamp.core.messages.Call
 import com.laurencegarmstrong.kwamp.core.messages.Dict
-import com.laurencegarmstrong.kwamp.core.messages.Error
 import com.laurencegarmstrong.kwamp.core.messages.Result
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
@@ -50,27 +50,16 @@ internal class Caller(
     private fun deferredResultWithListeners(requestId: Long): DeferredCallResult {
         val completableResult = CompletableDeferred<CallResult>()
 
-        applyListenersToCompletableResult(completableResult, requestId)
+        GlobalScope.launch {
+            try {
+                val resultMessage = messageListenersHandler.registerListenerWithErrorHandler<Result>(requestId).await()
+                completableResult.complete(resultMessageToCallResult(resultMessage))
+            } catch (error: WampErrorException) {
+                completableResult.completeExceptionally(error)
+            }
+        }
 
         return DeferredCallResult(completableResult)
-    }
-
-    private fun applyListenersToCompletableResult(
-        completableResult: CompletableDeferred<CallResult>,
-        requestId: Long
-    ) = GlobalScope.launch {
-        val deferredResultMessage = messageListenersHandler.registerListener<Result>(requestId)
-        val deferredErrorMessage = messageListenersHandler.registerListener<Error>(requestId)
-        launch {
-            val resultMessage = deferredResultMessage.await()
-            deferredErrorMessage.cancel()
-            completableResult.complete(resultMessageToCallResult(resultMessage))
-        }
-        launch {
-            val errorMessage = deferredErrorMessage.await()
-            deferredResultMessage.cancel()
-            completableResult.cancel(errorMessage.toCallException())
-        }
     }
 
     private fun resultMessageToCallResult(resultMessage: Result) = CallResult(
@@ -83,13 +72,13 @@ class DeferredCallResult(private val deferredResult: Deferred<CallResult>) {
     suspend fun await() = deferredResult.await()
     suspend fun join() = deferredResult.join()
 
-    fun invokeOnError(errorCallback: (CallError) -> Unit) {
+    fun invokeOnError(errorCallback: (WampErrorException) -> Unit) {
         deferredResult.invokeOnCompletion { throwable ->
-            (throwable as? CallError)?.apply { callbackAsynchronously(this, errorCallback) }
+            (throwable as? WampErrorException)?.apply { callbackAsynchronously(this, errorCallback) }
         }
     }
 
-    private fun callbackAsynchronously(error: CallError, callback: (CallError) -> Unit) =
+    private fun callbackAsynchronously(error: WampErrorException, callback: (WampErrorException) -> Unit) =
         GlobalScope.launch {
             callback(error)
         }

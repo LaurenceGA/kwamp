@@ -20,7 +20,7 @@ class MessageSender {
         connection.send(
             Abort(
                 mapOf("message" to exception.localizedMessage),
-                exception.error.uri
+                exception.error
             )
         )
         connection.close(exception.localizedMessage)

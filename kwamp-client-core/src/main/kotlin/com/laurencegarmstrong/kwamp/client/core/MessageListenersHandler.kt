@@ -1,11 +1,10 @@
 package com.laurencegarmstrong.kwamp.client.core
 
+import com.laurencegarmstrong.kwamp.core.messages.Error
 import com.laurencegarmstrong.kwamp.core.messages.Message
 import com.laurencegarmstrong.kwamp.core.messages.RequestMessage
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
+import com.laurencegarmstrong.kwamp.core.toWampErrorException
+import kotlinx.coroutines.*
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.KClass
 
@@ -26,14 +25,18 @@ class MessageListenersHandler {
     inline fun <reified T : Message> registerListener(requestId: Long): Deferred<T> =
         registerListener(requestId, T::class)
 
+    inline fun <reified T : Message> registerListenerWithErrorHandler(requestId: Long): Deferred<T> =
+        registerListenerWithErrorHandler(requestId, T::class)
+
     @Suppress("UNCHECKED_CAST")
-    fun <T : Message> registerTypeListener(messageType: KClass<out T>): Deferred<T> = GlobalScope.async {
-        registerToMessageListenerMap(typeListeners, messageType).await() as T
-    }.apply {
-        invokeOnCompletion {
-            typeListeners.remove(messageType)
+    fun <T : Message> registerTypeListener(messageType: KClass<out T>): Deferred<T> =
+        GlobalScope.async {
+            registerToMessageListenerMap(typeListeners, messageType).await() as T
+        }.apply {
+            invokeOnCompletion {
+                typeListeners.remove(messageType)
+            }
         }
-    }
 
     @Suppress("UNCHECKED_CAST")
     fun <T : Message> registerListener(requestId: Long, messageType: KClass<out T>): Deferred<T> =
@@ -47,6 +50,30 @@ class MessageListenersHandler {
                 requestIdListeners.remove(RequestListenerKey(requestId, messageType))
             }
         }
+
+    fun <T : Message> registerListenerWithErrorHandler(requestId: Long, messageType: KClass<out T>) =
+        CompletableDeferred<T>().also {
+            applyListenersToDeferred(it, requestId, messageType)
+        }
+
+    private fun <T : Message> applyListenersToDeferred(
+        completableDeferredMessage: CompletableDeferred<T>,
+        requestId: Long,
+        messageType: KClass<out T>
+    ) = GlobalScope.launch {
+        val deferredMessage = registerListener(requestId, messageType)
+        val deferredErrorMessage = registerListener<Error>(requestId)
+        launch {
+            val message = deferredMessage.await()
+            deferredErrorMessage.cancel()
+            completableDeferredMessage.complete(message)
+        }
+        launch {
+            val errorMessage = deferredErrorMessage.await()
+            deferredMessage.cancel()
+            completableDeferredMessage.completeExceptionally(errorMessage.toWampErrorException())
+        }
+    }
 
     private fun <T> registerToMessageListenerMap(
         listenerMap: MutableMap<T, CompletableDeferred<Message>>,
