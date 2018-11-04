@@ -77,7 +77,7 @@ class PublishAndSubscribe : StringSpec({
 
             val testSubUriPattern = UriPattern("test.sub")
             launchWithTimeout {
-                client.subscribe(testSubUriPattern) { arguments, argumentsKw ->
+                client.subscribe(testSubUriPattern) { arguments, _ ->
                     val index = arguments!![0] as Int
                     completions[index].complete(index)
                 }
