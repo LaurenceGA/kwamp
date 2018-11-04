@@ -1,6 +1,5 @@
 package com.laurencegarmstrong.kwamp.router.core.conversations.scripts
 
-import com.laurencegarmstrong.kwamp.conversations.core.RouterConversation
 import com.laurencegarmstrong.kwamp.conversations.core.TestConnection
 import com.laurencegarmstrong.kwamp.conversations.core.defaultRouter
 import com.laurencegarmstrong.kwamp.core.Uri
@@ -8,6 +7,7 @@ import com.laurencegarmstrong.kwamp.core.messages.Subscribe
 import com.laurencegarmstrong.kwamp.core.messages.Subscribed
 import com.laurencegarmstrong.kwamp.core.messages.Unsubscribe
 import com.laurencegarmstrong.kwamp.core.messages.Unsubscribed
+import com.laurencegarmstrong.kwamp.router.core.conversations.infrastructure.RouterConversation
 import io.kotlintest.be
 import io.kotlintest.should
 import io.kotlintest.specs.StringSpec
