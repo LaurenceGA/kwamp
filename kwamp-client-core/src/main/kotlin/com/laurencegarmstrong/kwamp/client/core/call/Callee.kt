@@ -76,30 +76,7 @@ internal class Callee(
                     registrationId
                 )
             )
-            deferredUnregisteredWithListeners(requestId).await()
-        }
-    }
-
-    private fun deferredUnregisteredWithListeners(requestId: Long): Deferred<Unregistered> =
-        CompletableDeferred<Unregistered>().also {
-            applyListenersToCompletableUnregistered(it, requestId)
-        }
-
-    private fun applyListenersToCompletableUnregistered(
-        completableResult: CompletableDeferred<Unregistered>,
-        requestId: Long
-    ) = GlobalScope.launch {
-        val deferredUnregisteredMessage = messageListenersHandler.registerListener<Unregistered>(requestId)
-        val deferredErrorMessage = messageListenersHandler.registerListener<Error>(requestId)
-        launch {
-            val registeredMessage = deferredUnregisteredMessage.await()
-            deferredErrorMessage.cancel()
-            completableResult.complete(registeredMessage)
-        }
-        launch {
-            val errorMessage = deferredErrorMessage.await()
-            deferredUnregisteredMessage.cancel()
-            completableResult.completeExceptionally(errorMessage.toWampErrorException())
+            messageListenersHandler.registerListenerWithErrorHandler<Unregistered>(requestId).await()
         }
     }
 
