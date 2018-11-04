@@ -14,8 +14,8 @@ class Dealer(
     private val procedures = HashMap<Uri, Long>()
     private val procedureRegistrations = HashMap<Long, ProcedureConfig>()
 
-    //TODO make own class and release generated IDs after use from random ID generator
-    private val invocations = HashMap<Long, InvocationConfig>()
+    private val invocations = IdentifiableSet<InvocationConfig>(randomIdGenerator)
+
 
     fun registerProcedure(
         session: WampSession,
@@ -51,25 +51,22 @@ class Dealer(
     }
 
     fun callProcedure(callerSession: WampSession, callMessage: Call) {
-        randomIdGenerator.newId().also { invocationRequestId ->
-            val procedureConfig = getProcedureConfig(callMessage)
-            messageSender.sendInvocation(
-                procedureConfig.procedureProvidingSession.connection,
-                invocationRequestId,
-                procedureConfig.registrationId,
-                emptyMap(),
-                callMessage.arguments,
-                callMessage.argumentsKw
+        val procedureConfig = getProcedureConfig(callMessage)
+        val invocationRequestId = invocations.put(
+            InvocationConfig(
+                callMessage.requestId,
+                callerSession,
+                procedureConfig.procedureProvidingSession
             )
-
-            invocations[invocationRequestId] =
-                    InvocationConfig(
-                        callMessage.requestId,
-                        callerSession,
-                        invocationRequestId,
-                        procedureConfig.procedureProvidingSession
-                    )
-        }
+        )
+        messageSender.sendInvocation(
+            procedureConfig.procedureProvidingSession.connection,
+            invocationRequestId,
+            procedureConfig.registrationId,
+            emptyMap(),
+            callMessage.arguments,
+            callMessage.argumentsKw
+        )
     }
 
     private fun getProcedureConfig(callMessage: Call) = procedureLock.withLock {
@@ -78,7 +75,7 @@ class Dealer(
     }
 
     fun handleYield(yieldMessage: Yield) {
-        //TODO  handle no call found
+        //TODO  handle no invocation found
         val invocationConfig = invocations.remove(yieldMessage.requestId)!!
         messageSender.sendResult(
             invocationConfig.caller.connection,
@@ -90,6 +87,7 @@ class Dealer(
     }
 
     fun handleInvocationError(errorMessage: Error) {
+        //TODO handle invocation doesn't exist
         val invocationConfig = invocations.remove(errorMessage.requestId)!!
         messageSender.sendCallError(
             invocationConfig.caller.connection,
@@ -107,6 +105,5 @@ data class ProcedureConfig(val uri: Uri, val procedureProvidingSession: WampSess
 data class InvocationConfig(
     val callRequestId: Long,
     val caller: WampSession,
-    val invocationRequestId: Long,
     val callee: WampSession
 )
