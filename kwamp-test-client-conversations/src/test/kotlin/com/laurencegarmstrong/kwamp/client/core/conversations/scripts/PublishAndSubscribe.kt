@@ -1,6 +1,6 @@
 package com.laurencegarmstrong.kwamp.client.core.conversations.scripts
 
-import com.laurencegarmstrong.kwamp.conversations.core.ClientConversation
+import com.laurencegarmstrong.kwamp.client.core.conversations.infrastructure.ClientConversation
 import com.laurencegarmstrong.kwamp.core.Uri
 import com.laurencegarmstrong.kwamp.core.UriPattern
 import com.laurencegarmstrong.kwamp.core.messages.*

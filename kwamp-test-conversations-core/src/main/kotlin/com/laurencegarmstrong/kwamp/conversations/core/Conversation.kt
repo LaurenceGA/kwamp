@@ -40,15 +40,6 @@ class RouterConversation(
     }
 }
 
-class ClientConversation(
-    realm: Uri = Uri("default"),
-    conversationDefinition: ClientConversationCanvas.() -> Unit
-) {
-    init {
-        ClientConversationCanvas(realm).conversationDefinition()
-    }
-}
-
 open class ConversationCanvas {
     infix fun TestConnection.willSend(messageSupplier: () -> Message) {
         send(messageSupplier())
@@ -85,66 +76,6 @@ open class ConversationCanvas {
 
     @Suppress("UNCHECKED_CAST")
     fun asDict(map: Any?) = map!! as HashMap<String, Any?>
-}
-
-//TODO put this in the client conversations package
-class ClientConversationCanvas(
-    private val realm: Uri
-) : ConversationCanvas(), CoroutineScope by GlobalScope {
-    infix fun TestClient.willBeSentRouterMessage(messageSupplier: () -> Message) {
-        send(messageSupplier())
-    }
-
-    fun launchWithTimeout(timeout: Long = RECEIVE_TIMEOUT, block: suspend CoroutineScope.() -> Unit) =
-        launch {
-            withTimeout(timeout, block)
-        }
-
-    fun <T> asyncWithTimeout(timeout: Long = RECEIVE_TIMEOUT, block: suspend CoroutineScope.() -> T) =
-        async {
-            withTimeout(timeout, block)
-        }
-
-    fun <T> runBlockingWithTimeout(timeout: Long = RECEIVE_TIMEOUT, block: suspend CoroutineScope.() -> T) =
-        runBlocking {
-            withTimeout(timeout, block)
-        }
-
-    inline infix fun <reified T : Message> TestClient.shouldHaveSentMessage(crossinline messageVerifier: (message: T) -> Unit) {
-        runBlocking {
-            withTimeout(RECEIVE_TIMEOUT) {
-                val message = receive()
-                if (message !is T) {
-                    message should beInstanceOf<T>()
-                } else {
-                    assertSoftly {
-                        messageVerifier(message)
-                    }
-                }
-            }
-        }
-    }
-
-    fun newConnectedTestClient(sessionId: Long = 123L): TestClient {
-        val client = TestClient()
-        val connectionJob = launchWithTimeout {
-            client.connect()
-        }
-        client shouldHaveSentMessage { message: Hello ->
-            message.realm should be(realm)
-        }
-        client willBeSentRouterMessage { Welcome(sessionId, emptyMap()) }
-
-        runBlocking {
-            connectionJob.join()
-        }
-
-        return client
-    }
-
-    fun TestClient.connect(testRealm: Uri = realm) {
-        this.connect(testRealm)
-    }
 }
 
 class TestClient : Client {

@@ -2,8 +2,8 @@ package com.laurencegarmstrong.kwamp.client.core.conversations.scripts
 
 import com.laurencegarmstrong.kwamp.client.core.call.CallResult
 import com.laurencegarmstrong.kwamp.client.core.call.RegistrationHandle
-import com.laurencegarmstrong.kwamp.conversations.core.ClientConversation
-import com.laurencegarmstrong.kwamp.conversations.core.ClientConversationCanvas
+import com.laurencegarmstrong.kwamp.client.core.conversations.infrastructure.ClientConversation
+import com.laurencegarmstrong.kwamp.client.core.conversations.infrastructure.ClientConversationCanvas
 import com.laurencegarmstrong.kwamp.conversations.core.TestClient
 import com.laurencegarmstrong.kwamp.core.Uri
 import com.laurencegarmstrong.kwamp.core.WampErrorException
