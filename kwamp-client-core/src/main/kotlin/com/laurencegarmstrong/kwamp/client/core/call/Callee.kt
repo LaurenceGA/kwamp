@@ -1,9 +1,14 @@
 package com.laurencegarmstrong.kwamp.client.core.call
 
 import com.laurencegarmstrong.kwamp.client.core.MessageListenersHandler
-import com.laurencegarmstrong.kwamp.core.*
+import com.laurencegarmstrong.kwamp.core.Connection
+import com.laurencegarmstrong.kwamp.core.ProtocolViolationException
+import com.laurencegarmstrong.kwamp.core.RandomIdGenerator
+import com.laurencegarmstrong.kwamp.core.Uri
 import com.laurencegarmstrong.kwamp.core.messages.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import java.util.concurrent.ConcurrentHashMap
 
 internal class Callee(
@@ -32,30 +37,7 @@ internal class Callee(
                     procedure
                 )
             )
-            return deferredRegisteredWithListeners(requestId).await()
-        }
-    }
-
-    private fun deferredRegisteredWithListeners(requestId: Long): Deferred<Registered> =
-        CompletableDeferred<Registered>().also {
-            applyListenersToCompletableRegistered(it, requestId)
-        }
-
-    private fun applyListenersToCompletableRegistered(
-        completableResult: CompletableDeferred<Registered>,
-        requestId: Long
-    ) = GlobalScope.launch {
-        val deferredRegisteredMessage = messageListenersHandler.registerListener<Registered>(requestId)
-        val deferredErrorMessage = messageListenersHandler.registerListener<Error>(requestId)
-        launch {
-            val registeredMessage = deferredRegisteredMessage.await()
-            deferredErrorMessage.cancel()
-            completableResult.complete(registeredMessage)
-        }
-        launch {
-            val errorMessage = deferredErrorMessage.await()
-            deferredRegisteredMessage.cancel()
-            completableResult.completeExceptionally(errorMessage.toWampErrorException())
+            return messageListenersHandler.registerListenerWithErrorHandler<Registered>(requestId).await()
         }
     }
 
