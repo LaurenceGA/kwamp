@@ -28,7 +28,7 @@ class LinearIdGenerator(seed: Long = 1L) : WampIdGenerator() {
     override val sequence = generateSequence(seed) { (it + 1).rem(Identifier.acceptableRange.endInclusive) }
 }
 
-class RandomIdGenerator() : WampIdGenerator() {
+class RandomIdGenerator : WampIdGenerator() {
     override val sequence = generateSequence(0L) { Identifier.acceptableRange.random() }
 }
 
@@ -40,8 +40,15 @@ fun ClosedRange<Long>.random() =
 class IdentifiableSet<T>(private val idGenerator: WampIdGenerator) {
     private val backingSet = ConcurrentHashMap<Long, T>()
 
-    fun put(obj: T) = idGenerator.newId().also {
-        backingSet[it] = obj
+    fun putWithId(objectInitializer: (id: Long) -> T) =
+        idGenerator.newId().let { id ->
+            objectInitializer(id).also {
+                backingSet[id] = it
+            }
+        }
+
+    fun put(obj: T) = idGenerator.newId().also { id ->
+        backingSet[id] = obj
     }
 
     fun remove(id: Long) = backingSet.remove(id)?.also {

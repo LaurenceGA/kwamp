@@ -4,7 +4,6 @@ import com.laurencegarmstrong.kwamp.core.*
 import com.laurencegarmstrong.kwamp.core.messages.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import java.util.concurrent.ConcurrentHashMap
 
 class Realm(
     val uri: Uri
@@ -90,17 +89,14 @@ class Realm(
     }
 }
 
-class SessionSet(private val idGenerator: WampIdGenerator) {
-    private val sessions = ConcurrentHashMap<Long, WampSession>()
+class SessionSet(idGenerator: WampIdGenerator) {
+    private val sessions = IdentifiableSet<WampSession>(idGenerator)
 
-    fun newSession(connection: Connection) = idGenerator.newId().let { sessionId ->
-        WampSession(sessionId, connection).also { sessions[sessionId] = it }
+    fun newSession(connection: Connection) = sessions.putWithId { id ->
+        WampSession(id, connection)
     }
 
-    fun endSession(id: Long) {
-        sessions.remove(id)
-        idGenerator.releaseId(id)
-    }
+    fun endSession(id: Long) = sessions.remove(id)
 }
 
 data class WampSession(val id: Long, val connection: Connection) {
