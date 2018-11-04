@@ -6,7 +6,7 @@ import com.laurencegarmstrong.kwamp.core.ProtocolViolationException
 import com.laurencegarmstrong.kwamp.core.RandomIdGenerator
 import com.laurencegarmstrong.kwamp.core.UriPattern
 import com.laurencegarmstrong.kwamp.core.messages.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.runBlocking
 import java.util.concurrent.ConcurrentHashMap
 
 internal class Subscriber(
@@ -35,30 +35,8 @@ internal class Subscriber(
                     topicPattern
                 )
             )
-            return deferredSubscribedWithListeners(requestId).await()
-        }
-    }
 
-    private fun deferredSubscribedWithListeners(requestId: Long): Deferred<Subscribed> =
-        CompletableDeferred<Subscribed>().also {
-            applyListenersToCompletableSubscribed(it, requestId)
-        }
-
-    private fun applyListenersToCompletableSubscribed(
-        completableResult: CompletableDeferred<Subscribed>,
-        requestId: Long
-    ) = GlobalScope.launch {
-        val deferredSubscribedMessage = messageListenersHandler.registerListener<Subscribed>(requestId)
-        val deferredErrorMessage = messageListenersHandler.registerListener<Error>(requestId)
-        launch {
-            val subscribedMessage = deferredSubscribedMessage.await()
-            deferredErrorMessage.cancel()
-            completableResult.complete(subscribedMessage)
-        }
-        launch {
-            val errorMessage = deferredErrorMessage.await()
-            deferredSubscribedMessage.cancel()
-            completableResult.cancel(/*TODO error as exception*/)
+            return messageListenersHandler.registerListenerWithErrorHandler<Subscribed>(requestId).await()
         }
     }
 
@@ -77,30 +55,7 @@ internal class Subscriber(
                     subscriptionId
                 )
             )
-            deferredUnsubscribeWithListeners(requestId).await()
-        }
-    }
-
-    private fun deferredUnsubscribeWithListeners(requestId: Long): Deferred<Unsubscribed> =
-        CompletableDeferred<Unsubscribed>().also {
-            applyListenersToCompletableUnsubscribed(it, requestId)
-        }
-
-    private fun applyListenersToCompletableUnsubscribed(
-        completableResult: CompletableDeferred<Unsubscribed>,
-        requestId: Long
-    ) = GlobalScope.launch {
-        val deferredUnsubscribedMessage = messageListenersHandler.registerListener<Unsubscribed>(requestId)
-        val deferredErrorMessage = messageListenersHandler.registerListener<Error>(requestId)
-        launch {
-            val unsubscribedMessage = deferredUnsubscribedMessage.await()
-            deferredErrorMessage.cancel()
-            completableResult.complete(unsubscribedMessage)
-        }
-        launch {
-            val errorMessage = deferredErrorMessage.await()
-            deferredUnsubscribedMessage.cancel()
-            completableResult.cancel(/*TODO to som exception*/)
+            messageListenersHandler.registerListenerWithErrorHandler<Unsubscribed>(requestId).await()
         }
     }
 
