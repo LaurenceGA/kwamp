@@ -36,3 +36,15 @@ fun Int.pow(x: Int) = this.toDouble().pow(x).toLong()
 
 fun ClosedRange<Long>.random() =
     ThreadLocalRandom.current().nextLong(endInclusive + 1 - start) + start
+
+class IdentifiableSet<T>(private val idGenerator: WampIdGenerator) {
+    private val backingSet = ConcurrentHashMap<Long, T>()
+
+    fun put(obj: T) = idGenerator.newId().also {
+        backingSet[it] = obj
+    }
+
+    fun remove(id: Long) = backingSet.remove(id)?.also {
+        idGenerator.releaseId(id)
+    }
+}
