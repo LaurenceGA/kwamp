@@ -3,13 +3,13 @@ package com.laurencegarmstrong.kwamp.client.core.conversations.scripts
 import com.laurencegarmstrong.kwamp.client.core.conversations.infrastructure.ClientConversation
 import com.laurencegarmstrong.kwamp.core.Uri
 import com.laurencegarmstrong.kwamp.core.UriPattern
+import com.laurencegarmstrong.kwamp.core.WampError
+import com.laurencegarmstrong.kwamp.core.WampErrorException
 import com.laurencegarmstrong.kwamp.core.messages.*
-import io.kotlintest.be
+import io.kotlintest.*
 import io.kotlintest.matchers.collections.shouldContainExactly
 import io.kotlintest.matchers.containExactly
 import io.kotlintest.matchers.haveKey
-import io.kotlintest.should
-import io.kotlintest.shouldNot
 import io.kotlintest.specs.StringSpec
 import kotlinx.coroutines.CompletableDeferred
 
@@ -102,6 +102,51 @@ class PublishAndSubscribe : StringSpec({
                 runBlockingWithTimeout {
                     completions[i].await() should be(i)
                 }
+            }
+        }
+    }
+
+    "Client receives an error when trying to subscribe" {
+        ClientConversation {
+            val client = newConnectedTestClient()
+
+
+            val testSubUriPattern = UriPattern("test.sub")
+            val deferredError = asyncWithTimeout {
+                try {
+                    client.subscribe(testSubUriPattern) { _, _ -> }
+                    null
+                } catch (error: WampErrorException) {
+                    error
+                }
+            }
+
+            var requestId: Long? = null
+            client shouldHaveSentMessage { message: Subscribe ->
+                message.topic should be(testSubUriPattern)
+                requestId = message.requestId
+            }
+
+            val errorArguments = listOf(1, 2, "three")
+            val errorArgumentsKw = mapOf("one" to 1, "two" to "two")
+            client willBeSentRouterMessage {
+                Error(
+                    MessageType.SUBSCRIBE,
+                    requestId!!,
+                    emptyMap(),
+                    WampError.NO_SUCH_SUBSCRIPTION.uri,
+                    errorArguments,
+                    errorArgumentsKw
+                )
+            }
+
+            runBlockingWithTimeout {
+                val error = deferredError.await()
+                error shouldNotBe null
+                error!!.requestType should be(MessageType.SUBSCRIBE)
+                error.requestId should be(requestId!!)
+                error.arguments shouldContainExactly errorArguments
+                error.argumentsKw!! should containExactly<String, Any?>(errorArgumentsKw)
             }
         }
     }
