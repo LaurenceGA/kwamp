@@ -8,8 +8,7 @@ import kotlinx.coroutines.launch
 class Realm(
     val uri: Uri
 ) {
-    private val messageSender: MessageSender =
-        MessageSender()
+    private val messageSender: MessageSender = MessageSender()
     private val dealer: Dealer =
         Dealer(
             messageSender,

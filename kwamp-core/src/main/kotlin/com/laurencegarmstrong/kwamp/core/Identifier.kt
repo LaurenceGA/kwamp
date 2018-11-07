@@ -40,6 +40,8 @@ fun ClosedRange<Long>.random() =
 class IdentifiableSet<T>(private val idGenerator: WampIdGenerator) {
     private val backingSet = ConcurrentHashMap<Long, T>()
 
+    operator fun get(id: Long) = backingSet[id]
+
     fun putWithId(objectInitializer: (id: Long) -> T) =
         idGenerator.newId().let { id ->
             objectInitializer(id).also {

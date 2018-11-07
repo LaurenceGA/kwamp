@@ -1,9 +1,6 @@
 package com.laurencegarmstrong.kwamp.router.core
 
-import com.laurencegarmstrong.kwamp.core.NoSuchSubscriptionException
-import com.laurencegarmstrong.kwamp.core.RandomIdGenerator
-import com.laurencegarmstrong.kwamp.core.Uri
-import com.laurencegarmstrong.kwamp.core.UriPattern
+import com.laurencegarmstrong.kwamp.core.*
 import com.laurencegarmstrong.kwamp.core.messages.Publish
 import com.laurencegarmstrong.kwamp.core.messages.Subscribe
 import com.laurencegarmstrong.kwamp.core.messages.Unsubscribe
@@ -15,7 +12,7 @@ const val ACKNOWLEDGE_OPTION = "acknowledge"
 class Broker(private val messageSender: MessageSender, private val randomIdGenerator: RandomIdGenerator) {
     private val subscriptionLock = ReentrantLock()
     private val topicSubscriptions = HashMap<UriPattern, MutableList<Long>>()
-    private val subscriptions = HashMap<Long, Subscription>()
+    private val subscriptions = IdentifiableSet<Subscription>(randomIdGenerator)
 
     fun subscribe(session: WampSession, subscriptionMessage: Subscribe) {
         val subscriptionId = findExistingSubscription(session, subscriptionMessage.topic)
@@ -32,14 +29,11 @@ class Broker(private val messageSender: MessageSender, private val randomIdGener
 
     private fun newSubscription(session: WampSession, subscriptionMessage: Subscribe) =
     //TODO should new ID be random?
-        randomIdGenerator.newId().let { subscriptionId ->
-            Subscription(subscriptionMessage.topic, session, subscriptionId)
-                .also { subscription ->
-                    subscriptionLock.withLock {
-                        topicSubscriptions.computeIfAbsent(subscriptionMessage.topic) { mutableListOf() } += subscriptionId
-                        subscriptions[subscriptionId] = subscription
-                    }
-                }
+        subscriptionLock.withLock {
+            subscriptions.putWithId { subscriptionId ->
+                topicSubscriptions.computeIfAbsent(subscriptionMessage.topic) { mutableListOf() } += subscriptionId
+                Subscription(subscriptionMessage.topic, session, subscriptionId)
+            }
         }
 
     fun unsubscribe(session: WampSession, unsubscribeMessage: Unsubscribe) {
@@ -47,7 +41,6 @@ class Broker(private val messageSender: MessageSender, private val randomIdGener
             val subscription = subscriptions.remove(unsubscribeMessage.subscription)
                 ?: throw NoSuchSubscriptionException(unsubscribeMessage.requestId)
 
-            //TODO release ID after use from random id generator
             topicSubscriptions[subscription.topic]!!.removeIf(unsubscribeMessage.subscription::equals)
         }
 
@@ -80,7 +73,7 @@ class Broker(private val messageSender: MessageSender, private val randomIdGener
         }
 
     private fun getTopicSubscriptions(topic: Uri) =
-        topicSubscriptions.get(topic)?.map { subscriptionId ->
+        topicSubscriptions[topic]?.map { subscriptionId ->
             subscriptions[subscriptionId]!!
         } ?: emptyList()
 }
