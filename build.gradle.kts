@@ -22,7 +22,7 @@ plugins {
 
 val kotlinVersion: String by extra
 val kotlinTestVersion = "3.1.10"
-val coroutinesVersion = "1.0.0"
+val coroutinesVersion = "1.0.1"
 val logbackVersion = "1.2.1"
 
 subprojects {

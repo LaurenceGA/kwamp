@@ -2,6 +2,7 @@ package com.laurencegarmstrong.kwamp.router.core
 
 import com.laurencegarmstrong.kwamp.core.*
 import com.laurencegarmstrong.kwamp.core.messages.*
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 
@@ -13,9 +14,9 @@ class Dealer(
     private val procedureLock = ReentrantLock()
     private val procedures = HashMap<Uri, Long>()
     private val procedureRegistrations = IdentifiableSet<ProcedureConfig>(linearIdGenerator)
+    private val sessionProcedures = ConcurrentHashMap<Long, MutableSet<Long>>()
 
     private val invocations = IdentifiableSet<InvocationConfig>(randomIdGenerator)
-
 
     fun registerProcedure(
         session: WampSession,
@@ -34,18 +35,28 @@ class Dealer(
                 )
             }
         }
+        sessionProcedures.computeIfAbsent(session.id) { hashSetOf() }.add(procedureConfig.registrationId)
         messageSender.sendRegistered(session.connection, registrationMessage.requestId, procedureConfig.registrationId)
     }
 
     fun unregisterProcedure(session: WampSession, unregisterMessage: Unregister) {
+        sessionProcedures[session.id]?.remove(unregisterMessage.registration)
+        try {
+            removeRegisteredProcedure(unregisterMessage.registration)
+        } catch (error: NoSuchRegistrationException) {
+            throw NoSuchRegistrationErrorException(unregisterMessage.requestId)
+        }
+        messageSender.sendUnregistered(session.connection, unregisterMessage.requestId)
+    }
+
+    private fun removeRegisteredProcedure(registrationId: Long) {
         procedureLock.withLock {
             //TODO clear associated invocations
-            val procedureConfig = procedureRegistrations.remove(unregisterMessage.registration)
-                ?: throw NoSuchRegistrationErrorException(unregisterMessage.requestId)
+            val procedureConfig = procedureRegistrations.remove(registrationId)
+                ?: throw NoSuchRegistrationException()
 
             procedures.remove(procedureConfig.uri)!!
         }
-        messageSender.sendUnregistered(session.connection, unregisterMessage.requestId)
     }
 
     fun callProcedure(callerSession: WampSession, callMessage: Call) {
@@ -97,7 +108,15 @@ class Dealer(
             errorMessage.argumentsKw
         )
     }
+
+    fun cleanSessionResources(sessionId: Long) {
+        sessionProcedures.remove(sessionId)?.forEach { procedureId ->
+            removeRegisteredProcedure(procedureId)
+        }
+    }
 }
+
+class NoSuchRegistrationException : IllegalArgumentException()
 
 data class ProcedureConfig(val uri: Uri, val procedureProvidingSession: WampSession, val registrationId: Long)
 

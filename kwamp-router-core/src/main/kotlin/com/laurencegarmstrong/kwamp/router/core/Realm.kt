@@ -36,7 +36,9 @@ class Realm(
                 is ProtocolViolationException -> messageSender.sendAbort(connection, fatalException)
                 else -> fatalException?.run { printStackTrace() }
             }
-            sessions.endSession(id)
+            sessions.endSession(id)?.also {
+                dealer.cleanSessionResources(id)
+            }
         }
     }
 

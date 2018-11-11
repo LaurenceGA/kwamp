@@ -3,6 +3,7 @@ package com.laurencegarmstrong.kwamp.router.core.conversations.scripts
 import com.laurencegarmstrong.kwamp.conversations.core.TestConnection
 import com.laurencegarmstrong.kwamp.conversations.core.defaultRouter
 import com.laurencegarmstrong.kwamp.core.Uri
+import com.laurencegarmstrong.kwamp.core.WampClose
 import com.laurencegarmstrong.kwamp.core.messages.*
 import com.laurencegarmstrong.kwamp.router.core.conversations.infrastructure.RouterConversation
 import io.kotlintest.be
@@ -69,6 +70,51 @@ class Rpc : StringSpec({
                 message.arguments shouldContainExactly listOf("result1", 4)
                 message.argumentsKw shouldNotBe null
                 message.argumentsKw!! should containExactly<String, Any?>(mapOf("world" to 5))
+            }
+        }
+    }
+
+    "Remove procedure registrations on disconnect" {
+        val clientA = TestConnection()
+        val clientB = TestConnection()
+        RouterConversation(
+            defaultRouter(),
+            clientA,
+            clientB
+        ) {
+            clientA.startsASession()
+            clientB.startsASession()
+
+            clientA willSend {
+                Register(
+                    123L,
+                    emptyMap(),
+                    Uri("clientA.proc")
+                )
+            }
+            clientA shouldReceiveMessage { message: Registered ->
+                message.requestId should be(123L)
+                message.registration should be(1L)
+            }
+
+            clientA willSend {
+                Goodbye(emptyMap(), WampClose.GOODBYE_AND_OUT.uri)
+            }
+
+            clientA shouldReceiveMessage { message: Goodbye ->
+                message.reason should be(WampClose.GOODBYE_AND_OUT.uri)
+            }
+
+            clientB willSend {
+                Register(
+                    123L,
+                    emptyMap(),
+                    Uri("clientA.proc")
+                )
+            }
+            clientB shouldReceiveMessage { message: Registered ->
+                message.requestId should be(123L)
+                message.registration should be(1L)
             }
         }
     }

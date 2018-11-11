@@ -20,7 +20,7 @@ class TestConnection(
 ) {
     val incoming = Channel<ByteArray>(channelCapacity)
     val outgoing = Channel<ByteArray>(channelCapacity)
-    val connection = Connection(incoming, outgoing, { }, messageSerializer)
+    val connection = Connection(incoming, outgoing, { incoming.close() }, messageSerializer)
 
     fun send(message: Message) {
         runBlocking {
