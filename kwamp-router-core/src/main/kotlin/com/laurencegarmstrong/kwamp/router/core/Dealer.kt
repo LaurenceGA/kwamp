@@ -7,7 +7,7 @@ import kotlin.concurrent.withLock
 
 class Dealer(
     private val messageSender: MessageSender,
-    private val linearIdGenerator: LinearIdGenerator,
+    linearIdGenerator: LinearIdGenerator,
     randomIdGenerator: RandomIdGenerator
 ) {
     private val procedureLock = ReentrantLock()
