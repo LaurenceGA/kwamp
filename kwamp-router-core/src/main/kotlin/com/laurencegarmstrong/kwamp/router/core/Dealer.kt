@@ -12,7 +12,7 @@ class Dealer(
 ) {
     private val procedureLock = ReentrantLock()
     private val procedures = HashMap<Uri, Long>()
-    private val procedureRegistrations = HashMap<Long, ProcedureConfig>()
+    private val procedureRegistrations = IdentifiableSet<ProcedureConfig>(linearIdGenerator)
 
     private val invocations = IdentifiableSet<InvocationConfig>(randomIdGenerator)
 
@@ -24,18 +24,17 @@ class Dealer(
         if (registrationMessage.procedure in procedures)
             throw ProcedureAlreadyExistsException(registrationMessage.requestId)
 
-        linearIdGenerator.newId().also { registrationId ->
-            procedureLock.withLock {
+        val procedureConfig = procedureLock.withLock {
+            procedureRegistrations.putWithId { registrationId ->
                 procedures[registrationMessage.procedure] = registrationId
-                procedureRegistrations[registrationId] =
-                        ProcedureConfig(
-                            registrationMessage.procedure,
-                            session,
-                            registrationId
-                        )
+                ProcedureConfig(
+                    registrationMessage.procedure,
+                    session,
+                    registrationId
+                )
             }
-            messageSender.sendRegistered(session.connection, registrationMessage.requestId, registrationId)
         }
+        messageSender.sendRegistered(session.connection, registrationMessage.requestId, procedureConfig.registrationId)
     }
 
     fun unregisterProcedure(session: WampSession, unregisterMessage: Unregister) {
@@ -44,7 +43,6 @@ class Dealer(
             val procedureConfig = procedureRegistrations.remove(unregisterMessage.registration)
                 ?: throw NoSuchRegistrationErrorException(unregisterMessage.requestId)
 
-            //TODO release ID after use from linear id generator
             procedures.remove(procedureConfig.uri)!!
         }
         messageSender.sendUnregistered(session.connection, unregisterMessage.requestId)
@@ -70,8 +68,9 @@ class Dealer(
     }
 
     private fun getProcedureConfig(callMessage: Call) = procedureLock.withLock {
-        procedureRegistrations[procedures[callMessage.procedure]]
-            ?: throw NoSuchProcedureException(callMessage.requestId)
+        val procedureRegistrationId =
+            procedures[callMessage.procedure] ?: throw NoSuchProcedureException(callMessage.requestId)
+        procedureRegistrations[procedureRegistrationId]!!
     }
 
     fun handleYield(yieldMessage: Yield) {
