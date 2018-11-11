@@ -38,6 +38,7 @@ class Realm(
             }
             sessions.endSession(id)?.also {
                 dealer.cleanSessionResources(id)
+                broker.cleanSessionResources(id)
             }
         }
     }

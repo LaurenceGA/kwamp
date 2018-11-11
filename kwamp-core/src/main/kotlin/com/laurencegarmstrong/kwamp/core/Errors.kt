@@ -117,5 +117,5 @@ class NoSuchRegistrationErrorException(requestId: Long) :
 class NoSuchProcedureException(requestId: Long) :
     WampErrorException(WampError.NO_SUCH_PROCEDURE.uri, requestType = MessageType.CALL, requestId = requestId)
 
-class NoSuchSubscriptionException(requestId: Long) :
+class NoSuchSubscriptionErrorException(requestId: Long) :
     WampErrorException(WampError.NO_SUCH_SUBSCRIPTION.uri, requestType = MessageType.UNSUBSCRIBE, requestId = requestId)
