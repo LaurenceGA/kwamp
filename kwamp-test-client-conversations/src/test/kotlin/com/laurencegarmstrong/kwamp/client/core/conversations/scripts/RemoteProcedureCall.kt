@@ -1,5 +1,7 @@
 package com.laurencegarmstrong.kwamp.client.core.conversations.scripts
 
+import com.laurencegarmstrong.kwamp.client.core.call.CallException
+import com.laurencegarmstrong.kwamp.client.core.call.CallHandler
 import com.laurencegarmstrong.kwamp.client.core.call.CallResult
 import com.laurencegarmstrong.kwamp.client.core.call.RegistrationHandle
 import com.laurencegarmstrong.kwamp.client.core.conversations.infrastructure.ClientConversation
@@ -70,6 +72,36 @@ class RemoteProcedureCall : StringSpec({
             client shouldHaveSentMessage { message: Yield ->
                 message.arguments shouldContainExactly callArguments
                 message.argumentsKw!! should containExactly<String, Any?>(callArgumentsKw)
+                message.requestId should be(invocationRequestId)
+            }
+        }
+    }
+
+    "A Client can register a procedure and throw an error in it" {
+        ClientConversation {
+            val client = newConnectedTestClient()
+
+            val testProcedure = Uri("test.proc")
+            val registrationId = 1L
+            clientRegistersAProcedure(client, testProcedure, registrationId) { arguments, argumentsKw ->
+                throw CallException(arguments, argumentsKw, Uri("error.FAIL"))
+            }
+
+            val callArguments = listOf(1, 2, "peanut")
+            val callArgumentsKw = mapOf(
+                "one" to 1,
+                "three" to "two"
+            )
+            val invocationRequestId = 789L
+            client willBeSentRouterMessage {
+                Invocation(invocationRequestId, registrationId, emptyMap(), callArguments, callArgumentsKw)
+            }
+
+            client shouldHaveSentMessage { message: Error ->
+                message.requestType should be(MessageType.INVOCATION)
+                message.arguments shouldContainExactly callArguments
+                message.argumentsKw!! should containExactly<String, Any?>(callArgumentsKw)
+                message.error should be(Uri("error.FAIL"))
                 message.requestId should be(invocationRequestId)
             }
         }
@@ -171,13 +203,14 @@ class RemoteProcedureCall : StringSpec({
 private fun ClientConversationCanvas.clientRegistersAProcedure(
     client: TestClient,
     procedure: Uri,
-    registrationId: Long
+    registrationId: Long,
+    block: CallHandler = { arguments, argumentsKw ->
+        // Echo procedure
+        CallResult(arguments, argumentsKw)
+    }
 ): RegistrationHandle {
     val deferredRegistrationHandle = asyncWithTimeout {
-        client.register(procedure) { arguments, argumentsKw ->
-            // Echo procedure
-            CallResult(arguments, argumentsKw)
-        }
+        client.register(procedure, block)
     }
 
     var requestId: Long? = null

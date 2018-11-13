@@ -64,19 +64,48 @@ internal class Callee(
 
     fun invokeProcedure(invocationMessage: Invocation) {
         //TODO use correct exception
-        val result = registrations[invocationMessage.registration]?.invoke(
-            invocationMessage.arguments,
-            invocationMessage.argumentsKw
-        ) ?: throw ProtocolViolationException("No such registration ${invocationMessage.registration}")
-        GlobalScope.launch {
-            connection.send(
-                Yield(
-                    invocationMessage.requestId,
-                    emptyMap(),
-                    result.arguments,
-                    result.argumentsKw
-                )
+        val registeredFunction = registrations[invocationMessage.registration]
+            ?: throw ProtocolViolationException("No such registration ${invocationMessage.registration}")
+
+        try {
+            val result = registeredFunction.invoke(
+                invocationMessage.arguments,
+                invocationMessage.argumentsKw
             )
+            GlobalScope.launch {
+                connection.send(
+                    Yield(
+                        invocationMessage.requestId,
+                        emptyMap(),
+                        result.arguments,
+                        result.argumentsKw
+                    )
+                )
+            }
+        } catch (error: CallException) {
+            GlobalScope.launch {
+                connection.send(
+                    Error(
+                        MessageType.INVOCATION,
+                        invocationMessage.requestId,
+                        emptyMap(),
+                        error.error,
+                        error.arguments,
+                        error.argumentsKw
+                    )
+                )
+            }
+        } catch (error: Exception) {
+            GlobalScope.launch {
+                connection.send(
+                    Error(
+                        MessageType.INVOCATION,
+                        invocationMessage.requestId,
+                        emptyMap(),
+                        DEFAULT_INVOCATION_ERROR
+                    )
+                )
+            }
         }
     }
 }

@@ -18,6 +18,7 @@ import io.kotlintest.be
 import io.kotlintest.matchers.beInstanceOf
 import io.kotlintest.should
 import kotlinx.coroutines.*
+import java.util.concurrent.Executors
 
 class ClientConversation(
     realm: Uri = Uri("default"),
@@ -30,7 +31,7 @@ class ClientConversation(
 
 class ClientConversationCanvas(
     private val realm: Uri
-) : ConversationCanvas(), CoroutineScope by GlobalScope {
+) : ConversationCanvas(), CoroutineScope by CoroutineScope(Executors.newCachedThreadPool().asCoroutineDispatcher()) {
     infix fun TestClient.willBeSentRouterMessage(messageSupplier: () -> Message) {
         send(messageSupplier())
     }
