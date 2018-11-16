@@ -4,11 +4,10 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 buildscript {
     var kotlinVersion: String by extra
-    kotlinVersion = "1.3.0"
+    kotlinVersion = "1.3.10"
 
     repositories {
         mavenCentral()
-        maven(url = "http://dl.bintray.com/kotlin/kotlin-eap")
     }
     dependencies {
         classpath(kotlin("gradle-plugin", kotlinVersion))

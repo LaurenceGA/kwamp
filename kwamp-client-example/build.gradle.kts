@@ -12,7 +12,7 @@ repositories {
     maven(url = "https://dl.bintray.com/kotlin/ktor")
 }
 
-val ktorVersion = "0.9.5-rc13"
+val ktorVersion = "1.0.0-beta-4"
 
 dependencies {
     implementation(project(":kwamp-client-core"))

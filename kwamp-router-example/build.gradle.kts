@@ -14,7 +14,7 @@ repositories {
     maven(url = "https://dl.bintray.com/kotlin/ktor")
 }
 
-val ktorVersion = "1.0.0-beta-3"
+val ktorVersion = "1.0.0-beta-4"
 
 dependencies {
     implementation(project(":kwamp-router-core"))
