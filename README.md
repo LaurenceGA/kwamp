@@ -3,10 +3,7 @@ This is an implementation of the [Web Application Messaging Protocol](https://wa
 
 It's based on the [WAMP RFC](https://wamp-proto.org/static/rfc/draft-oberstet-hybi-crossbar-wamp.html).
 
-## Contents of this project
-### KWAMP core
-The shared components of KWAMP used by both clients and routers (such as message and error definitions).
-
+## In this project
 ### KWAMP Router Core
 Transport agnostic WAMP router implementation logic using Kotlin coroutines that routes client messages.
 
@@ -19,5 +16,5 @@ A transport agnostic WAMP client implementation that interfaces with a WAMP rout
 ### KWAMP Client Example
 An example usage of KWAMP client that uses the [KTOR](https://ktor.io/) [websocket client](https://ktor.io/clients/websockets.html) to communicate to a WAMP router.
 
-### KWAMP Router Conversations
-A set of example conversations with a router where the clients are mocked out.
+### KWAMP Router and client Conversations
+A set of example conversations with a mocked out router or client.
