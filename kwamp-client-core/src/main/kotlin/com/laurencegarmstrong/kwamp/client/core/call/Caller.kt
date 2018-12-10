@@ -25,7 +25,6 @@ internal class Caller(
     ): DeferredCallResult = sendCallMessage(procedure, arguments, argumentsKw)
 
 
-    //TODO messageSender?
     private fun sendCallMessage(
         procedure: Uri,
         arguments: List<Any?>?,
