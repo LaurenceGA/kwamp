@@ -1,6 +1,8 @@
 # Kotlin Web Application Messaging Protocol (KWAMP)
 This is an implementation of the [Web Application Messaging Protocol](https://wamp-proto.org/) (WAMP) written in Kotlin.
 
+The provides facilities for routed Remote Procdeure Calls (RPC) and Publish and Subscribe (PubSub). 
+
 It's based on the [WAMP RFC](https://wamp-proto.org/_static/wamp_latest.html).
 
 So far this project aims to fulfil the WAMP basic profile.
@@ -9,9 +11,9 @@ So far this project aims to fulfil the WAMP basic profile.
 KWAMP is mostly transport independent (it must be a valid [WAMP transport](https://wamp-proto.org/_static/wamp_latest.html#transports)). E.G raw socket or web socket.
 
 To use the KWAMP client or router you can use the kwamp-client-core or kwamp-router-core packages respectively.
-They just need to be hooked into a transport (can be seen in kwamp-client-example and kwamp-router-example respectively).
+They just need to be hooked into a transport (doing this can be seen in kwamp-client-example and kwamp-router-example respectively).
 
-(At some point these should become actual packages in this project which can be used by themselves.)
+(At some point these integrations should become actual packages in this project which can be used by themselves.)
 
 ### Router
 The router supports the WAMP basic profile.
@@ -90,11 +92,10 @@ val call = client.call(Uri("<PROCEDURE_URI_HERE>"))
 ```
 
 This produces a `DeferredCallResult`.
-You then then use
+You then then use to await the result.
 ```kotlin
 val result = call.await()
 ```
-to await the result.
 
 If there is an error executing the procedure then this will throw an exception.
 
