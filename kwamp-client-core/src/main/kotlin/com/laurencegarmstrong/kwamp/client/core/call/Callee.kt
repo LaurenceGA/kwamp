@@ -43,7 +43,6 @@ internal class Callee(
 
     private fun unregister(registrationId: Long) {
         runBlocking {
-            //TODO consider current invocations
             performUnregister(registrationId)
             registrations.remove(registrationId)
         }
@@ -63,7 +62,6 @@ internal class Callee(
     }
 
     fun invokeProcedure(invocationMessage: Invocation) {
-        //TODO use correct exception
         val registeredFunction = registrations[invocationMessage.registration]
             ?: throw ProtocolViolationException("No such registration ${invocationMessage.registration}")
 
@@ -72,6 +70,12 @@ internal class Callee(
                 invocationMessage.arguments,
                 invocationMessage.argumentsKw
             )
+
+            //Verify function is still registered in case it was unregistered during processing
+            if (!registrations.containsKey(invocationMessage.registration)) {
+                throw IllegalStateException("Procedure has been unregistered during processing")
+            }
+
             GlobalScope.launch {
                 connection.send(
                     Yield(
