@@ -41,11 +41,12 @@ class ClientImpl(
     incoming: ReceiveChannel<ByteArray>,
     outgoing: SendChannel<ByteArray>,
     realm: Uri,
-    protocol: String = WAMP_DEFAULT
+    protocol: String = WAMP_DEFAULT,
+    onClose: suspend (message: String) -> Unit = {},
+    private val exceptionCatcher: ExceptionCatcher = ExceptionSwallower()
 ) : Client {
-    private val log = LoggerFactory.getLogger(ClientImpl::class.java)!! //TODO make this cleaner extension?
-    //TODO bubble close function up to transport layer
-    private val connection = Connection(incoming, outgoing, {}, getSerializer(protocol))
+    private val log = LoggerFactory.getLogger(ClientImpl::class.java)!!
+    private val connection = Connection(incoming, outgoing, onClose, getSerializer(protocol))
 
     private var sessionId: Long? = null
 
@@ -62,29 +63,22 @@ class ClientImpl(
     init {
         joinRealm(realm)
 
-        //TODO handle errors gracefully
         GlobalScope.launch {
-            connection.forEachMessage(exceptionHandler(connection)) {
+            connection.forEachMessage(exceptionHandler()) {
                 try {
                     handleMessage(it)
                 } catch (nonFatalError: WampErrorException) {
-//                    messageSender.sendExceptionError(connection, nonFatalError)
+                    exceptionCatcher.catchException(nonFatalError)
                 }
             }.invokeOnCompletion { fatalException ->
                 fatalException?.run { printStackTrace() }
-//                when (fatalException) {
-////                    is ProtocolViolationException -> messageSender.sendAbort(connection, fatalException)
-//                    else -> fatalException?.run { printStackTrace() }
-//                }
-//                sessions.endSession(id)
             }
         }
     }
 
-    private fun exceptionHandler(connection: Connection): (Throwable) -> Unit = { throwable ->
+    private fun exceptionHandler(): (Throwable) -> Unit = { throwable ->
         when (throwable) {
-            is WampErrorException -> {
-            }//messageSender.sendExceptionError(connection, throwable)
+            is WampErrorException -> exceptionCatcher.catchException(throwable)
             else -> throw throwable
         }
     }
@@ -96,15 +90,7 @@ class ClientImpl(
             is Invocation -> callee.invokeProcedure(message)
             is Event -> subscriber.receiveEvent(message)
 
-            is Error -> handleError(message)    // Need to check request type?
-        }
-    }
-
-    private fun handleError(errorMessage: Error) {
-        when (errorMessage.requestType) {
-//            MessageType.CALL -> caller.error(errorMessage)
-
-//            else -> throw NotImplementedError("Error with request type ${errorMessage.requestType} not implemented")
+            is Error -> exceptionCatcher.catchException(message.toWampErrorException())
         }
     }
 
@@ -119,7 +105,6 @@ class ClientImpl(
         connection.send(Hello(realmUri, emptyMap()))
         connection.withNextMessage { message: Welcome ->
             log.info("Session established. ID: ${message.session}")
-            //TODO thread safety?
             sessionId = message.session
         }.join()
     }
@@ -127,7 +112,6 @@ class ClientImpl(
     override fun register(procedure: Uri, handler: CallHandler) =
         callee.register(procedure, handler)
 
-    //TODO make extension on Client?
     override fun call(
         procedure: Uri,
         arguments: List<Any?>?,
@@ -138,7 +122,7 @@ class ClientImpl(
         connection.send(Goodbye(emptyMap(), closeReason))
 
         messageListenersHandler.registerListener<Goodbye>().await().let { message ->
-            log.info("Router replied goodbye reason: ${message.reason}")
+            log.info("Router replied goodbye, reason: ${message.reason}")
             message.reason
         }
     }
@@ -154,4 +138,15 @@ class ClientImpl(
         topicPattern: UriPattern,
         eventHandler: EventHandler
     ) = subscriber.subscribe(topicPattern, eventHandler)
+}
+
+// Can be overridden to handle exceptions
+interface ExceptionCatcher {
+    fun catchException(error: WampErrorException)
+}
+
+internal class ExceptionSwallower : ExceptionCatcher {
+    override fun catchException(error: WampErrorException) {
+        // swallow
+    }
 }
