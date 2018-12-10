@@ -1,17 +1,27 @@
 package com.laurencegarmstrong.kwamp.client.core.conversations.scripts
 
 import com.laurencegarmstrong.kwamp.client.core.conversations.infrastructure.ClientConversation
+import com.laurencegarmstrong.kwamp.client.core.conversations.infrastructure.ClientConversationCanvas
+import com.laurencegarmstrong.kwamp.client.core.conversations.infrastructure.TestClient
+import com.laurencegarmstrong.kwamp.client.core.pubsub.EventHandler
+import com.laurencegarmstrong.kwamp.client.core.pubsub.SubscriptionHandle
 import com.laurencegarmstrong.kwamp.core.Uri
 import com.laurencegarmstrong.kwamp.core.UriPattern
 import com.laurencegarmstrong.kwamp.core.WampError
 import com.laurencegarmstrong.kwamp.core.WampErrorException
 import com.laurencegarmstrong.kwamp.core.messages.*
-import io.kotlintest.*
+import io.kotlintest.be
 import io.kotlintest.matchers.collections.shouldContainExactly
 import io.kotlintest.matchers.containExactly
 import io.kotlintest.matchers.haveKey
+import io.kotlintest.should
+import io.kotlintest.shouldNot
+import io.kotlintest.shouldNotBe
 import io.kotlintest.specs.StringSpec
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 
 class PublishAndSubscribe : StringSpec({
     "A Client can publish an event unacknowledged" {
@@ -150,4 +160,82 @@ class PublishAndSubscribe : StringSpec({
             }
         }
     }
+
+    "A Client can subscribe and unsubscribe to a topic" {
+        ClientConversation {
+            val client = newConnectedTestClient()
+            val subscriptionId = 1L
+
+            val eventMarker = Channel<Boolean>()
+            val subscriptionHandle =
+                clientSubscribesToATopic(client, Uri("test.topic"), subscriptionId) { arguments, _ ->
+                    runBlocking {
+                        eventMarker.send(arguments!![0] as Boolean)
+                    }
+                }
+
+            val publicationId1 = 456L
+            client willBeSentRouterMessage {
+                Event(subscriptionId, publicationId1, emptyMap(), listOf(true))
+            }
+            runBlockingWithTimeout {
+                eventMarker.receive() should be(true)
+            }
+
+            clientUnsubscribesFromATopic(client, subscriptionHandle, subscriptionId)
+
+            val publication2 = 789L
+            launchWithTimeout {
+                delay(5000)
+                eventMarker.send(false)
+            }
+            client willBeSentRouterMessage {
+                Event(subscriptionId, publication2, emptyMap(), listOf(true))
+            }
+            runBlockingWithTimeout {
+                eventMarker.receive() should be(false)
+            }
+        }
+    }
 })
+
+private fun ClientConversationCanvas.clientSubscribesToATopic(
+    client: TestClient,
+    topic: UriPattern,
+    subscriptionId: Long,
+    block: EventHandler = { _, _ ->
+        // Swallow event
+    }
+): SubscriptionHandle {
+    val deferredSubscriptionHandle = asyncWithTimeout {
+        client.subscribe(topic, block)
+    }
+
+    var requestId: Long? = null
+    client shouldHaveSentMessage { message: Subscribe ->
+        message.topic should be(topic)
+        requestId = message.requestId
+    }
+    client willBeSentRouterMessage { Subscribed(requestId!!, subscriptionId) }
+
+    return runBlocking {
+        deferredSubscriptionHandle.await()
+    }
+}
+
+private fun ClientConversationCanvas.clientUnsubscribesFromATopic(
+    client: TestClient,
+    subscriptionHandle: SubscriptionHandle,
+    subscriptionId: Long
+) {
+    launchWithTimeout {
+        subscriptionHandle.unsubscribe()
+    }
+    var requestId: Long? = null
+    client shouldHaveSentMessage { message: Unsubscribe ->
+        message.subscription should be(subscriptionId)
+        requestId = message.requestId
+    }
+
+    client willBeSentRouterMessage { Unsubscribed(requestId!!) }
+}
