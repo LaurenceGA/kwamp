@@ -56,4 +56,10 @@ class IdentifiableSet<T>(private val idGenerator: WampIdGenerator) {
     fun remove(id: Long) = backingSet.remove(id)?.also {
         idGenerator.releaseId(id)
     }
+
+    fun removeIf(predicate: (T) -> Boolean) {
+        backingSet.forEach { id: Long, element: T ->
+            if (predicate(element)) remove(id)
+        }
+    }
 }

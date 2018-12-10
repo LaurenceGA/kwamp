@@ -54,11 +54,14 @@ class Dealer(
 
     private fun removeRegisteredProcedure(registrationId: Long) {
         procedureLock.withLock {
-            //TODO clear associated invocations
             val procedureConfig = procedureRegistrations.remove(registrationId)
                 ?: throw NoSuchRegistrationException()
 
             procedures.remove(procedureConfig.uri)!!
+
+            invocations.removeIf { invocation ->
+                invocation.registrationId == procedureConfig.registrationId
+            }
         }
     }
 
@@ -68,7 +71,8 @@ class Dealer(
             InvocationConfig(
                 callMessage.requestId,
                 callerSession,
-                procedureConfig.procedureProvidingSession
+                procedureConfig.procedureProvidingSession,
+                procedureConfig.registrationId
             )
         )
         messageSender.sendInvocation(
@@ -136,5 +140,6 @@ data class ProcedureConfig(val uri: Uri, val procedureProvidingSession: WampSess
 data class InvocationConfig(
     val callRequestId: Long,
     val caller: WampSession,
-    val callee: WampSession
+    val callee: WampSession,
+    val registrationId: Long
 )
