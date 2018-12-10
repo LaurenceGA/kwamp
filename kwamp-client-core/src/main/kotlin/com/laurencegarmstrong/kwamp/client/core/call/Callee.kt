@@ -2,7 +2,6 @@ package com.laurencegarmstrong.kwamp.client.core.call
 
 import com.laurencegarmstrong.kwamp.client.core.MessageListenersHandler
 import com.laurencegarmstrong.kwamp.core.Connection
-import com.laurencegarmstrong.kwamp.core.ProtocolViolationException
 import com.laurencegarmstrong.kwamp.core.RandomIdGenerator
 import com.laurencegarmstrong.kwamp.core.Uri
 import com.laurencegarmstrong.kwamp.core.messages.*
@@ -43,13 +42,13 @@ internal class Callee(
 
     private fun unregister(registrationId: Long) {
         runBlocking {
-            performUnregister(registrationId)
             registrations.remove(registrationId)
+            unregisterWithRouter(registrationId)
         }
 
     }
 
-    private suspend fun performUnregister(registrationId: Long) {
+    private suspend fun unregisterWithRouter(registrationId: Long) {
         randomIdGenerator.newId().also { requestId ->
             connection.send(
                 Unregister(
@@ -63,7 +62,20 @@ internal class Callee(
 
     fun invokeProcedure(invocationMessage: Invocation) {
         val registeredFunction = registrations[invocationMessage.registration]
-            ?: throw ProtocolViolationException("No such registration ${invocationMessage.registration}")
+
+        if (registeredFunction == null) {
+            GlobalScope.launch {
+                connection.send(
+                    Error(
+                        MessageType.INVOCATION,
+                        invocationMessage.requestId,
+                        emptyMap(),
+                        DEFAULT_INVOCATION_ERROR
+                    )
+                )
+            }
+            return
+        }
 
         try {
             val result = registeredFunction.invoke(

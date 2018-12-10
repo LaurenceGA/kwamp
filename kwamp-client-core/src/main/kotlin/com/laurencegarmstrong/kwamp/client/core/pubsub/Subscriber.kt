@@ -2,11 +2,11 @@ package com.laurencegarmstrong.kwamp.client.core.pubsub
 
 import com.laurencegarmstrong.kwamp.client.core.MessageListenersHandler
 import com.laurencegarmstrong.kwamp.core.Connection
-import com.laurencegarmstrong.kwamp.core.ProtocolViolationException
 import com.laurencegarmstrong.kwamp.core.RandomIdGenerator
 import com.laurencegarmstrong.kwamp.core.UriPattern
 import com.laurencegarmstrong.kwamp.core.messages.*
 import kotlinx.coroutines.runBlocking
+import org.slf4j.LoggerFactory
 import java.util.concurrent.ConcurrentHashMap
 
 internal class Subscriber(
@@ -15,6 +15,8 @@ internal class Subscriber(
     private val messageListenersHandler: MessageListenersHandler
 ) {
     private val subscriptions = ConcurrentHashMap<Long, EventHandler>()
+
+    private val logger = LoggerFactory.getLogger(Subscriber::class.java)!!
 
     fun subscribe(
         topicPattern: UriPattern,
@@ -42,12 +44,12 @@ internal class Subscriber(
 
     private fun unsubscribe(subscriptionId: Long) {
         runBlocking {
-            performUnsubscribe(subscriptionId)
             subscriptions.remove(subscriptionId)
+            unsubscribeFromRouter(subscriptionId)
         }
     }
 
-    private suspend fun performUnsubscribe(subscriptionId: Long) {
+    private suspend fun unsubscribeFromRouter(subscriptionId: Long) {
         randomIdGenerator.newId().also { requestId ->
             connection.send(
                 Unsubscribe(
@@ -60,11 +62,11 @@ internal class Subscriber(
     }
 
     fun receiveEvent(eventMessage: Event) {
-        //TODO use correct exception
         subscriptions[eventMessage.subscription]?.invoke(
             eventMessage.arguments,
             eventMessage.argumentsKw
-        ) ?: throw ProtocolViolationException("No such subscription ${eventMessage.subscription}")
+        )
+            ?: logger.warn("Got an event (${eventMessage.publication}) for a subscription we don't have (${eventMessage.subscription})")
     }
 }
 

@@ -1,9 +1,6 @@
 package com.laurencegarmstrong.kwamp.client.core.conversations.scripts
 
-import com.laurencegarmstrong.kwamp.client.core.call.CallException
-import com.laurencegarmstrong.kwamp.client.core.call.CallHandler
-import com.laurencegarmstrong.kwamp.client.core.call.CallResult
-import com.laurencegarmstrong.kwamp.client.core.call.RegistrationHandle
+import com.laurencegarmstrong.kwamp.client.core.call.*
 import com.laurencegarmstrong.kwamp.client.core.conversations.infrastructure.ClientConversation
 import com.laurencegarmstrong.kwamp.client.core.conversations.infrastructure.ClientConversationCanvas
 import com.laurencegarmstrong.kwamp.client.core.conversations.infrastructure.TestClient
@@ -127,12 +124,11 @@ class RemoteProcedureCall : StringSpec({
             client willBeSentRouterMessage {
                 Invocation(invocationRequestId2, registrationId, emptyMap())
             }
-            //TODO exception here or something
-//            client shouldHaveSentMessage { message: Error ->
-//                message.requestId should be(invocationRequestId2)
-//                message.requestType should be(MessageType.CALL)
-//                message.error should be(WampError.NO_SUCH_PROCEDURE.uri)
-//            }
+            client shouldHaveSentMessage { message: Error ->
+                message.requestId should be(invocationRequestId2)
+                message.requestType should be(MessageType.INVOCATION)
+                message.error should be(DEFAULT_INVOCATION_ERROR)
+            }
         }
     }
 
@@ -162,7 +158,6 @@ class RemoteProcedureCall : StringSpec({
                 "six" to "nope"
             )
             val invocationErrorUri = Uri("nope.did.not.work")
-            println("ROUTER SENDING ERROR")
             client willBeSentRouterMessage {
                 Error(
                     MessageType.CALL,
@@ -173,23 +168,11 @@ class RemoteProcedureCall : StringSpec({
                     invocationErrorArgumentsKw
                 )
             }
-            println("ROUTER SENT ERROR")
-
-//            deferredCallResult.invokeOnError { error ->
-//                println("ONERROR")
-//                error.requestId should be(callRequestId!!)
-//                error.requestType should be(MessageType.CALL)
-//                error.arguments shouldContainExactly invocationErrorArguments
-//                error.argumentsKw!! should containExactly<String, Any?>(invocationErrorArgumentsKw)
-//            }
 
             runBlocking {
                 try {
-                    println("WAITING")
                     deferredCallResult.await()
-                    println("DONE WAITING")
                 } catch (error: WampErrorException) {
-                    println("CAUGHT EXCEPTION")
                     error.requestId should be(callRequestId!!)
                     error.requestType should be(MessageType.CALL)
                     error.arguments shouldContainExactly invocationErrorArguments
