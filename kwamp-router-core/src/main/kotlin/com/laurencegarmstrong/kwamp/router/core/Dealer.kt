@@ -2,6 +2,7 @@ package com.laurencegarmstrong.kwamp.router.core
 
 import com.laurencegarmstrong.kwamp.core.*
 import com.laurencegarmstrong.kwamp.core.messages.*
+import org.slf4j.LoggerFactory
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
@@ -17,6 +18,8 @@ class Dealer(
     private val sessionProcedures = ConcurrentHashMap<Long, MutableSet<Long>>()
 
     private val invocations = IdentifiableSet<InvocationConfig>(randomIdGenerator)
+
+    private val logger = LoggerFactory.getLogger(Dealer::class.java)!!
 
     fun registerProcedure(
         session: WampSession,
@@ -85,8 +88,13 @@ class Dealer(
     }
 
     fun handleYield(yieldMessage: Yield) {
-        //TODO  handle no invocation found
-        val invocationConfig = invocations.remove(yieldMessage.requestId)!!
+        val invocationConfig = invocations.remove(yieldMessage.requestId)
+
+        if (invocationConfig == null) {
+            logger.warn("Got an yield for request ${yieldMessage.requestId}, but couldn't find associated invocation")
+            return
+        }
+
         messageSender.sendResult(
             invocationConfig.caller.connection,
             invocationConfig.callRequestId,
@@ -97,8 +105,13 @@ class Dealer(
     }
 
     fun handleInvocationError(errorMessage: Error) {
-        //TODO handle invocation doesn't exist
-        val invocationConfig = invocations.remove(errorMessage.requestId)!!
+        val invocationConfig = invocations.remove(errorMessage.requestId)
+
+        if (invocationConfig == null) {
+            logger.warn("Got an invocation error for request ${errorMessage.requestId}, but couldn't find associated invocation")
+            return
+        }
+
         messageSender.sendCallError(
             invocationConfig.caller.connection,
             invocationConfig.callRequestId,

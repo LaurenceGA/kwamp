@@ -77,16 +77,14 @@ class Realm(
 
             is Error -> handleError(message)
 
-            //TODO protocol violation?
-            else -> throw NotImplementedError("Message type ${message.messageType} not implemented")
+            else -> throw ProtocolViolationException("Message type ${message.messageType} is not a valid type")
         }
     }
 
     private fun handleError(errorMessage: Error) {
         when (errorMessage.requestType) {
             MessageType.INVOCATION -> dealer.handleInvocationError(errorMessage)
-            //TODO protocol violation?
-            else -> throw NotImplementedError("Error with request type ${errorMessage.requestType} not implemented")
+            else -> throw ProtocolViolationException("Error with request type ${errorMessage.requestType} - not valid type")
         }
     }
 }
