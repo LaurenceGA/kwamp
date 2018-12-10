@@ -2,6 +2,7 @@ package com.laurencegarmstrong.kwamp.core
 
 import com.laurencegarmstrong.kwamp.core.messages.Message
 import com.laurencegarmstrong.kwamp.core.serialization.MessageSerializer
+import com.laurencegarmstrong.kwamp.core.serialization.json.JsonMessageSerializer
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.SendChannel
@@ -12,7 +13,7 @@ class Connection(
     private val incoming: ReceiveChannel<ByteArray>,
     private val outgoing: SendChannel<ByteArray>,
     private val closeConnection: suspend (message: String) -> Unit,
-    private val messageSerializer: MessageSerializer
+    private val messageSerializer: MessageSerializer = JsonMessageSerializer()
 ) : MessageSerializer by messageSerializer {
     private val logger = LoggerFactory.getLogger(Connection::class.java)!!
     private var strictUris: Boolean = false
