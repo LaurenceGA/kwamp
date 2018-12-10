@@ -122,7 +122,7 @@ class ClientImpl(
         connection.send(Goodbye(emptyMap(), closeReason))
 
         messageListenersHandler.registerListener<Goodbye>().await().let { message ->
-            log.info("Router replied goodbye, reason: ${message.reason}")
+            log.info("Router replied goodbye. Reason: ${message.reason}")
             message.reason
         }
     }
