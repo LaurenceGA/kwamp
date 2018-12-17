@@ -19,7 +19,6 @@ buildscript {
 plugins {
     base
     java
-//    maven
     `maven-publish`
 }
 
@@ -70,9 +69,6 @@ task("artifacts") {
     }
 }
 
-val kwampRouter = project(":kwamp-router-core").tasks["jar"]
-val kwampClient = project(":kwamp-client-core").tasks["jar"]
-
 publishing {
     publications {
         create<MavenPublication>("router") {
@@ -95,73 +91,3 @@ publishing {
         }
     }
 }
-
-//artifacts {
-//    add("archives", kwampRouter) {
-//        type = "jar"
-//        name = "kwamp-router-core"
-//        group = project("kwamp-router-core").group
-//        version = project("kwamp-router-core").version
-//        classifier = project("kwamp-router-core").properties["classifier"] as String
-//        builtBy(kwampRouter)
-//    }
-//    add("archives", kwampClient) {
-//        type = "jar"
-//        name = "kwamp-client-core"
-//        group = project("kwamp-client-core").group
-//        version = project("kwamp-client-core").version
-//        classifier = project("kwamp-client-core").properties["classifier"] as String
-//        builtBy(kwampClient)
-//    }
-//}
-//
-//// We don't want the artifact produced by the root project
-//configurations.archives.allArtifacts.removeIf { artifact ->
-//    artifact.name == "kwamp"
-//}
-
-//val filter = object : PublishFilter {
-//    override fun accept(p0: Artifact?, p1: File?): Boolean {
-//        return true
-//    }
-//}
-
-//tasks.getByName<Upload>("install") {
-//    repositories.withGroovyBuilder {
-//        "mavenInstaller" {
-//            "addFilter"("test", filter)
-//        }
-//    }
-//    val installer = repositories["mavenInstaller"] as MavenResolver
-//    installer.addFilter("router") { artifact, _ ->
-//        artifact.name == "kwamp-router-core"
-//    }
-
-//    installer.addFilter("client") { artifact, _ ->
-//        artifact.name == "kwamp-client-core"
-//    }
-//    repositories.withGroovyBuilder {
-//        val installer = getProperty("mavenInstaller") as MavenResolver
-//        installer.addFilter("router") { artifact, _ ->
-//            artifact.name == "kwamp-router-core"
-//        }
-//        installer.addFilter("client") { artifact, _ ->
-//            artifact.name == "kwamp-client-core"
-//        }
-//    }
-//}
-
-//install {
-//    repositories.mavenInstaller {
-//        addFilter('api') { artifact, file -> artifact.name.endsWith('api') }
-//        addFilter('impl') { artifact, file -> artifact.name.endsWith('impl') }
-//    }
-//}
-
-//tasks.getByName<Upload>("uploadArchives") {
-//    repositories.withGroovyBuilder {
-//        "mavenDeployer" {
-//            "repository"("url" to "file://localhost/tmp/myRepo/")
-//        }
-//    }
-//}
