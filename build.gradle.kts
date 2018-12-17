@@ -59,16 +59,6 @@ subprojects {
     }
 }
 
-task("artifacts") {
-    doLast {
-        val allArtifacts = configurations.archives.allArtifacts
-        println("Project has ${allArtifacts.size} artifacts:")
-        allArtifacts.forEach { artifact ->
-            println("'${artifact.name}'")
-        }
-    }
-}
-
 publishing {
     publications {
         create<MavenPublication>("router") {
