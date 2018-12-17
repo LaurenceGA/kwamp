@@ -64,7 +64,6 @@ publishing {
             val project = project(":kwamp-router-core")
             groupId = project.group as String
             artifactId = project.properties["artifact_id"] as String
-//            version = project.version as String
 
             from(project.components["java"])
 
@@ -78,7 +77,6 @@ publishing {
             val project = project(":kwamp-client-core")
             groupId = project.group as String
             artifactId = project.properties["artifact_id"] as String
-//            version = project.version as String
 
             from(project.components["java"])
 
@@ -92,7 +90,6 @@ publishing {
             val project = project(":kwamp-core")
             groupId = project.group as String
             artifactId = project.properties["artifact_id"] as String
-//            version = project.version as String
 
             from(project.components["java"])
 
