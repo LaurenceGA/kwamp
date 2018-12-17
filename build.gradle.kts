@@ -32,7 +32,6 @@ subprojects {
         plugin<KotlinPluginWrapper>()
     }
 
-//    group = "com.laurencegarmstrong.kwamp"
     group = "com.github.LaurenceGA"
 
     repositories {
@@ -65,9 +64,13 @@ publishing {
             val project = project(":kwamp-router-core")
             groupId = project.group as String
             artifactId = project.properties["artifact_id"] as String
-            version = project.version as String
+//            version = project.version as String
 
             from(project.components["java"])
+
+            pom {
+                name.set("Router")
+            }
         }
     }
     publications {
@@ -75,9 +78,27 @@ publishing {
             val project = project(":kwamp-client-core")
             groupId = project.group as String
             artifactId = project.properties["artifact_id"] as String
-            version = project.version as String
+//            version = project.version as String
 
             from(project.components["java"])
+
+            pom {
+                name.set("Client")
+            }
+        }
+    }
+    publications {
+        create<MavenPublication>("core") {
+            val project = project(":kwamp-core")
+            groupId = project.group as String
+            artifactId = project.properties["artifact_id"] as String
+//            version = project.version as String
+
+            from(project.components["java"])
+
+            pom {
+                name.set("Core")
+            }
         }
     }
 }
