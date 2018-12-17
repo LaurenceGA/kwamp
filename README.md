@@ -7,6 +7,32 @@ It's based on the [WAMP RFC](https://wamp-proto.org/_static/wamp_latest.html).
 
 So far this project aims to fulfil the WAMP basic profile.
 
+## Getting the libraries
+Under repositories add:
+```groovy
+repositories {
+    mavenCentral()
+    jcenter()   // Required
+    maven { url 'https://jitpack.io' }
+}
+```
+
+### Router
+Under dependencies:
+```groovy
+dependencies {
+    implementation("com.github.LaurenceGA.kwamp:kwamp-router-core:1.0.2")
+}
+```
+
+### Client
+Under dependencies:
+```groovy
+dependencies {
+    implementation("com.github.LaurenceGA.kwamp:kwamp-client-core:1.0.2")
+}
+```
+
 ## Usage
 KWAMP is mostly transport independent (it must be a valid [WAMP transport](https://wamp-proto.org/_static/wamp_latest.html#transports)). E.G raw socket or web socket.
 
