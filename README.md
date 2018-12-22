@@ -3,7 +3,7 @@ This is an implementation of the [Web Application Messaging Protocol](https://wa
 
 The provides facilities for routed Remote Procdeure Calls (RPC) and Publish and Subscribe (PubSub). 
 
-It's based on the [WAMP RFC](https://wamp-proto.org/_static/wamp_latest.html).
+It's based on the [WAMP spec](https://wamp-proto.org/_static/gen/wamp_latest.html).
 
 So far this project aims to fulfil the WAMP basic profile.
 
@@ -34,7 +34,7 @@ dependencies {
 ```
 
 ## Usage
-KWAMP is mostly transport independent (it must be a valid [WAMP transport](https://wamp-proto.org/_static/wamp_latest.html#transports)). E.G raw socket or web socket.
+KWAMP is mostly transport independent (it must be a valid [WAMP transport](https://wamp-proto.org/_static/gen/wamp_latest.html#transports)). E.G raw socket or web socket.
 
 To use the KWAMP client or router you can use the kwamp-client-core or kwamp-router-core packages respectively.
 They just need to be hooked into a transport (doing this can be seen in kwamp-client-example and kwamp-router-example respectively).
@@ -48,7 +48,7 @@ To create a router:
 val router = Router()
 ```
 
-A client won't be able to connect to it unless it has a [Realm](https://wamp-proto.org/_static/wamp_latest.html#realms-sessions-and-transports) (WAMP message routing domain):
+A client won't be able to connect to it unless it has a [Realm](https://wamp-proto.org/_static/gen/wamp_latest.html#realms-sessions-and-transports) (WAMP message routing domain):
 ```kotlin
 router.addRealm(Realm(Uri("myRealm")))
 ```
