@@ -102,7 +102,18 @@ class ClientImpl(
         }
 
     private fun joinRealm(realmUri: Uri) = runBlocking {
-        connection.send(Hello(realmUri, emptyMap()))
+        connection.send(
+            Hello(
+                realmUri, mapOf(
+                    "roles" to mapOf<String, Any?>(
+                        "publisher" to emptyMap<String, Any?>(),
+                        "subscriber" to emptyMap<String, Any?>(),
+                        "caller" to emptyMap<String, Any?>(),
+                        "callee" to emptyMap<String, Any?>()
+                    )
+                )
+            )
+        )
         connection.withNextMessage { message: Welcome ->
             log.info("Session established. ID: ${message.session}")
             sessionId = message.session

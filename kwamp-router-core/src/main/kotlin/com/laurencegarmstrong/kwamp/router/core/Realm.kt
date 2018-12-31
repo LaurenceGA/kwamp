@@ -108,8 +108,8 @@ data class WampSession(val id: Long, val connection: Connection) {
                     mapOf(
                         "agent" to "KWAMP",
                         "roles" to mapOf<String, Any?>(
-                            "broker" to emptyMap<String, Any?>()
-                            , "dealer" to emptyMap<String, Any?>()
+                            "broker" to emptyMap<String, Any?>(),
+                            "dealer" to emptyMap<String, Any?>()
                         )
                     )
                 )
