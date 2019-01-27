@@ -6,6 +6,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 class MessageSender {
+
     fun sendGoodbye(connection: Connection) = GlobalScope.launch {
         connection.send(
             Goodbye(

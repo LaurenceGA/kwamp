@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap
 class SessionEstablisher(
     private val realms: ConcurrentHashMap<Uri, Realm>,
     private val connection: Connection,
-    private val messageSender: MessageSender = MessageSender()
+    private val messageSender: MessageSender
 ) {
     fun establish() = GlobalScope.launch {
         var connected: Boolean = false

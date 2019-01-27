@@ -6,9 +6,9 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 class Realm(
-    val uri: Uri
+    val uri: Uri,
+    private val messageSender: MessageSender
 ) {
-    private val messageSender: MessageSender = MessageSender()
     private val dealer: Dealer =
         Dealer(
             messageSender,
