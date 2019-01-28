@@ -3,11 +3,12 @@ package com.laurencegarmstrong.kwamp.router.core.conversations.scripts
 import com.laurencegarmstrong.kwamp.conversations.core.TestConnection
 import com.laurencegarmstrong.kwamp.conversations.core.defaultRouter
 import com.laurencegarmstrong.kwamp.core.Uri
-import com.laurencegarmstrong.kwamp.core.messages.*
+import com.laurencegarmstrong.kwamp.core.messages.Publish
+import com.laurencegarmstrong.kwamp.core.messages.Published
+import com.laurencegarmstrong.kwamp.core.messages.Subscribe
+import com.laurencegarmstrong.kwamp.core.messages.Subscribed
 import com.laurencegarmstrong.kwamp.router.core.conversations.infrastructure.RouterConversation
 import io.kotlintest.be
-import io.kotlintest.matchers.collections.shouldContainExactly
-import io.kotlintest.matchers.maps.shouldContainExactly
 import io.kotlintest.should
 import io.kotlintest.specs.StringSpec
 
@@ -67,19 +68,19 @@ class PublishEvent : StringSpec({
                 publicationId = message.publication
             }
 
-            clientB shouldReceiveMessage eventMessage(
+            clientB shouldReceiveMessage eventMessageMatching(
                 { clientBSubscription!! },
                 { publicationId!! },
                 eventArgs,
                 eventArgsKw
             )
-            clientC shouldReceiveMessage eventMessage(
+            clientC shouldReceiveMessage eventMessageMatching(
                 { clientCSubscription!! },
                 { publicationId!! },
                 eventArgs,
                 eventArgsKw
             )
-            clientD shouldReceiveMessage eventMessage(
+            clientD shouldReceiveMessage eventMessageMatching(
                 { clientDSubscription!! },
                 { publicationId!! },
                 eventArgs,
@@ -88,16 +89,3 @@ class PublishEvent : StringSpec({
         }
     }
 })
-
-internal fun eventMessage(
-    subscription: () -> Long,
-    publication: () -> Long,
-    arguments: List<Any?>,
-    argumentsKw: Map<String, Any?>
-) =
-    { message: Event ->
-        message.subscription should be(subscription())
-        message.publication should be(publication())
-        message.arguments!!.shouldContainExactly(*arguments.toTypedArray())
-        message.argumentsKw!!.shouldContainExactly(argumentsKw)
-    }

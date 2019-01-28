@@ -4,12 +4,16 @@ import com.laurencegarmstrong.kwamp.conversations.core.ConversationCanvas
 import com.laurencegarmstrong.kwamp.conversations.core.RECEIVE_TIMEOUT
 import com.laurencegarmstrong.kwamp.conversations.core.TestConnection
 import com.laurencegarmstrong.kwamp.core.Uri
+import com.laurencegarmstrong.kwamp.core.messages.Event
 import com.laurencegarmstrong.kwamp.core.messages.Hello
 import com.laurencegarmstrong.kwamp.core.messages.Message
 import com.laurencegarmstrong.kwamp.core.messages.Welcome
 import com.laurencegarmstrong.kwamp.router.core.Router
 import io.kotlintest.assertSoftly
+import io.kotlintest.be
 import io.kotlintest.matchers.beInstanceOf
+import io.kotlintest.matchers.collections.shouldContainExactly
+import io.kotlintest.matchers.maps.shouldContainExactly
 import io.kotlintest.should
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -65,4 +69,17 @@ class RouterConversationCanvas : ConversationCanvas() {
             }
         }
     }
+
+    internal fun eventMessageMatching(
+        subscription: () -> Long,
+        publication: () -> Long,
+        arguments: List<Any?>,
+        argumentsKw: Map<String, Any?>
+    ) =
+        { message: Event ->
+            message.subscription should be(subscription())
+            message.publication should be(publication())
+            message.arguments!!.shouldContainExactly(*arguments.toTypedArray())
+            message.argumentsKw!!.shouldContainExactly(argumentsKw)
+        }
 }

@@ -7,14 +7,13 @@ import java.util.concurrent.ConcurrentHashMap
 class Router(private val strictUris: Boolean = false) {
     private val realms = ConcurrentHashMap<Uri, Realm>()
     private val messageSender = MessageSender()
+    private val sessionEstablisher = SessionEstablisher(realms, messageSender)
 
-    fun registerConnection(connection: Connection) = SessionEstablisher(
-        realms,
+    fun registerConnection(connection: Connection) = sessionEstablisher.establish(
         connection.apply {
             setStrictUris(strictUris)
-        },
-        messageSender
-    ).establish()
+        }
+    )
 
     fun addRealm(realmUri: Uri) {
         ensureStrictUriIfRequired(realmUri)

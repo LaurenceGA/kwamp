@@ -2,17 +2,19 @@ package com.laurencegarmstrong.kwamp.router.core
 
 import com.laurencegarmstrong.kwamp.core.*
 import com.laurencegarmstrong.kwamp.core.messages.Hello
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.launch
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.Executors
 
 class SessionEstablisher(
     private val realms: ConcurrentHashMap<Uri, Realm>,
-    private val connection: Connection,
     private val messageSender: MessageSender
-) {
-    fun establish() = GlobalScope.launch {
-        var connected: Boolean = false
+) : CoroutineScope by CoroutineScope(Executors.newFixedThreadPool(4).asCoroutineDispatcher()) {
+
+    fun establish(connection: Connection) = launch {
+        var connected = false
         do {
             connection.withNextMessage { message: Hello ->
                 realms[message.realm]?.join(connection)

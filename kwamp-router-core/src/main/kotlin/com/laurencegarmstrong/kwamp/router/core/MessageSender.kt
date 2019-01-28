@@ -2,12 +2,14 @@ package com.laurencegarmstrong.kwamp.router.core
 
 import com.laurencegarmstrong.kwamp.core.*
 import com.laurencegarmstrong.kwamp.core.messages.*
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.launch
+import java.util.concurrent.Executors
 
-class MessageSender {
+class MessageSender : CoroutineScope by CoroutineScope(Executors.newFixedThreadPool(4).asCoroutineDispatcher()) {
 
-    fun sendGoodbye(connection: Connection) = GlobalScope.launch {
+    fun sendGoodbye(connection: Connection) = launch {
         connection.send(
             Goodbye(
                 mapOf(),
@@ -17,7 +19,7 @@ class MessageSender {
         connection.close("Closed by client.")
     }
 
-    fun sendAbort(connection: Connection, exception: WampException) = GlobalScope.launch {
+    fun sendAbort(connection: Connection, exception: WampException) = launch {
         connection.send(
             Abort(
                 mapOf("message" to exception.localizedMessage),
@@ -27,15 +29,19 @@ class MessageSender {
         connection.close(exception.localizedMessage)
     }
 
-    fun sendRegistered(connection: Connection, requestId: Long, registrationId: Long) = GlobalScope.launch {
+    fun sendWelcome(connection: Connection, sessionId: Long, details: Dict) = launch {
+        connection.send(Welcome(sessionId, details))
+    }
+
+    fun sendRegistered(connection: Connection, requestId: Long, registrationId: Long) = launch {
         connection.send(Registered(requestId, registrationId))
     }
 
-    fun sendUnregistered(connection: Connection, requestId: Long) = GlobalScope.launch {
+    fun sendUnregistered(connection: Connection, requestId: Long) = launch {
         connection.send(Unregistered(requestId))
     }
 
-    fun sendExceptionError(connection: Connection, wampError: WampErrorException) = GlobalScope.launch {
+    fun sendExceptionError(connection: Connection, wampError: WampErrorException) = launch {
         connection.send(wampError.getErrorMessage())
     }
 
@@ -47,7 +53,7 @@ class MessageSender {
         arguments: List<Any?>?,
         argumentsKw: Dict?
     ) =
-        GlobalScope.launch {
+        launch {
             procedureImplementingConnection.send(
                 Invocation(
                     requestId,
@@ -66,7 +72,7 @@ class MessageSender {
         arguments: List<Any?>?,
         argumentsKw: Dict?
     ) =
-        GlobalScope.launch {
+        launch {
             callerConnection.send(
                 Result(
                     callRequestId,
@@ -85,7 +91,7 @@ class MessageSender {
         arguments: List<Any?>?,
         argumentsKw: Dict?
     ) =
-        GlobalScope.launch {
+        launch {
             callerConnection.send(
                 Error(
                     MessageType.CALL,
@@ -98,15 +104,15 @@ class MessageSender {
             )
         }
 
-    fun sendSubscribed(connection: Connection, requestId: Long, subscribeRequestId: Long) = GlobalScope.launch {
+    fun sendSubscribed(connection: Connection, requestId: Long, subscribeRequestId: Long) = launch {
         connection.send(Subscribed(requestId, subscribeRequestId))
     }
 
-    fun sendUnsubscribe(connection: Connection, unsubscribeRequestId: Long) = GlobalScope.launch {
+    fun sendUnsubscribe(connection: Connection, unsubscribeRequestId: Long) = launch {
         connection.send(Unsubscribed(unsubscribeRequestId))
     }
 
-    fun sendPublished(connection: Connection, requestId: Long, publicationId: Long) = GlobalScope.launch {
+    fun sendPublished(connection: Connection, requestId: Long, publicationId: Long) = launch {
         connection.send(Published(requestId, publicationId))
     }
 
@@ -116,7 +122,7 @@ class MessageSender {
         publicationId: Long,
         arguments: List<Any?>?,
         argumentsKw: Dict?
-    ) = GlobalScope.launch {
+    ) = launch {
         connection.send(
             Event(
                 subscriptionId,

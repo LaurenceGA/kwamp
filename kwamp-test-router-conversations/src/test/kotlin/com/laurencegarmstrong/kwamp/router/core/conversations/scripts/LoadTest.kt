@@ -11,13 +11,19 @@ import com.laurencegarmstrong.kwamp.router.core.conversations.infrastructure.Rou
 import io.kotlintest.be
 import io.kotlintest.should
 import io.kotlintest.specs.StringSpec
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 class LoadTest : StringSpec({
     "Test router sending a high volume of messages" {
-        val numClients = 5;
+        val numClients = 400;
         val clients = ArrayList<TestConnection>().apply {
-            repeat(numClients) {
-                add(TestConnection())
+            runBlocking {
+                repeat(numClients) {
+                    launch {
+                        add(TestConnection())
+                    }
+                }
             }
         }
 
@@ -25,24 +31,35 @@ class LoadTest : StringSpec({
 
         RouterConversation(
             defaultRouter(),
-            *clients.toTypedArray()
+            *clients.toTypedArray(), publisher
         ) {
-            clients.forEach { client ->
-                client.startsASession()
+            runBlocking {
+                clients.forEach { client ->
+                    launch {
+                        client.startsASession()
+                    }
+                }
+                launch {
+                    publisher.startsASession()
+                }
             }
-            publisher.startsASession()
 
             val testTopic = Uri("test.topic")
-            clients.forEachIndexed { index, client ->
-                client willSend { Subscribe(index.toLong(), emptyMap(), testTopic) }
+            runBlocking {
+                clients.forEachIndexed { index, client ->
+                    launch {
+                        client willSend { Subscribe(index.toLong(), emptyMap(), testTopic) }
+                    }
+                }
             }
 
-            val clientSubscriptions = ArrayList<Long?>(clients.size);
-            clients.forEachIndexed { index, client ->
-                client shouldReceiveMessage { message: Subscribed ->
+            val clientSubscriptions = Array(clients.size) { index ->
+                var subscriptionId: Long? = null
+                clients[index] shouldReceiveMessage { message: Subscribed ->
                     message.requestId should be(index.toLong())
-                    clientSubscriptions[index] = message.subscription
+                    subscriptionId = message.subscription
                 }
+                subscriptionId
             }
 
             val eventArgs = listOf(1, 2, "three")
@@ -62,27 +79,18 @@ class LoadTest : StringSpec({
                 publicationId = message.publication
             }
 
-            clients.forEachIndexed { index, client ->
-                client shouldReceiveMessage eventMessage(
-                    { clientSubscriptions[index]!! },
-                    { publicationId!! },
-                    eventArgs,
-                    eventArgsKw
-                )
+            runBlocking {
+                clients.forEachIndexed { index, client ->
+                    launch {
+                        client shouldReceiveMessage eventMessageMatching(
+                            { clientSubscriptions[index]!! },
+                            { publicationId!! },
+                            eventArgs,
+                            eventArgsKw
+                        )
+                    }
+                }
             }
         }
     }
 })
-
-//internal fun eventMessage(
-//    subscription: () -> Long,
-//    publication: () -> Long,
-//    arguments: List<Any?>,
-//    argumentsKw: Map<String, Any?>
-//) =
-//    { message: Event ->
-//        message.subscription should be(subscription())
-//        message.publication should be(publication())
-//        message.arguments!!.shouldContainExactly(*arguments.toTypedArray())
-//        message.argumentsKw!!.shouldContainExactly(argumentsKw)
-//    }
