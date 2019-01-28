@@ -1,12 +1,9 @@
-import groovy.lang.Closure
-import org.gradle.internal.impldep.org.apache.ivy.core.module.descriptor.Artifact
-import org.jetbrains.kotlin.gradle.dsl.Coroutines
 import org.jetbrains.kotlin.gradle.plugin.KotlinPluginWrapper
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 buildscript {
     var kotlinVersion: String by extra
-    kotlinVersion = "1.3.10"
+    kotlinVersion = "1.3.20"
 
     repositories {
         mavenCentral()
@@ -23,8 +20,8 @@ plugins {
 }
 
 val kotlinVersion: String by extra
-val kotlinTestVersion = "3.1.10"
-val coroutinesVersion = "1.0.1"
+val kotlinTestVersion = "3.2.1"
+val coroutinesVersion = "1.1.1"
 val logbackVersion = "1.2.1"
 
 subprojects {
