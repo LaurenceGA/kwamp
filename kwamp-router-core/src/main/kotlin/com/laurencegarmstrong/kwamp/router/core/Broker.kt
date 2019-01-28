@@ -27,7 +27,9 @@ class Broker(private val messageSender: MessageSender, private val randomIdGener
     }
 
     private fun findExistingSubscription(subscriberSession: WampSession, topic: UriPattern) =
-        topicSubscriptions[topic]?.find { subscriptions[it]!!.session == subscriberSession }
+        subscriptionLock.withLock {
+            topicSubscriptions[topic]?.find { subscriptions[it]!!.session == subscriberSession }
+        }
 
     private fun newSubscription(session: WampSession, subscriptionMessage: Subscribe) =
     //TODO should new ID be random?
