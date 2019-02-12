@@ -1,7 +1,7 @@
 package com.laurencegarmstrong.kwamp.router.core.conversations.infrastructure
 
 import com.laurencegarmstrong.kwamp.conversations.core.ConversationCanvas
-import com.laurencegarmstrong.kwamp.conversations.core.RECEIVE_TIMEOUT
+import com.laurencegarmstrong.kwamp.conversations.core.STANDARD_TIMEOUT
 import com.laurencegarmstrong.kwamp.conversations.core.TestConnection
 import com.laurencegarmstrong.kwamp.core.Uri
 import com.laurencegarmstrong.kwamp.core.messages.Event
@@ -48,7 +48,7 @@ class RouterConversationCanvas : ConversationCanvas() {
 
     inline infix fun <reified T : Message> TestConnection.shouldReceiveMessage(crossinline messageVerifier: (message: T) -> Unit) {
         runBlocking {
-            withTimeout(RECEIVE_TIMEOUT) {
+            withTimeout(STANDARD_TIMEOUT) {
                 val message = receive()
                 if (message !is T) {
                     message should beInstanceOf<T>()
@@ -63,7 +63,7 @@ class RouterConversationCanvas : ConversationCanvas() {
 
     inline fun <reified T : Message> TestConnection.shouldReceiveMessage() {
         runBlocking {
-            withTimeout(RECEIVE_TIMEOUT) {
+            withTimeout(STANDARD_TIMEOUT) {
                 val message = receive()
                 message should beInstanceOf<T>()
             }

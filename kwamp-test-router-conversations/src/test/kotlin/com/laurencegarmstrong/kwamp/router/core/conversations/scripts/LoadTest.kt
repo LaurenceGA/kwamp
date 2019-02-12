@@ -15,7 +15,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 class LoadTest : StringSpec({
-    "Test router sending a high volume of messages" {
+    "Test router sending and receiving a high volume of messages" {
         val numClients = 400;
         val clients = ArrayList<TestConnection>().apply {
             runBlocking {

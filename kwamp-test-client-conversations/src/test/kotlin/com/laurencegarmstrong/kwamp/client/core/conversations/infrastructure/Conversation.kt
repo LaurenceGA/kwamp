@@ -5,7 +5,7 @@ import com.laurencegarmstrong.kwamp.client.core.ClientImpl
 import com.laurencegarmstrong.kwamp.client.core.call.CallHandler
 import com.laurencegarmstrong.kwamp.client.core.pubsub.EventHandler
 import com.laurencegarmstrong.kwamp.conversations.core.ConversationCanvas
-import com.laurencegarmstrong.kwamp.conversations.core.RECEIVE_TIMEOUT
+import com.laurencegarmstrong.kwamp.conversations.core.STANDARD_TIMEOUT
 import com.laurencegarmstrong.kwamp.conversations.core.TestConnection
 import com.laurencegarmstrong.kwamp.core.Uri
 import com.laurencegarmstrong.kwamp.core.UriPattern
@@ -18,7 +18,8 @@ import io.kotlintest.be
 import io.kotlintest.matchers.beInstanceOf
 import io.kotlintest.should
 import kotlinx.coroutines.*
-import java.util.concurrent.Executors
+import org.slf4j.LoggerFactory
+import java.util.concurrent.ForkJoinPool
 
 class ClientConversation(
     realm: Uri = Uri("default"),
@@ -31,29 +32,31 @@ class ClientConversation(
 
 class ClientConversationCanvas(
     private val realm: Uri
-) : ConversationCanvas(), CoroutineScope by CoroutineScope(Executors.newCachedThreadPool().asCoroutineDispatcher()) {
+) : ConversationCanvas(), CoroutineScope by CoroutineScope(ForkJoinPool().asCoroutineDispatcher()) {
+    val logger = LoggerFactory.getLogger(ClientConversationCanvas::class.java)!!
+
     infix fun TestClient.willBeSentRouterMessage(messageSupplier: () -> Message) {
         send(messageSupplier())
     }
 
-    fun launchWithTimeout(timeout: Long = RECEIVE_TIMEOUT, block: suspend CoroutineScope.() -> Unit) =
+    fun launchWithTimeout(timeout: Long = STANDARD_TIMEOUT, block: suspend CoroutineScope.() -> Unit) =
         launch {
             withTimeout(timeout, block)
         }
 
-    fun <T> asyncWithTimeout(timeout: Long = RECEIVE_TIMEOUT, block: suspend CoroutineScope.() -> T) =
+    fun <T> asyncWithTimeout(timeout: Long = STANDARD_TIMEOUT, block: suspend CoroutineScope.() -> T) =
         async {
             withTimeout(timeout, block)
         }
 
-    fun <T> runBlockingWithTimeout(timeout: Long = RECEIVE_TIMEOUT, block: suspend CoroutineScope.() -> T) =
+    fun <T> runBlockingWithTimeout(timeout: Long = STANDARD_TIMEOUT, block: suspend CoroutineScope.() -> T) =
         runBlocking {
             withTimeout(timeout, block)
         }
 
     inline infix fun <reified T : Message> TestClient.shouldHaveSentMessage(crossinline messageVerifier: (message: T) -> Unit) {
         runBlocking {
-            withTimeout(RECEIVE_TIMEOUT) {
+            withTimeout(STANDARD_TIMEOUT) {
                 val message = receive()
                 if (message !is T) {
                     message should beInstanceOf<T>()
