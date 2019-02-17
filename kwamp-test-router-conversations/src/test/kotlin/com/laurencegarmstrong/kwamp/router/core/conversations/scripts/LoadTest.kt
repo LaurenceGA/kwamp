@@ -16,7 +16,7 @@ import kotlinx.coroutines.runBlocking
 
 class LoadTest : StringSpec({
     "Test router sending and receiving a high volume of messages" {
-        val numClients = 400;
+        val numClients = 400    //TODO more produces StackOverFlow. Investigate this
         val clients = ArrayList<TestConnection>().apply {
             runBlocking {
                 repeat(numClients) {
