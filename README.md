@@ -117,8 +117,8 @@ To call a procedure use:
 val call = client.call(Uri("<PROCEDURE_URI_HERE>"))
 ```
 
-This produces a `DeferredCallResult`.
-You then then use to await the result.
+This produces a `DeferredCallResult`.  
+You can then use this to await the result.
 ```kotlin
 val result = call.await()
 ```
@@ -134,8 +134,8 @@ val subscriptionHandle = client.subscribe("<PROCEDURE_URI_HERE>") { arguments, a
 }
 ```
 
-#### Unsubscirbing to a topic
-Unsubscirbing is a blocking procedure. Using the subscription handle from when you subscribed:
+#### Unsubscribing to a topic
+Unsubscribing is a blocking procedure. Using the subscription handle from when you subscribed:
 ```kotlin
 subscriptionHandle.unsubscribe()
 ```
