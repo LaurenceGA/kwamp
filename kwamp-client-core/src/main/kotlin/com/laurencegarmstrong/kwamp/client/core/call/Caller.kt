@@ -72,15 +72,9 @@ class DeferredCallResult(private val deferredResult: Deferred<CallResult>) :
 
     fun invokeOnError(errorCallback: (WampErrorException) -> Unit) {
         deferredResult.invokeOnCompletion { throwable ->
-            (throwable as? WampErrorException)?.apply { callbackAsynchronously(this, errorCallback) }
+            (throwable as? WampErrorException)?.apply { errorCallback(this) }
         }
     }
-
-    private fun callbackAsynchronously(error: WampErrorException, callback: (WampErrorException) -> Unit) =
-    //TODO is this necessary?
-        launch {
-            callback(error)
-        }
 
     fun invokeOnSuccess(completionCallback: (CallResult) -> Unit) {
         deferredResult.invokeOnCompletion { throwable ->
