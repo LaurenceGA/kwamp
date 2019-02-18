@@ -8,10 +8,8 @@ import com.laurencegarmstrong.kwamp.core.WampErrorException
 import com.laurencegarmstrong.kwamp.core.messages.Call
 import com.laurencegarmstrong.kwamp.core.messages.Dict
 import com.laurencegarmstrong.kwamp.core.messages.Result
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
+import java.util.concurrent.Executors
 
 internal class Caller(
     private val connection: Connection,
@@ -67,7 +65,8 @@ internal class Caller(
     )
 }
 
-class DeferredCallResult(private val deferredResult: Deferred<CallResult>) {
+class DeferredCallResult(private val deferredResult: Deferred<CallResult>) :
+    CoroutineScope by CoroutineScope(Executors.newSingleThreadExecutor().asCoroutineDispatcher()) {
     suspend fun await() = deferredResult.await()
     suspend fun join() = deferredResult.join()
 
@@ -78,7 +77,14 @@ class DeferredCallResult(private val deferredResult: Deferred<CallResult>) {
     }
 
     private fun callbackAsynchronously(error: WampErrorException, callback: (WampErrorException) -> Unit) =
-        GlobalScope.launch {
+    //TODO is this necessary?
+        launch {
             callback(error)
         }
+
+    fun invokeOnSuccess(completionCallback: (CallResult) -> Unit) {
+        deferredResult.invokeOnCompletion { throwable ->
+            if (throwable == null) completionCallback(deferredResult.getCompleted())
+        }
+    }
 }
