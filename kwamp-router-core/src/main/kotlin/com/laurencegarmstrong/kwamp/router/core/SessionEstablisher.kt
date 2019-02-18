@@ -11,7 +11,7 @@ import java.util.concurrent.Executors
 class SessionEstablisher(
     private val realms: ConcurrentHashMap<Uri, Realm>,
     private val messageSender: MessageSender
-) : CoroutineScope by CoroutineScope(Executors.newFixedThreadPool(4).asCoroutineDispatcher()) {
+) : CoroutineScope by CoroutineScope(Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()).asCoroutineDispatcher()) {
 
     fun establish(connection: Connection) = launch {
         var connected = false

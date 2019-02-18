@@ -7,7 +7,8 @@ import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.launch
 import java.util.concurrent.Executors
 
-class MessageSender : CoroutineScope by CoroutineScope(Executors.newFixedThreadPool(4).asCoroutineDispatcher()) {
+class MessageSender :
+    CoroutineScope by CoroutineScope(Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()).asCoroutineDispatcher()) {
 
     fun sendGoodbye(connection: Connection) = launch {
         connection.send(
