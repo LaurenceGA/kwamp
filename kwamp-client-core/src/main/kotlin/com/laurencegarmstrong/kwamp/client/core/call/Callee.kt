@@ -4,17 +4,20 @@ import com.laurencegarmstrong.kwamp.client.core.MessageListenersHandler
 import com.laurencegarmstrong.kwamp.core.Connection
 import com.laurencegarmstrong.kwamp.core.RandomIdGenerator
 import com.laurencegarmstrong.kwamp.core.Uri
+import com.laurencegarmstrong.kwamp.core.WampError
 import com.laurencegarmstrong.kwamp.core.messages.*
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.Executors
 
 internal class Callee(
     private val connection: Connection,
     private val randomIdGenerator: RandomIdGenerator,
     private val messageListenersHandler: MessageListenersHandler
-) {
+) : CoroutineScope by CoroutineScope(Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()).asCoroutineDispatcher()) {
     private val registrations = ConcurrentHashMap<Long, CallHandler>()
 
     fun register(
@@ -64,15 +67,16 @@ internal class Callee(
         val registeredFunction = registrations[invocationMessage.registration]
 
         if (registeredFunction == null) {
-            GlobalScope.launch {
+            launch {
+                val errorMessage =
+                    "INVOCATION received for non-registered registration ID (${invocationMessage.registration}) requestID=${invocationMessage.requestId}"
                 connection.send(
-                    Error(
-                        MessageType.INVOCATION,
-                        invocationMessage.requestId,
-                        emptyMap(),
-                        DEFAULT_INVOCATION_ERROR
+                    Abort(
+                        mapOf("message" to errorMessage),
+                        WampError.PROTOCOL_VIOLATION.uri
                     )
                 )
+                connection.close(errorMessage)
             }
             return
         }
@@ -88,7 +92,7 @@ internal class Callee(
                 throw IllegalStateException("Procedure has been unregistered during processing")
             }
 
-            GlobalScope.launch {
+            launch {
                 connection.send(
                     Yield(
                         invocationMessage.requestId,
@@ -99,7 +103,7 @@ internal class Callee(
                 )
             }
         } catch (error: CallException) {
-            GlobalScope.launch {
+            launch {
                 connection.send(
                     Error(
                         MessageType.INVOCATION,
@@ -112,7 +116,7 @@ internal class Callee(
                 )
             }
         } catch (error: Exception) {
-            GlobalScope.launch {
+            launch {
                 connection.send(
                     Error(
                         MessageType.INVOCATION,

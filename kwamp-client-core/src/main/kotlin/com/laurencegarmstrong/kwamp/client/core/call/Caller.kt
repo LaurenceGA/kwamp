@@ -16,12 +16,16 @@ internal class Caller(
     private val randomIdGenerator: RandomIdGenerator,
     private val messageListenersHandler: MessageListenersHandler
 ) {
+    private val callSendScope =
+        CoroutineScope(Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()).asCoroutineDispatcher())
+    private val receiveScope =
+        CoroutineScope(Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()).asCoroutineDispatcher())
+
     fun call(
         procedure: Uri,
         arguments: List<Any?>?,
         argumentsKw: Dict?
     ): DeferredCallResult = sendCallMessage(procedure, arguments, argumentsKw)
-
 
     private fun sendCallMessage(
         procedure: Uri,
@@ -29,7 +33,7 @@ internal class Caller(
         argumentsKw: Dict?
     ) =
         randomIdGenerator.newId().let { requestId ->
-            GlobalScope.launch {
+            callSendScope.launch {
                 connection.send(
                     Call(
                         requestId,
@@ -47,10 +51,10 @@ internal class Caller(
     private fun deferredResultWithListeners(requestId: Long): DeferredCallResult {
         val completableResult = CompletableDeferred<CallResult>()
 
-        GlobalScope.launch {
+        receiveScope.launch {
             try {
                 val resultMessage = messageListenersHandler.registerListenerWithErrorHandler<Result>(requestId).await()
-                completableResult.complete(resultMessageToCallResult(resultMessage))
+                completableResult.complete(resultMessage.toCallResult())
             } catch (error: WampErrorException) {
                 completableResult.completeExceptionally(error)
             }
@@ -58,12 +62,9 @@ internal class Caller(
 
         return DeferredCallResult(completableResult)
     }
-
-    private fun resultMessageToCallResult(resultMessage: Result) = CallResult(
-        resultMessage.arguments,
-        resultMessage.argumentsKw
-    )
 }
+
+fun Result.toCallResult() = CallResult(arguments, argumentsKw)
 
 class DeferredCallResult(private val deferredResult: Deferred<CallResult>) :
     CoroutineScope by CoroutineScope(Executors.newSingleThreadExecutor().asCoroutineDispatcher()) {

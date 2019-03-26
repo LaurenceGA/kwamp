@@ -77,7 +77,7 @@ class Dealer(
         )
         messageSender.sendInvocation(
             procedureConfig.procedureProvidingSession.connection,
-            invocationRequestId,
+            invocationRequestId,    // I don't think this is right... New sequential ID? //TODO
             procedureConfig.registrationId,
             emptyMap(),
             callMessage.arguments,

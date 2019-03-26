@@ -31,27 +31,30 @@ class MessageListenersHandler :
         registerListenerWithErrorHandler(requestId, T::class)
 
     @Suppress("UNCHECKED_CAST")
-    fun <T : Message> registerTypeListener(messageType: KClass<out T>): Deferred<T> =
-        async {
-            registerToMessageListenerMap(typeListeners, messageType).await() as T
+    fun <T : Message> registerTypeListener(messageType: KClass<out T>): Deferred<T> {
+        val messageListener = registerToMessageListenerMap(typeListeners, messageType)
+        return async {
+            messageListener.await() as T
         }.apply {
             invokeOnCompletion {
                 typeListeners.remove(messageType)
             }
         }
+    }
 
     @Suppress("UNCHECKED_CAST")
-    fun <T : Message> registerListener(requestId: Long, messageType: KClass<out T>): Deferred<T> =
-        async {
-            registerToMessageListenerMap(
-                requestIdListeners,
-                RequestListenerKey(requestId, messageType)
-            ).await() as T
+    fun <T : Message> registerListener(requestId: Long, messageType: KClass<out T>): Deferred<T> {
+        //TODO investiage maybe still not working?
+        val messageListener =
+            registerToMessageListenerMap(requestIdListeners, RequestListenerKey(requestId, messageType))
+        return async {
+            messageListener.await() as T
         }.apply {
             invokeOnCompletion {
                 requestIdListeners.remove(RequestListenerKey(requestId, messageType))
             }
         }
+    }
 
     fun <T : Message> registerListenerWithErrorHandler(requestId: Long, messageType: KClass<out T>) =
         CompletableDeferred<T>().also {
