@@ -31,7 +31,9 @@ internal class Callee(
         }
 
     private suspend fun createRegistration(procedure: Uri): Registered {
+        //TODO change to linear ID
         randomIdGenerator.newId().also { requestId ->
+            val messageListener = messageListenersHandler.registerListenerWithErrorHandler<Registered>(requestId)
             connection.send(
                 Register(
                     requestId,
@@ -39,7 +41,7 @@ internal class Callee(
                     procedure
                 )
             )
-            return messageListenersHandler.registerListenerWithErrorHandler<Registered>(requestId).await()
+            return messageListener.await()
         }
     }
 
@@ -53,13 +55,14 @@ internal class Callee(
 
     private suspend fun unregisterWithRouter(registrationId: Long) {
         randomIdGenerator.newId().also { requestId ->
+            val messageListener = messageListenersHandler.registerListenerWithErrorHandler<Unregistered>(requestId)
             connection.send(
                 Unregister(
                     requestId,
                     registrationId
                 )
             )
-            messageListenersHandler.registerListenerWithErrorHandler<Unregistered>(requestId).await()
+            messageListener.await()
         }
     }
 

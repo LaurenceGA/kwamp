@@ -33,6 +33,8 @@ internal class Caller(
         argumentsKw: Dict?
     ) =
         randomIdGenerator.newId().let { requestId ->
+            val resultListener = deferredResultWithListeners(requestId)
+
             callSendScope.launch {
                 connection.send(
                     Call(
@@ -45,7 +47,7 @@ internal class Caller(
                 )
             }
 
-            deferredResultWithListeners(requestId)
+            resultListener
         }
 
     private fun deferredResultWithListeners(requestId: Long): DeferredCallResult {

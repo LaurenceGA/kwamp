@@ -30,6 +30,8 @@ internal class Subscriber(
 
     private suspend fun createSubscription(topicPattern: UriPattern): Subscribed {
         randomIdGenerator.newId().also { requestId ->
+            val messageListener = messageListenersHandler.registerListenerWithErrorHandler<Subscribed>(requestId)
+
             connection.send(
                 Subscribe(
                     requestId,
@@ -38,7 +40,7 @@ internal class Subscriber(
                 )
             )
 
-            return messageListenersHandler.registerListenerWithErrorHandler<Subscribed>(requestId).await()
+            return messageListener.await()
         }
     }
 
@@ -51,13 +53,15 @@ internal class Subscriber(
 
     private suspend fun unsubscribeFromRouter(subscriptionId: Long) {
         randomIdGenerator.newId().also { requestId ->
+            val messageListener = messageListenersHandler.registerListenerWithErrorHandler<Unsubscribed>(requestId)
+
             connection.send(
                 Unsubscribe(
                     requestId,
                     subscriptionId
                 )
             )
-            messageListenersHandler.registerListenerWithErrorHandler<Unsubscribed>(requestId).await()
+            messageListener.await()
         }
     }
 
