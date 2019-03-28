@@ -90,7 +90,7 @@ internal class Callee(
                 invocationMessage.argumentsKw
             )
 
-            //Verify function is still registered in case it was unregistered during processing
+            // Verify function is still registered in case it was unregistered during processing
             if (!registrations.containsKey(invocationMessage.registration)) {
                 throw IllegalStateException("Procedure has been unregistered during processing")
             }
