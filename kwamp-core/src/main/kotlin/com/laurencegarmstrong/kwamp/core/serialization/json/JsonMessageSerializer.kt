@@ -25,7 +25,7 @@ class JsonMessageSerializer : MessageSerializer {
         throw InvalidMessageException("Couldn't read message", e)
     }
 
-    private fun extractMessageType(messageArray: List<Any>) = try {
+    private fun extractMessageType(messageArray: List<Any?>) = try {
         Pair(toInteger(messageArray[0] as Number), messageArray.drop(1))
     } catch (e: IndexOutOfBoundsException) {
         throw InvalidMessageException("Message must have a least one item", e)
@@ -49,7 +49,7 @@ internal fun Klaxon.parseArrayWithMapConverter(reader: StringReader) =
 
 internal fun Klaxon.fromJsonArray(jsonArray: JsonArray<*>) = jsonArray.map(this::convertJsonObject)
 
-internal fun Klaxon.convertJsonObject(jo: Any?): Any = when {
+internal fun Klaxon.convertJsonObject(jo: Any?): Any? = when {
     jo is JsonObject -> parseFromJsonObject<Map<String, Any?>>(jo)
         ?: throw KlaxonException("Couldn't convert $jo")
     jo != null -> {

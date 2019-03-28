@@ -1,10 +1,14 @@
 package com.laurencegarmstrong.kwamp.client.core.conversations.scripts
 
-import com.laurencegarmstrong.kwamp.client.core.call.*
+import com.laurencegarmstrong.kwamp.client.core.call.CallException
+import com.laurencegarmstrong.kwamp.client.core.call.CallHandler
+import com.laurencegarmstrong.kwamp.client.core.call.CallResult
+import com.laurencegarmstrong.kwamp.client.core.call.RegistrationHandle
 import com.laurencegarmstrong.kwamp.client.core.conversations.infrastructure.ClientConversation
 import com.laurencegarmstrong.kwamp.client.core.conversations.infrastructure.ClientConversationCanvas
 import com.laurencegarmstrong.kwamp.client.core.conversations.infrastructure.TestClient
 import com.laurencegarmstrong.kwamp.core.Uri
+import com.laurencegarmstrong.kwamp.core.WampError
 import com.laurencegarmstrong.kwamp.core.WampErrorException
 import com.laurencegarmstrong.kwamp.core.messages.*
 import io.kotlintest.be
@@ -124,10 +128,8 @@ class RemoteProcedureCall : StringSpec({
             client willBeSentRouterMessage {
                 Invocation(invocationRequestId2, registrationId, emptyMap())
             }
-            client shouldHaveSentMessage { message: Error ->
-                message.requestId should be(invocationRequestId2)
-                message.requestType should be(MessageType.INVOCATION)
-                message.error should be(DEFAULT_INVOCATION_ERROR)
+            client shouldHaveSentMessage { message: Abort ->
+                message.reason should be(WampError.PROTOCOL_VIOLATION.uri)
             }
         }
     }

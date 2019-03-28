@@ -188,7 +188,7 @@ class LoadTest : StringSpec({
                     var requestId: Long? = null
                     val testProcedure = Uri("callee.$procedureIndex")
                     launchWithTimeout {
-                        calleeClient.register(testProcedure) { arguments, argumentsKw ->
+                        calleeClient.register(testProcedure) { _, argumentsKw ->
                             CallResult(listOf(procedureIndex), argumentsKw)
                         }
                     }

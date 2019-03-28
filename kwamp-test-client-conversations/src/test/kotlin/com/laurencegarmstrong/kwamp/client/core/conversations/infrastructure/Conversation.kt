@@ -86,7 +86,7 @@ class ClientConversationCanvas(
         return client
     }
 
-    fun TestClient.connect(testRealm: Uri = realm) {
+    private fun TestClient.connect(testRealm: Uri = realm) {
         this.connect(testRealm)
     }
 }
