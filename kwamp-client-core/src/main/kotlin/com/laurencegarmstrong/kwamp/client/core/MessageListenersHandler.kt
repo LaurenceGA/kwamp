@@ -44,7 +44,6 @@ class MessageListenersHandler :
 
     @Suppress("UNCHECKED_CAST")
     fun <T : Message> registerListener(requestId: Long, messageType: KClass<out T>): Deferred<T> {
-        //TODO investiage maybe still not working?
         val messageListener =
             registerToMessageListenerMap(requestIdListeners, RequestListenerKey(requestId, messageType))
         return async {
