@@ -21,7 +21,7 @@ class LoadTest : StringSpec({
     val receiveContext =
         Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()).asCoroutineDispatcher()
 
-    "!Test client sending a high volume of publish messages" {
+    "Test client sending a high volume of publish messages" {
         ClientConversation {
             val client = newConnectedTestClient()
 
@@ -71,7 +71,7 @@ class LoadTest : StringSpec({
         }
     }
 
-    "!Test client sending a high volume of call messages" {
+    "Test client sending a high volume of call messages" {
         ClientConversation {
             val client = newConnectedTestClient()
 
@@ -120,7 +120,7 @@ class LoadTest : StringSpec({
         }
     }
 
-    "!Test client sending a high volume of call messages and receiving errors" {
+    "Test client sending a high volume of call messages and receiving errors" {
         ClientConversation {
             val client = newConnectedTestClient()
 
