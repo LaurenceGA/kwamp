@@ -47,10 +47,21 @@ val messageData = listOf(
         ),
         "[8, 3, 123, $detailsDictRaw, \"error\"]"
     ),
-//            row(Error(5, 123, "details", Uri("error"), listOf("arg1", 2, null)),
-//                    "[8, 5, 123, \"details\", \"error\", [\"arg1\", 2, null]]"),
-//                row(Error(5, 123, "details", Uri("error"), listOf("arg1", 2, null), mapOf("arg3" to "val3", "arg4" to 4)),
-//                        "[8, 5, 123, \"details\", \"error\", [\"arg1\", 2, null], {\"arg3\": \"val3\", \"arg4\": 4}]"),
+//    row(
+//        Error(MessageType.PUBLISH, 123, detailsDict, Uri("error"), listOf("arg1", 2, null)),
+//        "[8, 16, 123, $detailsDictRaw, \"error\", [\"arg1\", 2, null]]"
+//    ),
+//    row(
+//        Error(
+//            MessageType.CALL,
+//            123,
+//            detailsDict,
+//            Uri("error"),
+//            listOf("arg1", 2, null),
+//            mapOf("arg3" to "val3", "arg4" to 4)
+//        ),
+//        "[8, 48, 123, $detailsDictRaw, \"error\", [\"arg1\", 2, null], {\"arg3\": \"val3\", \"arg4\": 4}]"
+//    ),
     row(
         Error(
             MessageType.ABORT,

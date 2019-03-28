@@ -9,12 +9,14 @@ import com.laurencegarmstrong.kwamp.core.*
 import com.laurencegarmstrong.kwamp.core.messages.*
 import com.laurencegarmstrong.kwamp.core.serialization.json.JsonMessageSerializer
 import com.laurencegarmstrong.kwamp.core.serialization.messagepack.MessagePackSerializer
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
+import java.util.concurrent.Executors
 
 interface Client {
     fun register(procedure: Uri, handler: CallHandler): RegistrationHandle
@@ -44,7 +46,7 @@ class ClientImpl(
     protocol: String = WAMP_DEFAULT,
     onClose: suspend (message: String) -> Unit = {},
     private val exceptionCatcher: ExceptionCatcher = ExceptionSwallower()
-) : Client {
+) : Client, CoroutineScope by CoroutineScope(Executors.newSingleThreadExecutor().asCoroutineDispatcher()) {
     private val log = LoggerFactory.getLogger(ClientImpl::class.java)!!
     private val connection = Connection(incoming, outgoing, onClose, getSerializer(protocol))
 
@@ -63,7 +65,7 @@ class ClientImpl(
     init {
         joinRealm(realm)
 
-        GlobalScope.launch {
+        launch {
             connection.forEachMessage(exceptionHandler()) {
                 try {
                     handleMessage(it)
@@ -130,9 +132,11 @@ class ClientImpl(
     ) = caller.call(procedure, arguments, argumentsKw)
 
     override fun disconnect(closeReason: Uri) = runBlocking {
+        val messageListener = messageListenersHandler.registerListener<Goodbye>()
+
         connection.send(Goodbye(emptyMap(), closeReason))
 
-        messageListenersHandler.registerListener<Goodbye>().await().let { message ->
+        messageListener.await().let { message ->
             log.info("Router replied goodbye. Reason: ${message.reason}")
             message.reason
         }

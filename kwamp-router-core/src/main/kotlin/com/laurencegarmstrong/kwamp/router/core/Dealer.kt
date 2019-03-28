@@ -77,7 +77,7 @@ class Dealer(
         )
         messageSender.sendInvocation(
             procedureConfig.procedureProvidingSession.connection,
-            invocationRequestId,
+            invocationRequestId,    //TODO Request should be session-scoped and sequential
             procedureConfig.registrationId,
             emptyMap(),
             callMessage.arguments,

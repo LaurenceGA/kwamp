@@ -8,13 +8,15 @@ import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.channels.consumeEach
 import org.slf4j.LoggerFactory
+import java.util.concurrent.Executors
 
 class Connection(
     private val incoming: ReceiveChannel<ByteArray>,
     private val outgoing: SendChannel<ByteArray>,
     private val closeConnection: suspend (message: String) -> Unit,
     private val messageSerializer: MessageSerializer = JsonMessageSerializer()
-) : MessageSerializer by messageSerializer {
+) : MessageSerializer by messageSerializer,
+    CoroutineScope by CoroutineScope(Executors.newSingleThreadExecutor().asCoroutineDispatcher() + cancelOnException) {
     private val logger = LoggerFactory.getLogger(Connection::class.java)!!
     private var strictUris: Boolean = false
 
@@ -26,8 +28,8 @@ class Connection(
         outgoing.close()
     }
 
-    suspend fun forEachMessage(exceptionHandler: (Throwable) -> Unit, action: suspend (Message) -> Unit) =
-        GlobalScope.launch(context = cancelOnException) {
+    fun forEachMessage(exceptionHandler: (Throwable) -> Unit, action: suspend (Message) -> Unit) =
+        launch {
             incoming.consumeEach {
                 try {
                     processRawMessage(it, action)
@@ -37,8 +39,8 @@ class Connection(
             }
         }
 
-    suspend fun <R> onNextMessage(action: suspend (Message) -> R): Deferred<R> =
-        GlobalScope.async(context = cancelOnException) {
+    fun <R> onNextMessage(action: suspend (Message) -> R): Deferred<R> =
+        async {
             processRawMessage(incoming.receive(), action)
         }
 
@@ -66,6 +68,6 @@ class Connection(
     }
 }
 
-val cancelOnException = Dispatchers.Default + CoroutineExceptionHandler { context, throwable ->
+val cancelOnException = CoroutineExceptionHandler { context, throwable ->
     context.cancel(throwable)
 }

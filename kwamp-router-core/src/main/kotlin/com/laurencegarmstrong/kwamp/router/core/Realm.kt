@@ -2,13 +2,25 @@ package com.laurencegarmstrong.kwamp.router.core
 
 import com.laurencegarmstrong.kwamp.core.*
 import com.laurencegarmstrong.kwamp.core.messages.*
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.CoroutineName
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.launch
+import java.util.concurrent.ForkJoinPool
+import kotlin.coroutines.CoroutineContext
+
+internal val WELCOME_MESSAGE = mapOf(
+    "agent" to "KWAMP",
+    "roles" to mapOf<String, Any?>(
+        "broker" to emptyMap<String, Any?>(),
+        "dealer" to emptyMap<String, Any?>()
+    )
+)
 
 class Realm(
-    val uri: Uri
-) {
-    private val messageSender: MessageSender = MessageSender()
+    val uri: Uri,
+    private val messageSender: MessageSender
+) : CoroutineScope {
     private val dealer: Dealer =
         Dealer(
             messageSender,
@@ -20,10 +32,15 @@ class Realm(
 
     private val sessions = SessionSet(RandomIdGenerator())
 
-    suspend fun join(connection: Connection) = startSession(connection)
+    private val sessionThreadPool = ForkJoinPool().asCoroutineDispatcher()
+    override val coroutineContext: CoroutineContext
+        get() = sessionThreadPool + CoroutineName("Realm session thread pool")
 
-    private suspend fun startSession(connection: Connection) = sessions.newSession(connection).also { session ->
-        GlobalScope.launch {
+    fun join(connection: Connection) = startSession(connection)
+
+    private fun startSession(connection: Connection) = sessions.newSession(connection).also { session ->
+        launch {
+            session.sendWelcomeMessage()
             session.listenForMessages()
         }
     }
@@ -43,12 +60,7 @@ class Realm(
         }
     }
 
-    private fun exceptionHandler(connection: Connection): (Throwable) -> Unit = { throwable ->
-        when (throwable) {
-            is WampErrorException -> messageSender.sendExceptionError(connection, throwable)
-            else -> throw throwable
-        }
-    }
+    private fun WampSession.sendWelcomeMessage() = messageSender.sendWelcome(connection, id, WELCOME_MESSAGE)
 
     private suspend fun handleMessage(
         message: Message,
@@ -81,6 +93,13 @@ class Realm(
         }
     }
 
+    private fun exceptionHandler(connection: Connection): (Throwable) -> Unit = { throwable ->
+        when (throwable) {
+            is WampErrorException -> messageSender.sendExceptionError(connection, throwable)
+            else -> throw throwable
+        }
+    }
+
     private fun handleError(errorMessage: Error) {
         when (errorMessage.requestType) {
             MessageType.INVOCATION -> dealer.handleInvocationError(errorMessage)
@@ -100,23 +119,6 @@ class SessionSet(idGenerator: WampIdGenerator) {
 }
 
 data class WampSession(val id: Long, val connection: Connection) {
-    init {
-        GlobalScope.launch {
-            connection.send(
-                Welcome(
-                    id,
-                    mapOf(
-                        "agent" to "KWAMP",
-                        "roles" to mapOf<String, Any?>(
-                            "broker" to emptyMap<String, Any?>(),
-                            "dealer" to emptyMap<String, Any?>()
-                        )
-                    )
-                )
-            )
-        }
-    }
-
     fun equals(other: WampSession): Boolean {
         return id == other.id
     }

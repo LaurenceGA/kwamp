@@ -1,7 +1,4 @@
-import org.jetbrains.kotlin.gradle.dsl.Coroutines
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
-val klaxonVersion = "3.0.6"
+val klaxonVersion = "5.0.5"
 val moshiPackVersion = "1.0.0-beta"
 
 val apacheLang3CommonsVersion = "3.7"

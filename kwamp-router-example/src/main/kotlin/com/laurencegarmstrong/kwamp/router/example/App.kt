@@ -25,7 +25,7 @@ import kotlinx.coroutines.launch
 import java.time.Duration
 
 private val router = Router().apply {
-    addRealm(Realm(Uri("default")))
+    addRealm(Uri("default"))
 }
 private const val websocketPath = "/connect"
 

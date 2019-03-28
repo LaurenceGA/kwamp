@@ -6,21 +6,27 @@ import java.util.concurrent.ConcurrentHashMap
 
 class Router(private val strictUris: Boolean = false) {
     private val realms = ConcurrentHashMap<Uri, Realm>()
+    private val messageSender = MessageSender()
+    private val sessionEstablisher = SessionEstablisher(realms, messageSender)
 
-    fun registerConnection(connection: Connection) = SessionEstablisher(
-        realms,
+    fun registerConnection(connection: Connection) = sessionEstablisher.establish(
         connection.apply {
             setStrictUris(strictUris)
         }
-    ).establish()
+    )
 
-    fun addRealm(realm: Realm) {
-        strictIfRequired(realm)
-        if (realm.uri !in realms) realms[realm.uri] = realm
-        else throw IllegalArgumentException("Realm already exists")
+    fun addRealm(realmUri: Uri) {
+        ensureStrictUriIfRequired(realmUri)
+        if (!realms.containsKey(realmUri)) {
+            realms[realmUri] = constructRealm(realmUri)
+        } else {
+            throw IllegalArgumentException("Realm already exists")
+        }
     }
 
-    private fun strictIfRequired(realm: Realm) {
-        if (strictUris) realm.uri.ensureStrict()
+    private fun constructRealm(realmUri: Uri) = Realm(realmUri, messageSender)
+
+    private fun ensureStrictUriIfRequired(realmUri: Uri) {
+        if (strictUris) realmUri.ensureStrict()
     }
 }

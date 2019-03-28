@@ -39,12 +39,11 @@ internal class JsonMessageSerializerTest : StringSpec({
         }
     }
 
-    "!Klaxon nulls" {
+    "Klaxon nulls" {
         Klaxon().toJsonString(listOf(1, 2, null, null, 3, null)) shouldBe "[1, 2, null, null, 3, null]"
         Klaxon().toJsonString(object {
             val test = null
-        }) shouldBe "{\"test\": null}"
-        Klaxon().toJsonString(SomeTest(null)) shouldBe "{\"test\": null}"
+        }) shouldBe "{}"
     }
 
     "!Klaxon can't read" {

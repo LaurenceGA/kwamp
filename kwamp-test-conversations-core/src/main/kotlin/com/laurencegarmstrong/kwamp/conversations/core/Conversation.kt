@@ -7,7 +7,7 @@ import com.laurencegarmstrong.kwamp.core.serialization.json.JsonMessageSerialize
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.runBlocking
 
-const val RECEIVE_TIMEOUT = 10000L
+const val STANDARD_TIMEOUT = 10000L
 
 open class ConversationCanvas {
     @Suppress("UNCHECKED_CAST")

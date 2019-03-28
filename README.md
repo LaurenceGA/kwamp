@@ -73,7 +73,7 @@ router.registerConnection(connection)
 
 You then just need to ensure that the incoming and outgoing channels are hooked into the input/output of the underlying transport.
 ```kotlin
-GlobalScope.launch {    // In another thread so it doesn't block
+launch {    // In another thread so it doesn't block
     outgoing.consumeEach { message ->
         // forward on anything the router wants to send over the connection to the transport here
     }
