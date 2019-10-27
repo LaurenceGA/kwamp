@@ -21,9 +21,6 @@ class Connection(
     private var strictUris: Boolean = false
 
     suspend fun close(message: String) {
-        while (outgoing.isFull) {
-            // Wait until messages are sent through the channel
-        }
         closeConnection(message)
         outgoing.close()
     }
@@ -69,5 +66,5 @@ class Connection(
 }
 
 val cancelOnException = CoroutineExceptionHandler { context, throwable ->
-    context.cancel(throwable)
+    context.cancel(CancellationException("Coroutine cancelled", throwable))
 }

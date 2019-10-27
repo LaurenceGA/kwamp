@@ -1,7 +1,7 @@
-val klaxonVersion = "5.0.5"
-val moshiPackVersion = "1.0.0-beta"
+val klaxonVersion = "5.0.12"
+val moshiPackVersion = "1.0.1"
 
-val apacheLang3CommonsVersion = "3.7"
+val apacheLang3CommonsVersion = "3.9"
 
 dependencies {
     implementation("com.daveanthonythomas.moshipack:moshipack:$moshiPackVersion")

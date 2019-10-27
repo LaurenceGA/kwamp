@@ -75,7 +75,7 @@ class PublishAndSubscribe : StringSpec({
         }
     }
 
-    "A Client subscribe to a topic and receive events" {
+    "A Client can subscribe to a topic and receive events" {
         ClientConversation {
             val client = newConnectedTestClient()
 

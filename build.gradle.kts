@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 buildscript {
     var kotlinVersion: String by extra
-    kotlinVersion = "1.3.20"
+    kotlinVersion = "1.3.50"
 
     repositories {
         mavenCentral()
@@ -20,9 +20,9 @@ plugins {
 }
 
 val kotlinVersion: String by extra
-val kotlinTestVersion = "3.2.1"
-val coroutinesVersion = "1.1.1"
-val logbackVersion = "1.2.1"
+val kotlinTestVersion = "3.4.2"
+val coroutinesVersion = "1.3.2"
+val logbackVersion = "1.2.3"
 
 subprojects {
     apply {
@@ -34,7 +34,7 @@ subprojects {
     repositories {
         mavenCentral()
         jcenter()
-        maven(url = "http://dl.bintray.com/kotlin/kotlin-eap")
+//        maven(url = "http://dl.bintray.com/kotlin/kotlin-eap")
     }
 
     tasks.withType<Test> {
