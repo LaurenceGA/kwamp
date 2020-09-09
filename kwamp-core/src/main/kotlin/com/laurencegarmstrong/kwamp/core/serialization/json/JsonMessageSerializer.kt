@@ -6,6 +6,7 @@ import com.laurencegarmstrong.kwamp.core.isWhole
 import com.laurencegarmstrong.kwamp.core.messages.Message
 import com.laurencegarmstrong.kwamp.core.messages.MessageType
 import com.laurencegarmstrong.kwamp.core.serialization.MessageSerializer
+import sun.rmi.runtime.Log
 import java.io.StringReader
 import java.nio.charset.Charset
 
@@ -56,7 +57,10 @@ internal fun Klaxon.convertJsonObject(jo: Any?): Any? = when {
         val converter = findConverterFromClass(Any::class.java, null)
         converter.fromJson(JsonValue(jo, null, null, this))
     }
-    else -> throw KlaxonException("Couldn't convert $jo")
+    //this helps prevent crashing when null value is received for any key
+    else -> {
+        log("Couldn't convert $jo")
+    }
 }
 
 private val MAP_CONVERTER = object : Converter {

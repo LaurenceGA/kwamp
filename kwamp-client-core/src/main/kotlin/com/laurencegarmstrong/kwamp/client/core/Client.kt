@@ -47,6 +47,8 @@ class ClientImpl(
     onClose: suspend (message: String) -> Unit = {},
     private val exceptionCatcher: ExceptionCatcher = ExceptionSwallower()
 ) : Client, CoroutineScope by CoroutineScope(Executors.newSingleThreadExecutor().asCoroutineDispatcher()) {
+
+
     private val log = LoggerFactory.getLogger(ClientImpl::class.java)!!
     private val connection = Connection(incoming, outgoing, onClose, getSerializer(protocol))
 
@@ -85,6 +87,7 @@ class ClientImpl(
         }
     }
 
+
     private fun handleMessage(message: Message) {
         messageListenersHandler.notifyListeners(message)
 
@@ -119,6 +122,7 @@ class ClientImpl(
         connection.withNextMessage { message: Welcome ->
             log.info("Session established. ID: ${message.session}")
             sessionId = message.session
+
         }.join()
     }
 
@@ -153,6 +157,11 @@ class ClientImpl(
         topicPattern: UriPattern,
         eventHandler: EventHandler
     ) = subscriber.subscribe(topicPattern, eventHandler)
+
+
+    fun getID(): Long? {
+        return sessionId
+    }
 }
 
 // Can be overridden to handle exceptions
