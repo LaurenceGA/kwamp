@@ -57,10 +57,7 @@ internal fun Klaxon.convertJsonObject(jo: Any?): Any? = when {
         val converter = findConverterFromClass(Any::class.java, null)
         converter.fromJson(JsonValue(jo, null, null, this))
     }
-    //this helps prevent crashing when null value is received for any key
-    else -> {
-        log("Couldn't convert $jo")
-    }
+    else -> throw KlaxonException("Couldn't convert $jo")
 }
 
 private val MAP_CONVERTER = object : Converter {
