@@ -21,7 +21,7 @@ repositories {
 Under dependencies:
 ```groovy
 dependencies {
-    implementation("com.github.LaurenceGA.kwamp:kwamp-router-core:1.0.2")
+    implementation("com.github.LaurenceGA.kwamp:kwamp-router-core:1.0.5")
 }
 ```
 
@@ -29,7 +29,7 @@ dependencies {
 Under dependencies:
 ```groovy
 dependencies {
-    implementation("com.github.LaurenceGA.kwamp:kwamp-client-core:1.0.2")
+    implementation("com.github.LaurenceGA.kwamp:kwamp-client-core:1.0.5")
 }
 ```
 
@@ -91,6 +91,7 @@ A client is created with:
 val incoming = Channel<ByteArray>()
 val outgoing = Channel<ByteArray>()
 val client = ClientImpl(wampIncoming, wampOutgoing, Uri("<REALM_URI_HERE>"))
+val sessionId = client.getSessionId()
 ```
 
 Then you just need to hook up incoming and outgoing channels with the input/output of the underlying channel (the same as is done above with the router).
