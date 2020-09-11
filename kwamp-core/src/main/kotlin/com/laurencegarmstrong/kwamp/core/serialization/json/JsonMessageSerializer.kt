@@ -6,7 +6,6 @@ import com.laurencegarmstrong.kwamp.core.isWhole
 import com.laurencegarmstrong.kwamp.core.messages.Message
 import com.laurencegarmstrong.kwamp.core.messages.MessageType
 import com.laurencegarmstrong.kwamp.core.serialization.MessageSerializer
-import sun.rmi.runtime.Log
 import java.io.StringReader
 import java.nio.charset.Charset
 
