@@ -153,6 +153,8 @@ class ClientImpl(
         topicPattern: UriPattern,
         eventHandler: EventHandler
     ) = subscriber.subscribe(topicPattern, eventHandler)
+
+    fun getSessionId() = sessionId
 }
 
 // Can be overridden to handle exceptions
